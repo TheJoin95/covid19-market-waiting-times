@@ -1,6 +1,6 @@
 from flask import Flask
 from markupsafe import escape
-import populartimes
+import waitingtimes
 
 app = Flask(__name__)
 
@@ -14,7 +14,23 @@ app = Flask(__name__)
 # radius (opt) int; meters; up to 50,000 for radar search; e.g. 180; this has can be adapted for very dense areas
 # all_places (opt) bool; include/exclude places without populartimes
 
-print(populartimes.get('ChIJSYuuSx9awokRyrrOFTGg0GY', ['supermarket', 'bar'], (43.8262343,11.1301156), (43.8234918,11.1239334)))
+print(
+	waitingtimes.get_by_fulldetail(
+		{
+        "place_id": "none",
+        "formatted_address": "",
+        "name": "Supermarket Milano open now",
+        "types": "Supermarket",
+        "geometry": {
+            "location": {
+                "lat": 0,
+                "lng": 0
+            }
+        }
+    }
+	)
+)
+
 raise
 
 @app.route('/user/<username>')
