@@ -1,213 +1,92 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import calendar
-import datetime
 import json
-import logging
-import math
-import re
-import ssl
-import threading
 import urllib.request
 import urllib.parse
-from time import sleep, time
-from queue import Queue
-
+import ssl
+import re
+import calendar
 import requests
-from geopy import Point
-from geopy.distance import vincenty, VincentyDistance
 
-# urls for google api web service
-BASE_URL = "https://maps.googleapis.com/maps/api/place/"
-RADAR_URL = BASE_URL + "radarsearch/json?location={},{}&radius={}&types={}&key={}"
-NEARBY_URL = BASE_URL + "nearbysearch/json?location={},{}&radius={}&types={}&key={}"
-DETAIL_URL = BASE_URL + "details/json?placeid={}&key={}"
+BASE_URL = "https://places.ls.hereapi.com/places/v1/"
+RADAR_URL = BASE_URL + "browse?in={},{};r={}&result_types=place&cs=&size={}&cat={}&apiKey={}"
+
+COMMON_HEADERS = {
+    "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "gzip"
+}
 
 # user agent for populartimes request
-USER_AGENT = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) "
+USER_AGENT = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) "
-                            "Chrome/54.0.2840.98 Safari/537.36"}
+                            "Chrome/80.0.3987.149 Safari/537.36"}
 
+#  {
+#   "position" : [ 43.823567, 11.119269 ],
+#   "distance" : 1356,
+#   "title" : "Bar Pasticceria il Grillo",
+#   "averageRating" : 0.0,
+#   "category" : {
+#     "id" : "food-drink",
+#     "title" : "Cibo e bevande",
+#     "href" : "https://places.ls.hereapi.com/places/v1/categories/places/food-drink?app_id=HZ1QBizc8VRERhzxYxyX&app_code=ZysIlwIFyllmSILbYckA6w",
+#     "type" : "urn:nlp-types:category",
+#     "system" : "places"
+#   },
+#   "icon" : "https://download.vcdn.data.here.com/p/d/places2/icons/categories/09.icon",
+#   "vicinity" : "Via Palestro<br/>50013 Campi Bisenzio",
+#   "having" : [ ],
+#   "type" : "urn:nlp-types:place",
+#   "href" : "https://places.ls.hereapi.com/places/v1/places/380spzcm-18c55235b8cb428e86c21ab03e3a9e89;context=Zmxvdy1pZD04MDUzNjcxZi05Y2UzLTVmNjEtYWJlOC01NDIzN2Y5ZmIxMzZfMTU4NTA3MDYwMTU4N18wXzI4MjEmcmFuaz0w?app_id=HZ1QBizc8VRERhzxYxyX&app_code=ZysIlwIFyllmSILbYckA6w",
+#   "tags" : [ {
+#     "id" : "italian",
+#     "title" : "Italiana",
+#     "group" : "cuisine"
+#   } ],
+#   "id" : "380spzcm-18c55235b8cb428e86c21ab03e3a9e89",
+#   "openingHours" : {
+#     "text" : "lun-dom: 06:00 - 05:30",
+#     "label" : "Orario di apertura",
+#     "isOpen" : true,
+#     "structured" : [ {
+#       "start" : "T060000",
+#       "duration" : "PT23H30M",
+#       "recurrence" : "FREQ:DAILY;BYDAY:MO,TU,WE,TH,FR,SA,SU"
+#     } ]
+#   },
+#   "alternativeNames" : [ {
+#     "name" : "Bar Pasticceria Il Grillo",
+#     "language" : "de"
+#   } ]
+# }
 
-class PopulartimesException(Exception):
-    """Exception raised for errors in the input.
-
-    Attributes:
-        expression -- input expression in which the error occurred
-        message -- explanation of the error
+def get_places_by_query(query):
+    """
+    make an API request to the HERE PLACES API to retrieve a list of places by geo
+    :param query: the parameters to make the request
+    :return: None if not available or the list of places
     """
 
-    def __init__(self, expression, message):
-        self.expression = expression
-        self.message = message
+    if (os.environ.get("HERE_PLACE_API_KEY") == None):
+        raise Exception("No HERE_PLACE_API_KEY in your environment");
 
+    _lat = query["location"]["lat"]
+    _lng = query["location"]["lng"]
 
-def rect_circle_collision(rect_left, rect_right, rect_bottom, rect_top, circle_x, circle_y, radius):
-    # returns true iff circle intersects rectangle
-
-    def clamp(val, min, max):
-        # limits value to the range min..max
-        if val < min:
-            return min
-        if val > max:
-            return max
-        return val
-
-    # Find the closest point to the circle within the rectangle
-    closest_x = clamp(circle_x, rect_left, rect_right);
-    closest_y = clamp(circle_y, rect_bottom, rect_top);
-
-    # Calculate the distance between the circle's center and this closest point
-    dist_x = circle_x - closest_x;
-    dist_y = circle_y - closest_y;
-
-    # If the distance is less than the circle's radius, an intersection occurs
-    dist_sq = (dist_x * dist_x) + (dist_y * dist_y);
-
-    return dist_sq < (radius * radius);
-
-def cover_rect_with_cicles(w, h, r):
-    """
-    fully cover a rectangle of given width and height with
-    circles of radius r. This algorithm uses a hexagonal
-    honeycomb pattern to cover the area.
-
-    :param w: width of rectangle
-    :param h: height of reclangle
-    :param r: radius of circles
-    :return: list of circle centers (x,y)
-    """
-
-    #initialize result list
-    res = []
-
-    # horizontal distance between circle centers
-    x_dist = math.sqrt(3) * r
-    # vertical distance between circle centers
-    y_dist = 1.5 * r
-    # number of circles per row (different for even/odd rows)
-    cnt_x_even = math.ceil(w / x_dist)
-    cnt_x_odd = math.ceil((w - x_dist/2) / x_dist) + 1
-    # number of rows
-    cnt_y = math.ceil((h-r) / y_dist) + 1
-
-    y_offs = 0.5 * r
-    for y in range(cnt_y):
-        if y % 2 == 0:
-            # shift even rows to the right
-            x_offs = x_dist/2
-            cnt_x = cnt_x_even
-        else:
-            x_offs = 0
-            cnt_x = cnt_x_odd
-
-        for x in range(cnt_x):
-            res.append((x_offs + x*x_dist, y_offs + y*y_dist))
-
-    # top-right circle is not always required
-    if res and not rect_circle_collision(0, w, 0, h, res[-1][0], res[-1][1], r):
-        res = res[0:-1]
-
-    return res
-
-def get_circle_centers(b1, b2, radius):
-    """
-    the function covers the area within the bounds with circles
-
-    :param b1: south-west bounds [lat, lng]
-    :param b2: north-east bounds [lat, lng]
-    :param radius: specified radius, adapt for high density areas
-    :return: list of circle centers that cover the area between lower/upper
-    """
-
-    sw = Point(b1)
-    ne = Point(b2)
-
-    # north/east distances
-    dist_lat = vincenty(Point(sw[0], sw[1]), Point(ne[0], sw[1])).meters
-    dist_lng = vincenty(Point(sw[0], sw[1]), Point(sw[0], ne[1])).meters
-
-    circles = cover_rect_with_cicles(dist_lat, dist_lng, radius)
-    cords = [
-        VincentyDistance(meters=c[0])
-        .destination(
-            VincentyDistance(meters=c[1])
-            .destination(point=sw, bearing=90),
-            bearing=0
-        )[:2]
-        for c in circles
-    ]
-
-    return cords
-
-
-def worker_radar():
-    """
-      worker that gets coordinates of queue and starts radar search
-      :return:
-      """
-    while True:
-        item = q_radar.get()
-        get_radar(item)
-        q_radar.task_done()
-
-
-def get_radar(item):
-    _lat, _lng = item["pos"]
-
-    # places - nearby search
-    # https://developers.google.com/places/web-service/search?hl=en#PlaceSearchRequests
-    radar_str = NEARBY_URL.format(
-        _lat, _lng, params["radius"], "|".join(params["type"]), params["API_key"]
+    browse_query = NEARBY_URL.format(
+        _lat, _lng, query["radius"], ",".join(query["types"]), os.environ.get("HERE_PLACE_API_KEY")
     )
 
-    # is this a next page request?
-    if item["res"] > 0:
-        # possibly wait remaining time until next_page_token becomes valid
-        min_wait = 2  # wait at least 2 seconds before the next page request
-        sec_passed = time() - item["last_req"]
-        if sec_passed < min_wait:
-            sleep(min_wait - sec_passed)
-        radar_str += "&pagetoken=" + item["next_page_token"]
+    res = json.loads(requests.get(browse_query, headers=COMMON_HEADERS).text)
+    if ("results" not in res):
+        raise Exception("No results")
 
-    resp = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)
-    check_response_code(resp)
+    if ("items" not in res["results"]):
+        raise Exception("No items")
 
-    radar = resp["results"]
+    return res["results"]["items"]
 
-    item["res"] += len(radar)
-    if item["res"] >= 60:
-        logging.warning("Result limit in search radius reached, some data may get lost")
-
-    bounds = params["bounds"]
-
-    # retrieve google ids for detail search
-    for place in radar:
-
-        geo = place["geometry"]["location"]
-        if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
-                and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
-            # this isn't thread safe, but we don't really care,
-            # since in worst case a set entry is simply overwritten
-            g_places[place["place_id"]] = place
-
-    # if there are more results, schedule next page requests
-    if "next_page_token" in resp:
-        item["next_page_token"] = resp["next_page_token"]
-        item["last_req"] = time()
-        q_radar.put(item)
-
-
-def worker_detail():
-    """
-    worker that gets item of queue and starts detailed data retrieval
-    :return:
-    """
-    while True:
-        item = q_detail.get()
-        get_detail(item)
-        q_detail.task_done()
 
 
 def get_popularity_for_day(popularity):
@@ -352,9 +231,6 @@ def get_populartimes_from_search(place_identifier):
     }
 
     search_url = "https://www.google.com/search?" + "&".join(k + "=" + str(v) for k, v in params_url.items())
-    logging.info("searchterm: " + search_url)
-
-    print(search_url)
 
     # noinspection PyUnresolvedReferences
     gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
@@ -371,100 +247,37 @@ def get_populartimes_from_search(place_identifier):
     jdata = json.loads(data)["d"]
     jdata = json.loads(jdata[4:])
 
+    # get info from result array, has to be adapted if backend api changes
+    info = index_get(jdata, 0, 1, 0, 14)
 
-    if len(jdata[0][1]) > 2:
-        print(len(jdata[0][1]))
-        raise
-        results = []
-        for x in range(1,len(jdata[0][1])):
-            # get info from result array, has to be adapted if backend api changes
-            info = index_get(jdata[0][1][x], 14)
+    rating = index_get(info, 4, 7)
+    rating_n = index_get(info, 4, 8)
 
-            rating = index_get(info, 4, 7)
-            rating_n = index_get(info, 4, 8)
+    popular_times = index_get(info, 84, 0)
 
-            popular_times = index_get(info, 84, 0)
+    # current_popularity is also not available if popular_times isn't
+    current_popularity = index_get(info, 84, 7, 1)
 
-            # current_popularity is also not available if popular_times isn't
-            current_popularity = index_get(info, 84, 7, 1)
+    time_spent = index_get(info, 117, 0)
 
-            time_spent = index_get(info, 117, 0)
+    # extract wait times and convert to minutes
+    if time_spent:
 
-            # extract wait times and convert to minutes
-            if time_spent:
+        nums = [float(f) for f in re.findall(r'\d*\.\d+|\d+', time_spent.replace(",", "."))]
+        contains_min, contains_hour = "min" in time_spent, "hour" in time_spent or "hr" in time_spent
 
-                nums = [float(f) for f in re.findall(r'\d*\.\d+|\d+', time_spent.replace(",", "."))]
-                contains_min, contains_hour = "min" in time_spent, "hour" in time_spent or "hr" in time_spent
+        time_spent = None
 
-                time_spent = None
+        if contains_min and contains_hour:
+            time_spent = [nums[0], nums[1] * 60]
+        elif contains_hour:
+            time_spent = [nums[0] * 60, (nums[0] if len(nums) == 1 else nums[1]) * 60]
+        elif contains_min:
+            time_spent = [nums[0], nums[0] if len(nums) == 1 else nums[1]]
 
-                if contains_min and contains_hour:
-                    time_spent = [nums[0], nums[1] * 60]
-                elif contains_hour:
-                    time_spent = [nums[0] * 60, (nums[0] if len(nums) == 1 else nums[1]) * 60]
-                elif contains_min:
-                    time_spent = [nums[0], nums[0] if len(nums) == 1 else nums[1]]
-
-                time_spent = [int(t) for t in time_spent]
-
-            results.append([rating, rating_n, popular_times, current_popularity, time_spent]);
-    else:
-        # get info from result array, has to be adapted if backend api changes
-        info = index_get(jdata[0][1][x], 0, 1, 0, 14)
-
-        rating = index_get(info, 4, 7)
-        rating_n = index_get(info, 4, 8)
-
-        popular_times = index_get(info, 84, 0)
-
-        # current_popularity is also not available if popular_times isn't
-        current_popularity = index_get(info, 84, 7, 1)
-
-        time_spent = index_get(info, 117, 0)
-
-        # extract wait times and convert to minutes
-        if time_spent:
-
-            nums = [float(f) for f in re.findall(r'\d*\.\d+|\d+', time_spent.replace(",", "."))]
-            contains_min, contains_hour = "min" in time_spent, "hour" in time_spent or "hr" in time_spent
-
-            time_spent = None
-
-            if contains_min and contains_hour:
-                time_spent = [nums[0], nums[1] * 60]
-            elif contains_hour:
-                time_spent = [nums[0] * 60, (nums[0] if len(nums) == 1 else nums[1]) * 60]
-            elif contains_min:
-                time_spent = [nums[0], nums[0] if len(nums) == 1 else nums[1]]
-
-            time_spent = [int(t) for t in time_spent]
+        time_spent = [int(t) for t in time_spent]
 
     return rating, rating_n, popular_times, current_popularity, time_spent
-
-
-def get_detail(place_id):
-    """
-    loads data for a given area
-    :return:
-    """
-    global results
-
-    # detail_json = get_populartimes(params["API_key"], place_id)
-    detail_json = get_populartimes_by_detail(params["API_key"], g_places[place_id])
-
-    if params["all_places"] or "populartimes" in detail_json:
-        results.append(detail_json)
-
-
-def get_populartimes(place_detail):
-    """
-    sends request to detail to get a search string
-    and uses standard proto buffer to get additional information
-    on the current status of popular times
-    :return: json details
-    """
-
-    return get_populartimes_by_detail(place_detail)
 
 
 def get_by_detail(detail):
@@ -481,95 +294,6 @@ def get_by_detail(detail):
     detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier))
 
     return detail_json
-
-
-def check_response_code(resp):
-    """
-    check if query quota has been surpassed or other errors occured
-    :param resp: json response
-    :return:
-    """
-    if resp["status"] == "OK" or resp["status"] == "ZERO_RESULTS":
-        return
-
-    if resp["status"] == "REQUEST_DENIED":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "Request was denied, the API key is invalid.")
-
-    if resp["status"] == "OVER_QUERY_LIMIT":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "You exceeded your Query Limit for Google Places API Web Service, "
-                                    "check https://developers.google.com/places/web-service/usage "
-                                    "to upgrade your quota.")
-
-    if resp["status"] == "INVALID_REQUEST":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "The query string is malformed, "
-                                    "check if your formatting for lat/lng and radius is correct.")
-
-    if resp["status"] == "INVALID_REQUEST":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "The query string is malformed, "
-                                    "check if your formatting for lat/lng and radius is correct.")
-
-    if resp["status"] == "NOT_FOUND":
-        raise PopulartimesException("Google Places " + resp["status"],
-                                    "The place ID was not found and either does not exist or was retired.")
-
-    raise PopulartimesException("Google Places " + resp["status"],
-                                "Unidentified error with the Places API, please check the response code")
-
-
-def run(_params):
-    """
-    wrap execution logic in method, for later external call
-    :return:
-    """
-    global params, g_places, q_radar, q_detail, results
-
-    start = datetime.datetime.now()
-
-    # shared variables
-    params = _params
-    q_radar, q_detail = Queue(), Queue()
-    g_places, results = dict(), list()
-
-    logging.info("Adding places to queue...")
-
-    # threading for radar search
-    for i in range(params["n_threads"]):
-        t = threading.Thread(target=worker_radar)
-        t.daemon = True
-        t.start()
-
-    # cover search area with circles
-    bounds = params["bounds"]
-    for lat, lng in get_circle_centers([bounds["lower"]["lat"], bounds["lower"]["lng"]],  # southwest
-                                       [bounds["upper"]["lat"], bounds["upper"]["lng"]],  # northeast
-                                       params["radius"]):
-        q_radar.put(dict(pos=(lat, lng), res=0))
-
-    q_radar.join()
-    logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))
-
-    logging.info("{} places to process...".format(len(g_places)))
-
-    # threading for detail search and popular times
-    for i in range(params["n_threads"]):
-        t = threading.Thread(target=worker_detail)
-        t.daemon = True
-        t.start()
-
-    for g_place_id in g_places:
-        q_detail.put(g_place_id)
-
-    q_detail.join()
-    logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))
-
-    return results
-
-def main():
-    print("hello")
 
 if __name__ == "__main__":
     pass

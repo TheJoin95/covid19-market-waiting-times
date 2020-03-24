@@ -19,7 +19,7 @@ print(
 		{
         "place_id": "none",
         "formatted_address": "",
-        "name": "Supermarket Milano open now",
+        "name": "Coop Campi Bisenzio",
         "types": "Supermarket",
         "geometry": {
             "location": {
