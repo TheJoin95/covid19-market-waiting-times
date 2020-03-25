@@ -10,8 +10,9 @@ import calendar
 import requests
 import os
 
-BASE_URL = "https://places.ls.hereapi.com/places/v1/"
-BROWSE_URL = BASE_URL + "browse?in={},{};r={}&result_types=place&tf=plain&cs=&size={}&cat={}&apiKey={}"
+HERE_BASE_URL = "https://places.ls.hereapi.com/places/v1/"
+BROWSE_URL = HERE_BASE_URL + "browse?in={},{};r={}&result_types=place&tf=plain&cs=&size={}&cat={}&apiKey={}"
+GEOCODE_URL = "https://geocode.xyz/{},{}?geoit=json&auth={}"
 
 COMMON_HEADERS = {
     "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -23,44 +24,39 @@ USER_AGENT = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) "
                             "Chrome/80.0.3987.149 Safari/537.36"}
 
-#  {
-#   "position" : [ 43.823567, 11.119269 ],
-#   "distance" : 1356,
-#   "title" : "Bar Pasticceria il Grillo",
-#   "averageRating" : 0.0,
-#   "category" : {
-#     "id" : "food-drink",
-#     "title" : "Cibo e bevande",
-#     "href" : "https://places.ls.hereapi.com/places/v1/categories/places/food-drink?app_id=HZ1QBizc8VRERhzxYxyX&app_code=ZysIlwIFyllmSILbYckA6w",
-#     "type" : "urn:nlp-types:category",
-#     "system" : "places"
-#   },
-#   "icon" : "https://download.vcdn.data.here.com/p/d/places2/icons/categories/09.icon",
-#   "vicinity" : "Via Palestro<br/>50013 Campi Bisenzio",
-#   "having" : [ ],
-#   "type" : "urn:nlp-types:place",
-#   "href" : "https://places.ls.hereapi.com/places/v1/places/380spzcm-18c55235b8cb428e86c21ab03e3a9e89;context=Zmxvdy1pZD04MDUzNjcxZi05Y2UzLTVmNjEtYWJlOC01NDIzN2Y5ZmIxMzZfMTU4NTA3MDYwMTU4N18wXzI4MjEmcmFuaz0w?app_id=HZ1QBizc8VRERhzxYxyX&app_code=ZysIlwIFyllmSILbYckA6w",
-#   "tags" : [ {
-#     "id" : "italian",
-#     "title" : "Italiana",
-#     "group" : "cuisine"
-#   } ],
-#   "id" : "380spzcm-18c55235b8cb428e86c21ab03e3a9e89",
-#   "openingHours" : {
-#     "text" : "lun-dom: 06:00 - 05:30",
-#     "label" : "Orario di apertura",
-#     "isOpen" : true,
-#     "structured" : [ {
-#       "start" : "T060000",
-#       "duration" : "PT23H30M",
-#       "recurrence" : "FREQ:DAILY;BYDAY:MO,TU,WE,TH,FR,SA,SU"
-#     } ]
-#   },
-#   "alternativeNames" : [ {
-#     "name" : "Bar Pasticceria Il Grillo",
-#     "language" : "de"
-#   } ]
-# }
+def get_info_from_geocode(lat, lng):
+    if (os.environ.get('GEOCODE_API_KEY') == None):
+        raise Exception("You need to add an environment variable for GEOCODE_API_KEY")
+
+    info = json.loads(requests.get(GEOCODE_URL.format(lat, lng, os.environ.get('GEOCODE_API_KEY'))).text)
+
+    if ("timezone" not in info):
+        raise Exception("No info from geocode")
+    
+    return info
+
+def get_places_by_search(q):
+    """
+    Make an API request to google web service to retrieve a list of places
+    """
+    places = []
+    json = make_google_search_request(q)
+    json = json[0][1]
+    for x in range(1, len(json)-1):
+        info = index_get(json[x], 14)
+
+        places.append({
+            "name": index_get(info, 11),
+            "address": index_get(info, 39),
+            "location": {
+                "lat": index_get(info, 9, 2),
+                "lng": index_get(info, 9, 3)
+            },
+            "categories": index_get(info, 13),
+            "place_types": index_get(info, 76),
+        })
+
+    return places
 
 def get_places_by_query(query):
     """
@@ -70,7 +66,7 @@ def get_places_by_query(query):
     """
 
     if (os.environ.get("HERE_PLACE_API_KEY") == None):
-        raise Exception("No HERE_PLACE_API_KEY in your environment");
+        raise Exception("No HERE_PLACE_API_KEY in your environment")
 
     if ("limit" not in query):
         query["limit"] = 35
@@ -211,18 +207,12 @@ def add_optional_parameters(detail_json, detail, rating, rating_n, popularity, c
 
     return detail_json
 
-
-def get_populartimes_from_search(place_identifier):
-    """
-    request information for a place and parse current popularity
-    :param place_identifier: name and address string
-    :return:
-    """
+def make_google_search_request(query_string):
     params_url = {
         "tbm": "map",
         "tch": 1,
         "hl": "it",
-        "q": urllib.parse.quote_plus(place_identifier),
+        "q": urllib.parse.quote_plus(query_string),
         "pb": "!4m12!1m3!1d4005.9771522653964!2d-122.42072974863942!3d37.8077459796541!2m3!1f0!2f0!3f0!3m2!1i1125!2i976"
               "!4f13.1!7i20!10b1!12m6!2m3!5m1!6e2!20e3!10b1!16b1!19m3!2m2!1i392!2i106!20m61!2m2!1i203!2i100!3m2!2i4!5b1"
               "!6m6!1m2!1i86!2i86!1m2!1i408!2i200!7m46!1m3!1e1!2b0!3e3!1m3!1e2!2b1!3e2!1m3!1e2!2b0!3e3!1m3!1e3!2b0!3e3!"
@@ -249,7 +239,16 @@ def get_populartimes_from_search(place_identifier):
         data = data[:jend + 1]
 
     jdata = json.loads(data)["d"]
-    jdata = json.loads(jdata[4:])
+    return json.loads(jdata[4:])
+
+def get_populartimes_from_search(place_identifier):
+    """
+    request information for a place and parse current popularity
+    :param place_identifier: name and address string
+    :return:
+    """
+    
+    jdata = make_google_search_request(place_identifier)
 
     # get info from result array, has to be adapted if backend api changes
     info = index_get(jdata, 0, 1, 0, 14)
@@ -288,7 +287,6 @@ def get_by_detail(detail):
     place_identifier = "{} {}".format(detail["name"], detail["formatted_address"])
 
     detail_json = {
-        "id": detail["place_id"],
         "name": detail["name"],
         "address": detail["formatted_address"],
         "types": detail["types"],

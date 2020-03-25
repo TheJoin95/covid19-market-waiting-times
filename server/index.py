@@ -1,10 +1,9 @@
 from flask import Flask
-from flask import jsonify
+from flask import jsonify, abort
 from flask import request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-from markupsafe import escape
 import waitingtimes
 
 app = Flask(__name__)
@@ -15,72 +14,101 @@ limiter = Limiter(
     default_limits=["200 per day", "100 per hour"]
 )
 
-# print(
-# 	waitingtimes.get_places(
-# 		{
-#         "types": ["food-drink", "pharmacy", "post-office", "postal-area"],
-#         "location": {
-#             "lat": 43.33,
-#             "lng": 11.23
-#         },
-#         "radius": 6000
-#     }
-# 	)
-# )
-# raise
+# rate limit 10/sec
+@app.route("/geocode", methods=["GET"])
+def get_geocode_address():
+	lat = request.args.get("lat")
+	lng = request.args.get("lng")
+	if (lng == None or lat == None):
+		abort(400, "You need to provide at least your gps coords")
 
-# print(
-# 	waitingtimes.get_by_fulldetail(
-# 		{
-# 				"accepted-place-type": ["bakery", "bank", "bar", "cafe", "doctor", "drugstore", "food", "health", "hospital", "meal_delivery", "meal_takeaway", "pharmacy", "post_office", "postal_code", "postal_town", "restaurant", "shopping_mall", "supermarket", "grocery_store", "discount_supermarket", "supermarket", "grocery"],
-#         "place_id": "none",
-#         "formatted_address": "",
-#         "name": "Coop Campi Bisenzio",
-#         "types": "Supermarket",
-#         "geometry": {
-#             "location": {
-#                 "lat": 0,
-#                 "lng": 0
-#             }
-#         }
-#     }
-# 	)
-# )
+	try:
+		response = waitingtimes.get_address_from_geocode(lat, lng)
+	except Exception as e:
+		abort(500, e)
 
-# raise
+	return jsonify(response)
 
-@app.route('/places/explore', methods=["GET"])
-def get_places():
-	if (request.args.get('lng') == None or request.args.get('lat') == None):
-		abort(400)
+@app.route("/places/explore", methods=["GET"])
+def get_places_from_google():
+	QUERY_SEARCH = "{} near {} open now"
 
-	places = waitingtimes.get_places({
-    "types": ["food-drink", "pharmacy", "post-office", "postal-area"],
-    "location": {
-        "lat": request.args.get('lat'),
-        "lng": request.args.get('lng')
-    },
-    "radius": 6000
-  })
+	q = request.args.get("q") # supermarket or pharmacy
+	address = request.args.get("address") # porta nuova, milano
+
+	if (q == None or address == None):
+		abort(400, "You need to provide your query string and your address")
+
+	try:
+		places = waitingtimes.get_places_from_google(QUERY_SEARCH.format(q, address))
+	except Exception as e:
+		abort(500, e)
 
 	formattedPlaces = []
 
-	for x in range(0, len(places)-1):
-		formattedPlaces.append(
-			waitingtimes.get_by_fulldetail({
-				"accepted_place_type": ["bakery", "bank", "bar", "cafe", "doctor", "drugstore", "food", "health", "hospital", "meal_delivery", "meal_takeaway", "pharmacy", "post_office", "postal_code", "postal_town", "restaurant", "shopping_mall", "supermarket", "grocery_store", "discount_supermarket", "supermarket", "grocery"],
-		    "place_id": place["id"],
-		    "formatted_address": place["vicinity"].replace("\n", " "),
-		    "name": place["title"],
-		    "types": place["category"]["id"],
-		    "geometry": {
-		        "location": {
-		            "lat": place["position"][0],
-		            "lng": place["position"][1]
-		        }
-		    }
-			})
-		)
+	if (len(places) > 0):
+		for x in range(0, len(places)-1):
+			if (places[x]["name"] == None):
+				continue
+
+			print("processing: " + places[x]["name"])
+			formattedPlaces.append(
+				waitingtimes.get_by_fulldetail({
+					"place_id": "",
+					"formatted_address": places[x]["address"],
+					"name": places[x]["name"],
+					"types": places[x]["categories"],
+					"geometry": {
+						"location": {
+							"lat": places[x]["location"]["lat"],
+							"lng": places[x]["location"]["lng"]
+						}
+					}
+				})
+			)
+
+	return jsonify(formattedPlaces)
+
+
+@app.route("/places/browse", methods=["GET"])
+def get_places_from_here():
+	lat = request.args.get("lat")
+	lng = request.args.get("lng")
+	if (lng == None or lat == None):
+		abort(400, "You need to provide at least your gps coords (lat, lng)")
+
+	try:
+		places = waitingtimes.get_places_from_here({
+	    "types": ["food-drink", "pharmacy", "post-office", "postal-area"],
+	    "location": {
+	        "lat": lat,
+	        "lng": lng
+	    },
+	    "radius": 6000
+	  })
+	except Exception as e:
+		abort(500, e)
+
+	formattedPlaces = []
+
+	if (len(places) > 0):
+		for x in range(0, len(places)-1):
+			print("processing: " + places[x]["title"])
+			formattedPlaces.append(
+				waitingtimes.get_by_fulldetail({
+					"accepted_place_type": ["bakery", "bank", "bar", "cafe", "doctor", "drugstore", "food", "health", "hospital", "meal_delivery", "meal_takeaway", "pharmacy", "post_office", "postal_code", "postal_town", "restaurant", "shopping_mall", "supermarket", "grocery_store", "discount_supermarket", "supermarket", "grocery"],
+			    "place_id": places[x]["id"],
+			    "formatted_address": places[x]["vicinity"].replace("\n", " "),
+			    "name": places[x]["title"],
+			    "types": places[x]["category"]["id"],
+			    "geometry": {
+			        "location": {
+			            "lat": places[x]["position"][0],
+			            "lng": places[x]["position"][1]
+			        }
+			    }
+				})
+			)
 
 	return jsonify(formattedPlaces)
 

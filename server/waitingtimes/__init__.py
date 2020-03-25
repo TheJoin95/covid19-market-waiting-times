@@ -3,6 +3,8 @@
 
 from .crawler import get_by_detail
 from .crawler import get_places_by_query
+from .crawler import get_places_by_search
+from .crawler import get_info_from_geocode
 
 """
 
@@ -10,7 +12,23 @@ ENTRY POINT
 
 """
 
-def get_places(query):
+def get_address_from_geocode(lat, lng):
+    """
+    retrieve information from geo coordinates
+    """
+
+    return get_info_from_geocode(lat, lng)
+
+def get_places_from_google(query):
+    """
+    retrieve a list of places
+    query: string
+    "supermarket campi bisenzio open now"
+    """
+
+    return get_places_by_search(query)
+
+def get_places_from_here(query):
     """
     retrieve a list of places
     {
