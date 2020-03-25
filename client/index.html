@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin=""/>
+
+        <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+        crossorigin=""></script>
+
+        <style>
+            #full-map {
+                width: 100%;
+                height: 200px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="full-map"></div>
+        <footer>Made with love in Florence</footer>
+
+        <script>
+            const TimesApp = {
+                lat: null,
+                lng: null,
+                address: "",
+                zoom: 14,
+                lMap: null,
+                myPosition: null,
+                initMap: function () {
+                    TimesApp.lMap = L.map('full-map').setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
+                    L.tileLayer(
+                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 18,
+                            attribution: 'Map data <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+                        }
+                    ).addTo(TimesApp.lMap);
+
+                    TimesApp.myPosition = L.circle([TimesApp.lat, TimesApp.lng], {
+                        color: '#0696c1',
+                        fillColor: '#06aee0',
+                        fillOpacity: 0.5,
+                        radius: 50
+                    }).addTo(TimesApp.lMap);
+                    TimesApp.myPosition.setTooltipContent("Your position");
+                },
+                geoSuccess: function (position) {
+                    console.log(position);
+                    TimesApp.lat = position.coords.latitude;
+                    TimesApp.lng = position.coords.longitude;
+                    TimesApp.initMap();
+                },
+                geoError: function () {
+                    this.address = prompt("This app need your gps position or at least your address or your city:", "");
+                }
+            };
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const mapEl = document.getElementById('full-map');
+                mapEl.style.height = window.innerHeight - 50 + 'px';
+                
+                navigator.geolocation.getCurrentPosition(TimesApp.geoSuccess, TimesApp.geoError);
+            });
+        </script>
+    </body>
+</html>

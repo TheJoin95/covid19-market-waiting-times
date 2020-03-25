@@ -21,6 +21,9 @@ limiter = Limiter(
 # rate limit 10/sec
 @app.route("/geocode", methods=["GET"])
 def get_geocode_address():
+	"""
+	retrieve information, from lat and lng, about the location
+	"""
 	lat = request.args.get("lat")
 	lng = request.args.get("lng")
 	if (lng == None or lat == None):
@@ -35,11 +38,17 @@ def get_geocode_address():
 
 
 def worker_fulldetail():
+	"""
+	worker for the queue; it will serve the results then
+	"""
 	global q_detail, formattedPlaces
 
 	while True:
 		item = q_detail.get()
-		formattedPlaces.append(waitingtimes.get_by_fulldetail(item))
+		try:
+			formattedPlaces.append(waitingtimes.get_by_fulldetail(item))
+		except Exception as e:
+			print(e)
 		q_detail.task_done()
 
 @app.route("/places/explore", methods=["GET"])
@@ -60,7 +69,6 @@ def get_places_from_google():
 		abort(500, e)
 
 	formattedPlaces = []
-
 
 	if (len(places) > 0):
 		for i in range(20):
@@ -87,30 +95,10 @@ def get_places_from_google():
 
 		q_detail.join()
 
-		# for x in range(0, len(places)-1):
-		# 	if (places[x]["name"] == None):
-		# 		continue
-
-		# 	print("processing: " + places[x]["name"])
-		# 	formattedPlaces.append(
-		# 		waitingtimes.get_by_fulldetail({
-		# 			"place_id": "",
-		# 			"formatted_address": places[x]["address"],
-		# 			"name": places[x]["name"],
-		# 			"types": places[x]["categories"],
-		# 			"geometry": {
-		# 				"location": {
-		# 					"lat": places[x]["location"]["lat"],
-		# 					"lng": places[x]["location"]["lng"]
-		# 				}
-		# 			}
-		# 		})
-		# 	)
-
 	return jsonify(formattedPlaces)
 
 
-@app.route("/places/browse", methods=["GET"])
+""" @app.route("/places/browse", methods=["GET"])
 def get_places_from_here():
 	lat = request.args.get("lat")
 	lng = request.args.get("lng")
@@ -136,7 +124,7 @@ def get_places_from_here():
 			print("processing: " + places[x]["title"])
 			formattedPlaces.append(
 				waitingtimes.get_by_fulldetail({
-					"accepted_place_type": ["bakery", "bank", "bar", "cafe", "doctor", "drugstore", "food", "health", "hospital", "meal_delivery", "meal_takeaway", "pharmacy", "post_office", "postal_code", "postal_town", "restaurant", "shopping_mall", "supermarket", "grocery_store", "discount_supermarket", "supermarket", "grocery"],
+				"accepted_place_type": ["bakery", "bank", "bar", "cafe", "doctor", "drugstore", "food", "health", "hospital", "meal_delivery", "meal_takeaway", "pharmacy", "post_office", "postal_code", "postal_town", "restaurant", "shopping_mall", "supermarket", "grocery_store", "discount_supermarket", "supermarket", "grocery"],
 			    "place_id": places[x]["id"],
 			    "formatted_address": places[x]["vicinity"].replace("\n", " "),
 			    "name": places[x]["title"],
@@ -150,7 +138,7 @@ def get_places_from_here():
 				})
 			)
 
-	return jsonify(formattedPlaces)
+	return jsonify(formattedPlaces) """
 
 if __name__ == '__main__':
 	app.run()
