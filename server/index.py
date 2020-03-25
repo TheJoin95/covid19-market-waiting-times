@@ -4,9 +4,13 @@ from flask import request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+from queue import Queue
+import threading
+
 import waitingtimes
 
 app = Flask(__name__)
+q_detail = Queue()
 
 limiter = Limiter(
     app,
@@ -29,8 +33,19 @@ def get_geocode_address():
 
 	return jsonify(response)
 
+
+def worker_fulldetail():
+	global q_detail, formattedPlaces
+
+	while True:
+		item = q_detail.get()
+		formattedPlaces.append(waitingtimes.get_by_fulldetail(item))
+		q_detail.task_done()
+
 @app.route("/places/explore", methods=["GET"])
 def get_places_from_google():
+	global q_detail, formattedPlaces
+
 	QUERY_SEARCH = "{} near {} open now"
 
 	q = request.args.get("q") # supermarket or pharmacy
@@ -46,26 +61,51 @@ def get_places_from_google():
 
 	formattedPlaces = []
 
-	if (len(places) > 0):
-		for x in range(0, len(places)-1):
-			if (places[x]["name"] == None):
-				continue
 
-			print("processing: " + places[x]["name"])
-			formattedPlaces.append(
-				waitingtimes.get_by_fulldetail({
-					"place_id": "",
-					"formatted_address": places[x]["address"],
-					"name": places[x]["name"],
-					"types": places[x]["categories"],
-					"geometry": {
-						"location": {
-							"lat": places[x]["location"]["lat"],
-							"lng": places[x]["location"]["lng"]
-						}
+	if (len(places) > 0):
+		for i in range(20):
+			t = threading.Thread(target=worker_fulldetail)
+			t.daemon = True
+			t.start()
+
+		for place in places:
+			if (place["name"] == None):
+				continue
+			
+			q_detail.put({
+				"place_id": "",
+				"formatted_address": place["address"],
+				"name": place["name"],
+				"types": place["categories"],
+				"geometry": {
+					"location": {
+						"lat": place["location"]["lat"],
+						"lng": place["location"]["lng"]
 					}
-				})
-			)
+				}
+			})
+
+		q_detail.join()
+
+		# for x in range(0, len(places)-1):
+		# 	if (places[x]["name"] == None):
+		# 		continue
+
+		# 	print("processing: " + places[x]["name"])
+		# 	formattedPlaces.append(
+		# 		waitingtimes.get_by_fulldetail({
+		# 			"place_id": "",
+		# 			"formatted_address": places[x]["address"],
+		# 			"name": places[x]["name"],
+		# 			"types": places[x]["categories"],
+		# 			"geometry": {
+		# 				"location": {
+		# 					"lat": places[x]["location"]["lat"],
+		# 					"lng": places[x]["location"]["lng"]
+		# 				}
+		# 			}
+		# 		})
+		# 	)
 
 	return jsonify(formattedPlaces)
 
