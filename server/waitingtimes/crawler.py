@@ -8,9 +8,10 @@ import ssl
 import re
 import calendar
 import requests
+import os
 
 BASE_URL = "https://places.ls.hereapi.com/places/v1/"
-RADAR_URL = BASE_URL + "browse?in={},{};r={}&result_types=place&cs=&size={}&cat={}&apiKey={}"
+BROWSE_URL = BASE_URL + "browse?in={},{};r={}&result_types=place&tf=plain&cs=&size={}&cat={}&apiKey={}"
 
 COMMON_HEADERS = {
     "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -71,11 +72,14 @@ def get_places_by_query(query):
     if (os.environ.get("HERE_PLACE_API_KEY") == None):
         raise Exception("No HERE_PLACE_API_KEY in your environment");
 
+    if ("limit" not in query):
+        query["limit"] = 35
+
     _lat = query["location"]["lat"]
     _lng = query["location"]["lng"]
 
-    browse_query = NEARBY_URL.format(
-        _lat, _lng, query["radius"], ",".join(query["types"]), os.environ.get("HERE_PLACE_API_KEY")
+    browse_query = BROWSE_URL.format(
+        _lat, _lng, query["radius"], query["limit"], ",".join(query["types"]), os.environ.get("HERE_PLACE_API_KEY")
     )
 
     res = json.loads(requests.get(browse_query, headers=COMMON_HEADERS).text)
