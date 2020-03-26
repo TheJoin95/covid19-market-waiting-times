@@ -1,0 +1,15 @@
+{
+  "name": "Covid-19 - Supermarket waiting time",
+  "short_name": "Market Waiting Time",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fff",
+  "theme_color": "#111",
+  "icons": [
+    {
+      "src": "/assets/icon.png",
+      "sizes": "512x512"
+    }
+  ]
+}

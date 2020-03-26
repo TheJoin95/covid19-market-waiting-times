@@ -17,7 +17,7 @@ q_detail = Queue()
 limiter = Limiter(
     app,
     key_func=get_remote_address,
-    default_limits=["200 per day", "100 per hour"]
+    default_limits=["1000 per day", "200 per hour"]
 )
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
