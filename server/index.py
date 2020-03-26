@@ -77,11 +77,6 @@ def get_places_from_google():
 	formattedPlaces = []
 
 	if (len(places) > 0):
-		for i in range(20):
-			t = threading.Thread(target=worker_fulldetail)
-			t.daemon = True
-			t.start()
-
 		for place in places:
 			if (place["name"] == None):
 				continue
@@ -147,4 +142,10 @@ def get_places_from_here():
 	return jsonify(formattedPlaces) """
 
 if __name__ == '__main__':
+	if (threading.active_count() <= 20):
+		for i in range(20):
+			t = threading.Thread(target=worker_fulldetail)
+			t.daemon = True
+			t.start()
+
 	app.run(port=2354)

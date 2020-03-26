@@ -194,6 +194,9 @@
                     fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng))
                         .then((r) => { if (r.ok) return r.json(); })
                         .then((r) => { 
+                            r.staddress = (typeof(r.staddress) === 'object') ? '' : r.staddress;
+                            r.city = (typeof(r.city) === 'object') ? '' : r.city;
+
                             TimesApp.address = r.staddress + ', ' + r.city;
                             (initMap === true) ? TimesApp.initMap() : TimesApp.getPlaces();
                         });
