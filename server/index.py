@@ -3,6 +3,7 @@ from flask import jsonify, abort
 from flask import request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_cors import CORS, cross_origin
 
 from queue import Queue
 import threading
@@ -17,9 +18,12 @@ limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["200 per day", "100 per hour"]
 )
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # rate limit 10/sec
 @app.route("/geocode", methods=["GET"])
+@cross_origin()
 def get_geocode_address():
 	"""
 	retrieve information, from lat and lng, about the location
@@ -52,6 +56,7 @@ def worker_fulldetail():
 		q_detail.task_done()
 
 @app.route("/places/explore", methods=["GET"])
+@cross_origin()
 def get_places_from_google():
 	global q_detail, formattedPlaces
 

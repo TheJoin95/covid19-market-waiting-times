@@ -3,6 +3,8 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
+        <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
         integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
         crossorigin=""/>
@@ -12,6 +14,10 @@
         crossorigin=""></script>
 
         <style>
+            html {
+                font-family: 'Raleway', sans-serif;
+            }
+
             #full-map {
                 width: 100%;
                 height: 200px;
@@ -23,6 +29,17 @@
         <footer>Made with love in Florence</footer>
 
         <script>
+            const WaitingTimesAPI = {
+                geocodeAPI: 'http://localhost:5000/geocode?lat=%s&lng=%s',
+                getPlacesAPI: 'http://localhost:5000/places/explore?q=%s&address=%s',
+                format: function (str) {
+                    var args = [].slice.call(arguments, 1),
+                        i = 0;
+
+                    return str.replace(/%s/g, () => args[i++]);
+                }
+            };
+
             const TimesApp = {
                 lat: null,
                 lng: null,
@@ -30,6 +47,7 @@
                 zoom: 14,
                 lMap: null,
                 myPosition: null,
+                query: "supermarket",
                 initMap: function () {
                     TimesApp.lMap = L.map('full-map').setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
                     L.tileLayer(
@@ -45,16 +63,65 @@
                         fillOpacity: 0.5,
                         radius: 50
                     }).addTo(TimesApp.lMap);
-                    TimesApp.myPosition.setTooltipContent("Your position");
+                    
+                    TimesApp.getPlaces();
+                },
+                getMarkerPlaceColor: function (radius) {
+                    return d > 600 ? ['#800026', '#ff2929'] :
+                        d > 500  ? ['#BD0026', '#cc0c33'] :
+                        d > 400  ? ['#e33c17', '#fa4c25'] :
+                        d > 300  ? ['#de691b', '#fc7e2a'] :
+                        d > 200   ? ['#ed7a26', '#FD8D3C'] :
+                        d > 150   ? ['#e6a910', '#ffbf1c'] :
+                        d > 80   ? ['#d9e30e', '#ecf716'] :
+                                    ['#1dbd00', '#1fcc00'];
+                },
+                getRadius: function (place) {
+
+                },
+                getPlaces: function () {
+                    let places = [];
+                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, TimesApp.query, TimesApp.address))
+                        .then((r) => { if (r.ok) return r.json(); })
+                        .then((r) => places = r);
+
+                    TimesApp.setPlaceOnMap(places);
+                },
+                setPlaceOnMap: function (place) {
+                    for (const key in place) {
+                        if (place["populartimes"] === undefined) continue;
+                        let radius = TimesApp.getRadius() || 80;
+                        let colors = TimesApp.getMarkerPlaceColor(radius);
+                        L.circle([place.geometry.location.lat, place.geometry.location.lng], {
+                            color: colors[0],
+                            fillColor: colors[1],
+                            fillOpacity: 0.5,
+                            radius: radius
+                        }).addTo(TimesApp.lMap);
+                    }
                 },
                 geoSuccess: function (position) {
-                    console.log(position);
                     TimesApp.lat = position.coords.latitude;
                     TimesApp.lng = position.coords.longitude;
+
+                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng))
+                        .then((r) => { if (r.ok) return r.json(); })
+                        .then((r) => TimesApp.address = r.staddress + ', ' + r.city);
+
                     TimesApp.initMap();
                 },
                 geoError: function () {
-                    this.address = prompt("This app need your gps position or at least your address or your city:", "");
+                    TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "").trim();
+                    if (address != "") {
+                        let geocode = {latt: 0, lngt: 0};
+                        fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
+                            .then((r) => { if (r.ok) r.json(); })
+                            .then((r) => geocode = r);
+                        
+                        TimesApp.lat = geocode.latt;
+                        TimesApp.lng = geocode.lngt;
+                        TimesApp.initMap();
+                    }
                 }
             };
 
