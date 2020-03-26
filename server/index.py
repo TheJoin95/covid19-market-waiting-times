@@ -9,6 +9,7 @@ from queue import Queue
 import threading
 
 import waitingtimes
+import hashlib
 
 app = Flask(__name__)
 q_detail = Queue()
@@ -86,7 +87,7 @@ def get_places_from_google():
 				continue
 			
 			q_detail.put({
-				"place_id": "",
+				"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
 				"formatted_address": place["address"],
 				"name": place["name"],
 				"types": place["categories"],

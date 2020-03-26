@@ -22,6 +22,33 @@
                 width: 100%;
                 height: 200px;
             }
+
+            .info {
+                padding: 6px 8px;
+                font-size: 14px;
+                background: rgba(255,255,255,0.8);
+                box-shadow: 0 0 15px rgba(0,0,0,0.2);
+                border-radius: 5px;
+            }
+
+            .info h4 {
+                margin: 0 0 5px;
+                color: #777;
+            }
+
+            .legend {
+                text-align: left;
+                line-height: 18px;
+                color: #555;
+            }
+
+            .legend i {
+                width: 18px;
+                height: 18px;
+                float: left;
+                margin-right: 8px;
+                opacity: 0.7;
+            }
         </style>
     </head>
     <body>
@@ -48,6 +75,7 @@
                 lMap: null,
                 myPosition: null,
                 query: "supermarket",
+                place_ids: [],
                 initMap: function () {
                     TimesApp.lMap = L.map('full-map').setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
                     L.tileLayer(
@@ -57,70 +85,132 @@
                         }
                     ).addTo(TimesApp.lMap);
 
+                    TimesApp.lMap.zoomControl.remove()
+
                     TimesApp.myPosition = L.circle([TimesApp.lat, TimesApp.lng], {
                         color: '#0696c1',
                         fillColor: '#06aee0',
                         fillOpacity: 0.5,
                         radius: 50
-                    }).addTo(TimesApp.lMap);
+                    }).bindPopup("Your position").addTo(TimesApp.lMap);
+
+                    TimesApp.lMap.on("moveend", async function () {
+                        let center = TimesApp.lMap.getCenter();
+                        console.log("new center ", center.toString());
+                        TimesApp.lat = center.lat;
+                        TimesApp.lng = center.lng;
+                        await TimesApp.updateAddress(-1);
+                    });
                     
+                    TimesApp.showLegend();
                     TimesApp.getPlaces();
                 },
-                getMarkerPlaceColor: function (radius) {
-                    return d > 600 ? ['#800026', '#ff2929'] :
-                        d > 500  ? ['#BD0026', '#cc0c33'] :
-                        d > 400  ? ['#e33c17', '#fa4c25'] :
-                        d > 300  ? ['#de691b', '#fc7e2a'] :
-                        d > 200   ? ['#ed7a26', '#FD8D3C'] :
-                        d > 150   ? ['#e6a910', '#ffbf1c'] :
-                        d > 80   ? ['#d9e30e', '#ecf716'] :
+                getMarkerPlaceColor: function (d) {
+                    return d > 60 ? ['#BD0026', '#cc0c33'] :
+                        d > 45  ? ['#800026', '#ff2929'] :
+                        d > 30  ? ['#e33c17', '#fa4c25'] :
+                        d > 25  ? ['#de691b', '#fc7e2a'] :
+                        d > 15   ? ['#e6a910', '#ffbf1c'] :
+                        d > 10   ? ['#d9e30e', '#ecf716'] :
                                     ['#1dbd00', '#1fcc00'];
                 },
-                getRadius: function (place) {
+                showLegend: function () {
+                    var legend = L.control({position: 'bottomright'});
 
+                    legend.onAdd = function (map) {
+
+                        var div = L.DomUtil.create('div', 'info legend'),
+                            grades = [5, 10, 15, 25, 30, 45, 60],
+                            labels = [],
+                            from, to;
+
+                        for (var i = 0; i < grades.length; i++) {
+                            from = grades[i];
+                            to = grades[i + 1];
+
+                            labels.push(
+                                '<i style="background:' + TimesApp.getMarkerPlaceColor(grades[i]+1)[1] + '"></i> ' +
+                                from + (to ? '&ndash;' + to : '+'));
+                        }
+
+                        div.innerHTML = labels.join('<br>');
+                        return div;
+                    };
+
+                    legend.addTo(TimesApp.lMap);
+                },
+                getWaitTime: function (place) {
+                    const hour = (new Date()).getHours();
+                    const weekDay = ((new Date()).getDay() === 0) ? 6 : (new Date()).getDay() - 1;
+                    const maxTimeSpent = Math.max(...place["time_spent"]) || 0;
+                    const meanTimeSpent = (place["time_spent"][0] + place["time_spent"][1]) / 2 || 0;
+                    const cPopularity = place["current_popularity"] || 15;
+                    const waitTimes = place["time_wait"][weekDay]["data"][hour] || 15;
+                    const popTimes = place["populartimes"][weekDay]["data"][hour] || 15;
+
+                    console.log("maxSpent: %d, cPop: %d, wait: %d, popTimes: %d", maxTimeSpent, cPopularity, waitTimes, popTimes);
+                    console.log("wait_times+timespent: ", (waitTimes+maxTimeSpent+popTimes));
+                    console.log("radius: ", (waitTimes + meanTimeSpent + cPopularity));
+                    return Math.ceil(waitTimes + meanTimeSpent);
                 },
                 getPlaces: function () {
-                    let places = [];
                     fetch(WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, TimesApp.query, TimesApp.address))
                         .then((r) => { if (r.ok) return r.json(); })
-                        .then((r) => places = r);
-
-                    TimesApp.setPlaceOnMap(places);
+                        .then((places) => TimesApp.setPlaceOnMap(places));
                 },
-                setPlaceOnMap: function (place) {
-                    for (const key in place) {
-                        if (place["populartimes"] === undefined) continue;
-                        let radius = TimesApp.getRadius() || 80;
-                        let colors = TimesApp.getMarkerPlaceColor(radius);
-                        L.circle([place.geometry.location.lat, place.geometry.location.lng], {
+                setPlaceOnMap: function (places) {
+                    console.log(places);
+                    for (const key in places) {
+                        if (places[key]["populartimes"] === undefined || TimesApp.place_ids.indexOf(places[key]["place_id"]) !== -1) continue;
+                        
+                        let waitTime = TimesApp.getWaitTime(places[key]) || 20;
+                        let radius = waitTime + 80;
+                        let colors = TimesApp.getMarkerPlaceColor(waitTime);
+                        
+                        const circleMarker = L.circle([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {
                             color: colors[0],
                             fillColor: colors[1],
                             fillOpacity: 0.5,
                             radius: radius
-                        }).addTo(TimesApp.lMap);
+                        });
+
+                        const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]]);
+                        
+                        circleMarker.bindPopup(places[key]["name"] + " " + waitTime + "min of line");
+                        circleMarker.addTo(TimesApp.lMap);
+                        
+                        pointMarker.bindPopup(places[key]["name"] + " " + waitTime + "min of line");
+                        pointMarker.addTo(TimesApp.lMap);
+                        
+                        TimesApp.place_ids.push(places[key]["place_id"]);
                     }
                 },
-                geoSuccess: function (position) {
+                updateAddress: async function (initMap) {
+                    initMap = initMap || true;
+                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng))
+                        .then((r) => { if (r.ok) return r.json(); })
+                        .then((r) => { 
+                            TimesApp.address = r.staddress + ', ' + r.city;
+                            (initMap === true) ? TimesApp.initMap() : TimesApp.getPlaces();
+                        });
+                },
+                geoSuccess: async function (position) {
                     TimesApp.lat = position.coords.latitude;
                     TimesApp.lng = position.coords.longitude;
 
-                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng))
-                        .then((r) => { if (r.ok) return r.json(); })
-                        .then((r) => TimesApp.address = r.staddress + ', ' + r.city);
-
-                    TimesApp.initMap();
+                    await TimesApp.updateAddress();
+                    // TimesApp.initMap();
                 },
                 geoError: function () {
                     TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "").trim();
                     if (address != "") {
-                        let geocode = {latt: 0, lngt: 0};
                         fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
                             .then((r) => { if (r.ok) r.json(); })
-                            .then((r) => geocode = r);
-                        
-                        TimesApp.lat = geocode.latt;
-                        TimesApp.lng = geocode.lngt;
-                        TimesApp.initMap();
+                            .then((r) => {
+                                TimesApp.lat = r.latt;
+                                TimesApp.lng = r.lngt;
+                                TimesApp.initMap();
+                            });
                     }
                 }
             };

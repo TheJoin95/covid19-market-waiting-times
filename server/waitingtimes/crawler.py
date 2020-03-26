@@ -287,6 +287,7 @@ def get_by_detail(detail):
     place_identifier = "{} {}".format(detail["name"], detail["formatted_address"])
 
     detail_json = {
+        "place_id": detail["place_id"],
         "name": detail["name"],
         "address": detail["formatted_address"],
         "types": detail["types"],
