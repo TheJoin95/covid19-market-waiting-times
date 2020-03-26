@@ -210,12 +210,12 @@
                 },
                 geoError: function () {
                     TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "").trim();
-                    if (address != "") {
+                    if (TimesApp.address != "") {
                         fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
-                            .then((r) => { if (r.ok) r.json(); })
+                            .then((r) => { if (r.ok) return r.json(); })
                             .then((r) => {
                                 TimesApp.lat = r.latt;
-                                TimesApp.lng = r.lngt;
+                                TimesApp.lng = r.longt;
                                 TimesApp.initMap();
                             });
                     }

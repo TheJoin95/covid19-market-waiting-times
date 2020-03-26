@@ -142,8 +142,8 @@ def get_places_from_here():
 	return jsonify(formattedPlaces) """
 
 if __name__ == '__main__':
-	if (threading.active_count() <= 20):
-		for i in range(20):
+	if (threading.active_count() <= 40):
+		for i in range(40):
 			t = threading.Thread(target=worker_fulldetail)
 			t.daemon = True
 			t.start()
