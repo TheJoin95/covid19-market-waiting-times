@@ -147,4 +147,4 @@ def get_places_from_here():
 	return jsonify(formattedPlaces) """
 
 if __name__ == '__main__':
-	app.run()
+	app.run(port=2354)
