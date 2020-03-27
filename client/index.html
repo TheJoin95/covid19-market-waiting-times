@@ -152,6 +152,37 @@
                 }
             };
 
+            Number.prototype.toRad = function() {
+               return this * Math.PI / 180;
+            }
+
+            Number.prototype.toDeg = function() {
+               return this * 180 / Math.PI;
+            }
+
+            // Lat, Lng, Angle, Range in Km => get point of destination
+            // usage: destinationPoint(43.81, 11.13, 90, 10)
+            const Utils = {
+                destinationPoint: function(lat, lng, brng, dist) {
+                   dist = dist / 6371;  
+                   brng = brng.toRad();  
+
+                   var lat1 = lat.toRad(), lon1 = lng.toRad();
+
+                   var lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) + 
+                                        Math.cos(lat1) * Math.sin(dist) * Math.cos(brng));
+
+                   var lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) *
+                                                Math.cos(lat1), 
+                                                Math.cos(dist) - Math.sin(lat1) *
+                                                Math.sin(lat2));
+
+                   if (isNaN(lat2) || isNaN(lon2)) return null;
+
+                   return [lat2.toDeg(), lon2.toDeg()];
+                }
+            };
+
             // Calcolare la distanza tra un pan e l'altro per verificare se c'è da effettuare una richiesta oppure non necessaria
             // Aggiungere textbox per ricerca
             // Aggiungere sidebar con listing places
@@ -192,6 +223,8 @@
                         TimesApp.lat = center.lat;
                         TimesApp.lng = center.lng;
                         await TimesApp.updateAddress(-1);
+
+                        await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                     });
                     
                     TimesApp.showLegend();
@@ -259,14 +292,14 @@
 
                     var waitTime = Math.ceil(waitTimes + meanIntersectPop);
                     if (popTimes !== 0 && cPopularity > 15)
-                        waitTime += 10; // relative error, white rumor
+                        waitTime += 5; // relative error, white rumor
 
                     return [place["populartimes"][weekDay]["data"][hour], waitTime];
                 },
                 getPlaces: function () {
-                    TimesApp.toggleSpinner();
+                    // TimesApp.toggleSpinner();
                     fetch(WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, TimesApp.query, TimesApp.address))
-                        .then((r) => { TimesApp.toggleSpinner(); if (r.ok) return r.json(); })
+                        .then((r) => { /*TimesApp.toggleSpinner();*/ if (r.ok) return r.json(); })
                         .then((places) => TimesApp.setPlaceOnMap(places));
                 },
                 setPlaceOnMap: function (places) {
@@ -280,6 +313,8 @@
                         let radius = waitTime + 80;
                         let colors = TimesApp.getMarkerPlaceColor(waitTime);
                         let message = " " + waitTime + "min of line";
+
+                        if (isNaN(radius)) radius = 80;
                         
                         if (waitTimeArr[0] === 0) {
                             colors = ["#ccc", "#777"];
@@ -317,12 +352,22 @@
                             (initMap === true) ? TimesApp.initMap() : TimesApp.getPlaces();
                         });
                 },
+                updateBound: async function (originLat, originLng) {
+                    for (var i = 0; i <= 360; i += 90) {
+                        let destLatLng = Utils.destinationPoint(originLat, originLng, i, 4);
+                        TimesApp.lat = destLatLng[0];
+                        TimesApp.lng = destLatLng[1];
+
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        await TimesApp.updateAddress(-1);
+                    }
+                },
                 geoSuccess: async function (position) {
                     TimesApp.lat = position.coords.latitude;
                     TimesApp.lng = position.coords.longitude;
 
                     await TimesApp.updateAddress();
-                    // TimesApp.initMap();
+                    await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                 },
                 geoError: function () {
                     TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "").trim();

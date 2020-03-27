@@ -2,7 +2,7 @@ from flask import Flask
 from flask import jsonify, abort
 from flask import request
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from flask_limiter.util import get_remote_address, get_ipaddr
 from flask_cors import CORS, cross_origin
 
 from queue import Queue
@@ -16,8 +16,8 @@ q_detail = Queue()
 
 limiter = Limiter(
     app,
-    key_func=get_remote_address,
-    default_limits=["1000 per day", "200 per hour"]
+    key_func=get_ipaddr,
+    default_limits=["10000 per day", "1000 per hour"]
 )
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -60,6 +60,8 @@ def worker_fulldetail():
 @cross_origin()
 def get_places_from_google():
 	global q_detail, formattedPlaces
+
+	print(get_ipaddr())
 
 	QUERY_SEARCH = "{} near {} open now"
 
