@@ -234,7 +234,7 @@
                         if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) == 2) {
                             TimesApp.lat = center.lat;
                             TimesApp.lng = center.lng;
-                            Utils.updateTimeout = setTimeout(function () {
+                            Utils.updateTimeout = setTimeout(async function () {
                                 await TimesApp.updateAddress(-1);
                                 await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                             }, 1000);
