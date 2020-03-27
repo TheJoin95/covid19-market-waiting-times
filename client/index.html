@@ -268,7 +268,7 @@
                     const hour = (new Date()).getHours();
                     const weekDay = ((new Date()).getDay() === 0) ? 6 : (new Date()).getDay() - 1;
 
-                    var maxTimeSpent, meanTimeSpent = 0;
+                    var maxTimeSpent, meanTimeSpent, minTimeSpent = 0;
 
                     if (place["time_spent"] !== undefined) {
                         maxTimeSpent = Math.max(...place["time_spent"]);
@@ -288,7 +288,7 @@
                     console.log("radius: ", (waitTimes + meanTimeSpent + cPopularity));
 
                     // If there is no one, I do not need to calculate the mean on the timespent inside
-                    var meanIntersectPop = (cPopularity <= 15) ? 0 : meanTimeSpent;
+                    var meanIntersectPop = (cPopularity <= 15) ? 0 : minTimeSpent;
 
                     var waitTime = Math.ceil(waitTimes + meanIntersectPop);
                     if (popTimes !== 0 && cPopularity > 15)
