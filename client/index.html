@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Covid-19 - Supermarket Waiting Times</title>
+        <meta name="author" content="https://github.com/TheJoin95/covid19-market-waiting-times/">
         <link rel="icon" type="image/png" href="/assets/icon.png">
         <meta name="description" content="A project to help people stand in line at the market as little as possible" />
         <meta charset="utf-8">
@@ -137,7 +138,7 @@
             </div>
         </div>
         <div id="full-map"></div>
-        <footer>Made with love in Florence</footer>
+        <footer>Made with ❤ in Florence</footer>
 
         <script>
             const WaitingTimesAPI = {
@@ -163,6 +164,7 @@
             // Lat, Lng, Angle, Range in Km => get point of destination
             // usage: destinationPoint(43.81, 11.13, 90, 10)
             const Utils = {
+                updateTimeout: null,
                 destinationPoint: function(lat, lng, brng, dist) {
                    dist = dist / 6371;  
                    brng = brng.toRad();  
@@ -196,10 +198,6 @@
                 }
             };
 
-            // Aggiungere textbox per ricerca
-            // Aggiungere sidebar con listing places
-            // Cambiare marker
-
             const TimesApp = {
                 lat: null,
                 lng: null,
@@ -229,15 +227,17 @@
                     }).bindPopup("Your position").addTo(TimesApp.lMap);
 
                     TimesApp.lMap.on("moveend", async function () {
+                        clearTimeout(Utils.updateTimeout);
                         let center = TimesApp.lMap.getCenter();
                         console.log("new center ", center.toString());
 
-                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 2.5) {
+                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) == 2) {
                             TimesApp.lat = center.lat;
                             TimesApp.lng = center.lng;
-                            await TimesApp.updateAddress(-1);
-
-                            await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+                            Utils.updateTimeout = setTimeout(function () {
+                                await TimesApp.updateAddress(-1);
+                                await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+                            }, 1000);
                         }
 
                     });
