@@ -27,6 +27,8 @@ How many time to wait, how popular is the place and when.. etc etc.
 - Add search input in overlay
 - Add sidebar to list all the visible places
 - Change marker icon
+- Add a sort of cache on the backend (e.g. Redis with Geopos operator)
+- Add a way to store the place data to prevent an overload on the requested resource
 
 # Credits
 
