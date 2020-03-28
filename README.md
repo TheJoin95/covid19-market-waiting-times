@@ -29,6 +29,7 @@ How many time to wait, how popular is the place and when.. etc etc.
 - Change marker icon
 - Add a sort of cache on the backend (e.g. Redis with Geopos operator)
 - Add a way to store the place data to prevent an overload on the requested resource
+- Add Pharmacy results
 
 # Credits
 

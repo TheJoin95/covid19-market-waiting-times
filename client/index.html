@@ -49,8 +49,10 @@
             }
 
             .legend i {
-                width: 18px;
-                height: 18px;
+                /*width: 18px;*/
+                /*height: 18px;*/
+                width: 16px;
+    						height: 16px;
                 float: left;
                 margin-right: 8px;
                 opacity: 0.7;
@@ -124,9 +126,23 @@
               } 
             }
             /* SPINNER */
+
+            div#search-button {
+					    position: fixed;
+					    bottom: 10px;
+					    right: 10px;
+					    z-index: 10000;
+					    border-radius: 50%;
+					    background: #2780ca;
+					    font-size: 1.2em;
+					    padding: 1em;
+					    border: 1px solid #35a9ff;
+					    cursor: pointer;
+						}
         </style>
     </head>
     <body>
+    		<div id="search-button" onclick="TimesApp.search();"><span>🔍</span></div>
         <div id="loading" style="display: none">
             <div class="sk-chase">
               <div class="sk-chase-dot"></div>
@@ -390,6 +406,19 @@
 
                     await TimesApp.updateAddress();
                     await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+                },
+                search: async function () {
+                	TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "").trim();
+                	if (TimesApp.address != "") {
+                        fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
+                            .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
+                            .then((r) => {
+                                TimesApp.lat = r.latt;
+                                TimesApp.lng = r.longt;
+                                TimesApp.lMap.setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
+                                TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+                            });
+                    }
                 },
                 geoError: function () {
                     TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "").trim();
