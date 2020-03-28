@@ -88,6 +88,7 @@ def get_places_from_google():
 				"formatted_address": place["address"],
 				"name": place["name"],
 				"types": place["categories"],
+				"place_types": place["place_types"],
 				"geometry": {
 					"location": {
 						"lat": place["location"]["lat"],

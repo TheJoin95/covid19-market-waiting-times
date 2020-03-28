@@ -291,6 +291,7 @@ def get_by_detail(detail):
         "name": detail["name"],
         "address": detail["formatted_address"],
         "types": detail["types"],
+        "place_types": detail["place_types"],
         "coordinates": detail["geometry"]["location"]
     }
 

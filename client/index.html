@@ -144,7 +144,7 @@
             const WaitingTimesAPI = {
                 // geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
                 geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
-                getPlacesAPI: 'https://api-geo.thejoin.tech/places/explore?q=%s&address=%s',
+                getPlacesAPI: 'https://api-geo.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
                         i = 0;
@@ -320,7 +320,7 @@
                 },
                 getPlaces: function () {
                     // TimesApp.toggleSpinner();
-                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, TimesApp.query, TimesApp.address))
+                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, TimesApp.query, TimesApp.address, TimesApp.lat, TimesApp.lng))
                         .then((r) => { /*TimesApp.toggleSpinner();*/ if (r.ok) return r.json(); })
                         .then((places) => TimesApp.setPlaceOnMap(places));
                 },
@@ -334,14 +334,14 @@
                         let waitTime = waitTimeArr[1];
                         let radius = waitTime + 80;
                         let colors = TimesApp.getMarkerPlaceColor(waitTime);
-                        let message = " " + waitTime + "min of line";
+                        let message = "<b>" + places[key]["name"] + "</b><br><small>" + places[key]["address"] + "</small><br/><i>" + waitTime + "min</i> of line";
 
                         if (isNaN(radius)) radius = 80;
                         
                         if (waitTimeArr[0] === 0) {
                             colors = ["#ccc", "#777"];
                             radius = 80;
-                            message = " - Closed";
+                            message = "<i>Closed</i><br/>" + message;
                         }
 
                         const circleMarker = L.circle([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {
@@ -353,10 +353,10 @@
 
                         const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]]);
                         
-                        circleMarker.bindPopup(places[key]["name"] + message);
+                        circleMarker.bindPopup(message);
                         circleMarker.addTo(TimesApp.lMap);
                         
-                        pointMarker.bindPopup(places[key]["name"] + message);
+                        pointMarker.bindPopup(message);
                         pointMarker.addTo(TimesApp.lMap);
                         
                         TimesApp.place_ids.push(places[key]["place_id"]);
@@ -365,7 +365,7 @@
                 updateAddress: async function (initMap) {
                     initMap = initMap || true;
                     fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng))
-                        .then((r) => { if (r.ok) return r.json(); })
+                        .then((r) => { return ((r.ok) ? r.json() : {staddress: '', city: ''}); })
                         .then((r) => { 
                             r.staddress = (typeof(r.staddress) === 'object') ? '' : r.staddress;
                             r.city = (typeof(r.city) === 'object') ? '' : r.city;
@@ -395,7 +395,7 @@
                     TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "").trim();
                     if (TimesApp.address != "") {
                         fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
-                            .then((r) => { if (r.ok) return r.json(); })
+                            .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
                             .then((r) => {
                                 TimesApp.lat = r.latt;
                                 TimesApp.lng = r.longt;
