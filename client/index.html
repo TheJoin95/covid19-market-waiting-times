@@ -231,7 +231,7 @@
                         let center = TimesApp.lMap.getCenter();
                         console.log("new center ", center.toString());
 
-                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) == 2) {
+                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 4) {
                             TimesApp.lat = center.lat;
                             TimesApp.lng = center.lng;
                             Utils.updateTimeout = setTimeout(async function () {
