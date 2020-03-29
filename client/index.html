@@ -162,8 +162,8 @@
 
         <script>
             const WaitingTimesAPI = {
-                // geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
-                geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
+                geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
+                // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
                 getPlacesAPI: 'https://api-geo.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
@@ -252,8 +252,8 @@
                         console.log("new center ", center.toString());
 
                         if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 4) {
-                            TimesApp.lat = center.lat;
-                            TimesApp.lng = center.lng;
+                            TimesApp.lat = parseFloat(center.lat);
+                            TimesApp.lng = parseFloat(center.lng);
                             Utils.updateTimeout = setTimeout(async function () {
                                 await TimesApp.updateAddress(-1);
                                 await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
@@ -319,9 +319,6 @@
                     
                     popTimes = place["populartimes"][weekDay]["data"][hour];
 
-                    // console.log("maxSpent: %d, cPop: %d, wait: %d, popTimes: %d", maxTimeSpent, cPopularity, waitTimes, popTimes);
-                    // console.log("wait_times+timespent: ", (waitTimes+maxTimeSpent));
-                    // console.log("radius: ", (waitTimes + meanTimeSpent + cPopularity));
 
                     // If there is no one, I do not need to calculate the mean on the timespent inside
                     var meanIntersectPop = meanTimeSpent;
@@ -393,26 +390,27 @@
                     fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng))
                         .then((r) => { return ((r.ok) ? r.json() : {staddress: '', city: ''}); })
                         .then((r) => { 
-                            r.staddress = (typeof(r.staddress) === 'object') ? '' : r.staddress;
-                            r.city = (typeof(r.city) === 'object') ? '' : r.city;
+                            r.staddress = (typeof(r.staddress) === 'object' || r.staddress === undefined) ? '' : r.staddress;
+                            r.city = (typeof(r.city) === 'object' || r.city === undefined) ? '' : r.city;
 
-                            TimesApp.address = r.staddress + ', ' + r.city;
+                            TimesApp.address = (r.staddress !== '') ? r.staddress + ', ' : '';
+                            TimesApp.address += r.city;
                             (initMap === true) ? TimesApp.initMap() : TimesApp.getPlaces();
                         });
                 },
                 updateBound: async function (originLat, originLng) {
                     for (var i = 0; i <= 360; i += 90) {
                         let destLatLng = Utils.destinationPoint(originLat, originLng, i, 4);
-                        TimesApp.lat = destLatLng[0];
-                        TimesApp.lng = destLatLng[1];
+                        TimesApp.lat = parseFloat(destLatLng[0]);
+                        TimesApp.lng = parseFloat(destLatLng[1]);
 
                         await new Promise(resolve => setTimeout(resolve, 3000));
                         await TimesApp.updateAddress(-1);
                     }
                 },
                 geoSuccess: async function (position) {
-                    TimesApp.lat = position.coords.latitude;
-                    TimesApp.lng = position.coords.longitude;
+                    TimesApp.lat = parseFloat(position.coords.latitude);
+                    TimesApp.lng = parseFloat(position.coords.longitude);
 
                     await TimesApp.updateAddress();
                     await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
@@ -423,8 +421,8 @@
                         fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
                             .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
                             .then((r) => {
-                                TimesApp.lat = r.latt;
-                                TimesApp.lng = r.longt;
+                                TimesApp.lat = parseFloat(r.latt);
+                                TimesApp.lng = parseFloat(r.longt);
                                 TimesApp.lMap.setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
                                 TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                             });
@@ -436,8 +434,8 @@
                         fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
                             .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
                             .then((r) => {
-                                TimesApp.lat = r.latt;
-                                TimesApp.lng = r.longt;
+                                TimesApp.lat = parseFloat(r.latt);
+                                TimesApp.lng = parseFloat(r.longt);
                                 TimesApp.initMap();
                             });
                     }

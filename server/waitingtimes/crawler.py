@@ -11,8 +11,10 @@ import requests
 import os
 
 HERE_BASE_URL = "https://places.ls.hereapi.com/places/v1/"
+HERE_GEOCODE_BASE_URL = "https://revgeocode.search.hereapi.com/v1/"
 BROWSE_URL = HERE_BASE_URL + "browse?in={},{};r={}&result_types=place&tf=plain&cs=&size={}&cat={}&apiKey={}"
 GEOCODE_URL = "https://geocode.xyz/{},{}?geoit=json&auth={}"
+GEOCODE_HERE_URL = HERE_GEOCODE_BASE_URL + "revgeocode?at={},{}&lang=it-IT&apiKey={}"
 
 COMMON_HEADERS = {
     "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -24,16 +26,35 @@ USER_AGENT = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) "
                             "Chrome/80.0.3987.149 Safari/537.36"}
 
+# def get_info_from_geocode(lat, lng):
+#     if (os.environ.get('GEOCODE_API_KEY') == None):
+#         raise Exception("You need to add an environment variable for GEOCODE_API_KEY")
+# 
+#     info = json.loads(requests.get(GEOCODE_URL.format(lat, lng, os.environ.get('GEOCODE_API_KEY'))).text)
+# 
+#     if ("timezone" not in info):
+#         raise Exception("No info from geocode")
+#     
+#     return info
+
 def get_info_from_geocode(lat, lng):
-    if (os.environ.get('GEOCODE_API_KEY') == None):
-        raise Exception("You need to add an environment variable for GEOCODE_API_KEY")
+    if (os.environ.get('HERE_PLACE_API_KEY') == None):
+        raise Exception("You need to add an environment variable for HERE_PLACE_API_KEY")
 
-    info = json.loads(requests.get(GEOCODE_URL.format(lat, lng, os.environ.get('GEOCODE_API_KEY'))).text)
+    info = json.loads(requests.get(GEOCODE_HERE_URL.format(lat, lng, os.environ.get('HERE_PLACE_API_KEY'))).text)
 
-    if ("timezone" not in info):
+    if ("items" not in info):
         raise Exception("No info from geocode")
+
+    info["items"][0]["staddress"] = ""
+    if ("street" in info["items"][0]["address"]):
+        info["items"][0]["staddress"] = info["items"][0]["address"]["street"]
+
+    info["items"][0]["city"] = ""
+    if ("city" in info["items"][0]["address"]):
+        info["items"][0]["city"] = info["items"][0]["address"]["city"]
     
-    return info
+    return info["items"][0]
 
 def get_places_by_search(q):
     """
