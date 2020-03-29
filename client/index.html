@@ -3,11 +3,15 @@
     <head>
         <title>Covid-19 - Supermarket Waiting Times</title>
         <meta name="author" content="https://github.com/TheJoin95/covid19-market-waiting-times/">
-        <link rel="icon" type="image/png" href="/assets/icon.png">
+        <link rel="icon" type="image/png" href="/assets/icon-resize.png">
         <meta name="description" content="A project to help people stand in line at the market as little as possible" />
         <meta charset="utf-8">
         <link rel="manifest" href="manifest.json">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta property="og:title" content="Covid-19 - Supermarket Waiting Times"/>
+        <meta property="og:image" content="https://covid19-waiting-time.thejoin.tech/assets/map.png"/>
+        <meta property="og:description" content="A project to help people stand in line at the market as little as possible"/>
+        <meta property="og:url" content="https://covid19-waiting-time.thejoin.tech" />
 
         <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
 
@@ -154,7 +158,7 @@
             </div>
         </div>
         <div id="full-map"></div>
-        <footer>Made with ❤ in Florence</footer>
+        <footer>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">Open Source on Github</a></footer>
 
         <script>
             const WaitingTimesAPI = {
@@ -254,6 +258,7 @@
                                 await TimesApp.updateAddress(-1);
                                 await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                             }, 1000);
+                            TimesApp.getPharmacies();
                         }
 
                     });
@@ -308,7 +313,7 @@
 
                     const cPopularity = place["current_popularity"] || 0;
 
-                    var waitTimes, popTimes = 0;
+                    var waitTimes = popTimes = 0;
                     if (place["time_wait"] !== undefined && place["time_wait"].length > 0)
                         waitTimes = place["time_wait"][weekDay]["data"][hour];
                     
@@ -334,9 +339,14 @@
 
                     return [place["populartimes"][weekDay]["data"][hour], waitTime];
                 },
-                getPlaces: function () {
+                getPharmacies: function () {
+                    console.log("Getting pharmacy");
+                    TimesApp.getPlaces("pharmacy");
+                },
+                getPlaces: function (query) {
+                    query = query || TimesApp.query;
                     // TimesApp.toggleSpinner();
-                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, TimesApp.query, TimesApp.address, TimesApp.lat, TimesApp.lng))
+                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng))
                         .then((r) => { /*TimesApp.toggleSpinner();*/ if (r.ok) return r.json(); })
                         .then((places) => TimesApp.setPlaceOnMap(places));
                 },
