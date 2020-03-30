@@ -33,4 +33,7 @@ How many time to wait, how popular is the place and when.. etc etc.
 
 # Credits
 
-The waitingtimes lib is based on the [populartimes python library](https://github.com/m-wrzr/populartimes/). Cheers.
+The waitingtimes lib is based on the [populartimes python library](https://github.com/m-wrzr/populartimes/).
+The geolocation utility comes from the [greg's repo](https://github.com/gregsramblings/getAccurateCurrentPosition).
+
+Cheers.

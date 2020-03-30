@@ -10,6 +10,10 @@
     {
       "src": "/assets/icon.png",
       "sizes": "512x512"
+    },
+    {
+      "src": "/assets/icon-resize.png",
+      "sizes": "192x192"
     }
   ]
 }
