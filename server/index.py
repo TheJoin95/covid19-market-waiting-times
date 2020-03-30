@@ -10,6 +10,7 @@ import threading
 
 import waitingtimes
 import hashlib
+import json
 
 app = Flask(__name__)
 q_detail = Queue()
@@ -101,6 +102,19 @@ def get_places_from_google():
 
 	return jsonify(formattedPlaces)
 
+@app.route("/logger", methods=["POST"])
+def save_client_log():
+	try:
+		print(request.data)
+		log = request.json
+		with(open("/tmp/covid-client-map.log", "a")) as f:
+			log["remote_addr"] = get_ipaddr()
+			f.write(json.dumps(log))
+			f.close()
+	except Exception as e:
+		print(e)
+
+	return jsonify({"ok": 200})
 
 """ @app.route("/places/browse", methods=["GET"])
 def get_places_from_here():

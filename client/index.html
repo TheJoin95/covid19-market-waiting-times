@@ -166,6 +166,7 @@
             const WaitingTimesAPI = {
                 geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
                 // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
+                logAPI: 'https://api-geo.thejoin.tech/logger',
                 getPlacesAPI: 'https://api-geo.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
@@ -273,10 +274,11 @@
                 lat: null,
                 lng: null,
                 address: "",
-                zoom: 14,
+                zoom: 15,
                 lMap: null,
                 myPosition: null,
                 query: "supermarket",
+                isLoading: false,
                 place_ids: [],
                 initMap: function () {
                     TimesApp.lMap = L.map('full-map').setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
@@ -478,7 +480,11 @@
                   await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                 },
                 search: async function () {
-                	TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "").trim();
+                	TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "");
+
+                	if (TimesApp.address === null)
+                		return false;
+
                 	if (TimesApp.address != "") {
                         fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
                             .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
@@ -540,6 +546,26 @@
                     spinnerEl.style.display = displayProp;
                 }
             };
+
+            window.onerror = function(errorMessage, errorUrl, errorLine) {
+
+            	const requestBody = {
+            		date: (new Date()).toString(),
+            		ua: navigator.userAgent,
+            		errorMessage: errorMessage,
+            		errorUrl: errorUrl,
+            		errorLine: errorLine
+            	};
+
+            	fetch(WaitingTimesAPI.logAPI, {
+						    method: 'POST',
+						    headers: {
+						      'Accept': 'application/json',
+						      'Content-Type': 'application/json'
+						    },
+						    body: JSON.stringify(requestBody)
+						  });
+            }
 
             document.addEventListener('DOMContentLoaded', function () {
                 const mapEl = document.getElementById('full-map');
