@@ -88,19 +88,19 @@ def get_places_from_google():
 			if (place["name"] == None):
 				continue
 
-				formattedPlaces.append({
-					"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
-					"formatted_address": place["address"],
-					"name": place["name"],
-					"types": place["categories"],
-					"place_types": place["place_types"],
-					"geometry": {
-						"location": {
-							"lat": place["location"]["lat"],
-							"lng": place["location"]["lng"]
-						}
+			formattedPlaces.append({
+				"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
+				"formatted_address": place["address"],
+				"name": place["name"],
+				"types": place["categories"],
+				"place_types": place["place_types"],
+				"geometry": {
+					"location": {
+						"lat": place["location"]["lat"],
+						"lng": place["location"]["lng"]
 					}
-				})
+				}
+			})
 			
 			# q_detail.put({
 			# 	"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
