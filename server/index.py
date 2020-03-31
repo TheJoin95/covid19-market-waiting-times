@@ -57,6 +57,12 @@ def worker_fulldetail():
 			print(e)
 		q_detail.task_done()
 
+@app.route("/places/get-waiting-times", methods=["POST"])
+@cross_origin()
+def get_place_from_place_name_address():
+	wait_times = waitingtimes.get_by_fulldetail(request.json)
+	return jsonify(wait_times)
+
 @app.route("/places/explore", methods=["GET"])
 @cross_origin()
 def get_places_from_google():
@@ -81,26 +87,41 @@ def get_places_from_google():
 		for place in places:
 			if (place["name"] == None):
 				continue
-			
-			q_detail.put({
-				"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
-				"formatted_address": place["address"],
-				"name": place["name"],
-				"types": place["categories"],
-				"place_types": place["place_types"],
-				"geometry": {
-					"location": {
-						"lat": place["location"]["lat"],
-						"lng": place["location"]["lng"]
-					}
-				}
-			})
 
-		q_detail.join()
+				formattedPlaces.append({
+					"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
+					"formatted_address": place["address"],
+					"name": place["name"],
+					"types": place["categories"],
+					"place_types": place["place_types"],
+					"geometry": {
+						"location": {
+							"lat": place["location"]["lat"],
+							"lng": place["location"]["lng"]
+						}
+					}
+				})
+			
+			# q_detail.put({
+			# 	"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
+			# 	"formatted_address": place["address"],
+			# 	"name": place["name"],
+			# 	"types": place["categories"],
+			# 	"place_types": place["place_types"],
+			# 	"geometry": {
+			# 		"location": {
+			# 			"lat": place["location"]["lat"],
+			# 			"lng": place["location"]["lng"]
+			# 		}
+			# 	}
+			# })
+
+		# q_detail.join()
 
 	return jsonify(formattedPlaces)
 
 @app.route("/logger", methods=["POST"])
+@cross_origin()
 def save_client_log():
 	try:
 		log = request.json
