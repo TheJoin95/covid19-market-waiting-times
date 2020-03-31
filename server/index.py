@@ -88,21 +88,7 @@ def get_places_from_google():
 			if (place["name"] == None):
 				continue
 
-			formattedPlaces.append({
-				"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
-				"formatted_address": place["address"],
-				"name": place["name"],
-				"types": place["categories"],
-				"place_types": place["place_types"],
-				"geometry": {
-					"location": {
-						"lat": place["location"]["lat"],
-						"lng": place["location"]["lng"]
-					}
-				}
-			})
-			
-			# q_detail.put({
+			# formattedPlaces.append({
 			# 	"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
 			# 	"formatted_address": place["address"],
 			# 	"name": place["name"],
@@ -115,8 +101,22 @@ def get_places_from_google():
 			# 		}
 			# 	}
 			# })
+			
+			q_detail.put({
+				"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
+				"formatted_address": place["address"],
+				"name": place["name"],
+				"types": place["categories"],
+				"place_types": place["place_types"],
+				"geometry": {
+					"location": {
+						"lat": place["location"]["lat"],
+						"lng": place["location"]["lng"]
+					}
+				}
+			})
 
-		# q_detail.join()
+		q_detail.join()
 
 	return jsonify(formattedPlaces)
 
@@ -182,4 +182,4 @@ if __name__ == '__main__':
 		t.daemon = True
 		t.start()
 
-	app.run(port=2354)
+	app.run(port=2354, threaded=True, processes=5)

@@ -136,26 +136,127 @@
                 transform: scale(1.0); 
               } 
             }
+
+            @keyframes opac {
+                from {
+                    opacity: 0
+                }
+
+                to {
+                    opacity: 1
+                }
+            }
+
             /* SPINNER */
 
+            /* MODAL */
+            .modal {
+                z-index: 100000;
+                display: none;
+                padding-top: 100px;
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgb(0,0,0);
+                background-color: rgba(0,0,0,0.4);
+            }
+            .animate-opacity {
+                animation: opac 0.8s;
+            }
+            .card-4 {
+                box-shadow: 0 4px 10px 0 rgba(0,0,0,0.2), 0 4px 20px 0 rgba(0,0,0,0.19);
+            }
+            .modal-content {
+                margin: auto;
+                background-color: #fff;
+                position: relative;
+                padding: 0;
+                outline: 0;
+                width: 600px;
+                max-width: 100%;
+            }
+            .modal-content textarea {
+                width: 100%;
+                margin-top: 10px;
+                padding: 5px;
+                border: 1px solid #f2f2f2;
+                resize: none;
+            }
+            .teal {
+                color: #fff!important;
+                background-color: #009688!important;
+            }
+            .container, .panel {
+                padding: 0.01em 16px;
+            }
+            .display-topright {
+                position: absolute;
+                right: 0;
+                top: 0;
+            }
+            .close-button {
+                border: none;
+                font-size: 2.4em;
+                display: inline-block;
+                padding: 8px 16px;
+                vertical-align: middle;
+                overflow: hidden;
+                text-decoration: none;
+                color: inherit;
+                background-color: inherit;
+                text-align: center;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .modal-content .btn {
+                padding: 10px 10px;
+                background: #028276;
+                margin: 10px;
+                display: inline-block;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+            /* MODAL */
+
+            div#help-button {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                z-index: 10000;
+                border-radius: 50%;
+                text-align: center;
+                background: #ffc950;
+                font-size: 1.2em;
+                padding: 1em;
+                border: 1px solid #fcd25e;
+                cursor: pointer;
+                width: 26px;
+                height: 26px;
+            }
+
             div#search-button {
-					    position: fixed;
-					    bottom: 10px;
-					    right: 10px;
-					    z-index: 10000;
-					    border-radius: 50%;
-					    background: #2780ca;
-					    font-size: 1.2em;
-					    padding: 1em;
-					    border: 1px solid #35a9ff;
-					    cursor: pointer;
-					    width: 26px;
-					    height: 26px;
-						}
+			    position: fixed;
+			    bottom: 10px;
+                text-center: center;
+			    right: 10px;
+			    z-index: 10000;
+			    border-radius: 50%;
+			    background: #2780ca;
+			    font-size: 1.2em;
+			    padding: 1em;
+			    border: 1px solid #35a9ff;
+			    cursor: pointer;
+			    width: 26px;
+			    height: 26px;
+			}
         </style>
     </head>
     <body>
-    		<div id="search-button" onclick="TimesApp.search();"><span>🔍</span></div>
+        <div id="help-button" onclick="TimesApp.showModalHelp();"><span>❓</span></div>
+    	<div id="search-button" onclick="TimesApp.search();"><span>🔍</span></div>
         <div id="loading" style="display: none">
             <div class="sk-chase">
               <div class="sk-chase-dot"></div>
@@ -169,12 +270,30 @@
         <div id="full-map"></div>
         <footer>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">Open Source on Github</a></footer>
 
+        <div id="help-modal" class="modal">
+            <div class="modal-content animate-opacity card-4">
+              <header class="container teal"> 
+                <span onclick="document.getElementById('help-modal').style.display='none'" class="close-button display-topright">&times;</span>
+                <h2>Need help? Do you want to ask something?</h2>
+              </header>
+              <div class="container">
+                <textarea placeholder="Write here your question or tips" rows="7"></textarea>
+              </div>
+              <footer class="container teal">
+                <span class="btn" onclick="TimesApp.sendHelp(document.querySelector('.modal-content textarea').value)">Send</span>
+                <span class="btn" style="float: right" onclick="document.getElementById('help-modal').style.display='none'">Close</span>
+              </footer>
+            </div>
+        </div>
+
         <script>
+            const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo-fr', 'api-geo-fr'];
+            const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
                 geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
                 // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
                 logAPI: 'https://api-geo.thejoin.tech/logger',
-                getPlacesAPI: 'https://api-geo.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
+                getPlacesAPI: 'https://'+API_DOMAIN+'.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
                         i = 0;
@@ -306,7 +425,7 @@
                     L.tileLayer(
                         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             maxZoom: 15,
-                            minZoom: 13,
+                            minZoom: 14,
                             attribution: 'Map data <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
                         }
                     ).addTo(TimesApp.lMap);
@@ -502,11 +621,26 @@
                   }
                 },
                 geoSuccess: async function (position) {
+                  if (position === undefined) {
+                    TimesApp.geoError();
+                    return false;
+                  }
+                  
                   TimesApp.lat = parseFloat(position.coords.latitude);
                   TimesApp.lng = parseFloat(position.coords.longitude);
 
                   await TimesApp.updateAddressAwait();
                   await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+                },
+                showModalHelp: function () {
+                    document.getElementById('help-modal').style.display='block';
+                },
+                sendHelp: function (message) {
+                    Utils.sendError({message: message});
+                    document.querySelector('.modal-content div.container').innerHTML = '<h2>Message sent, thank you!</h2>';
+                    setTimeout(function() {
+                        document.getElementById('help-modal').style.display='none';
+                    }, 1200);
                 },
                 search: async function () {
                 	TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "");
@@ -532,8 +666,7 @@
                 	return prompt("This app need your gps position or at least your address or your city:", "");
                 },
                 geoError: function (e) {
-                	console.log(e);
-                	clearTimeout(Utils.geoErrorTimeout);
+                  clearTimeout(Utils.geoErrorTimeout);
                   TimesApp.address = TimesApp.promptAddress();
 
                   if (TimesApp.address === null) {
