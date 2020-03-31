@@ -28,6 +28,10 @@
                 font-family: 'Raleway', sans-serif;
             }
 
+            body {
+                margin: 0;
+            }
+
             #full-map {
                 width: 100%;
                 height: 200px;
@@ -77,8 +81,11 @@
               width: 40px;
               height: 40px;
               position: relative;
-              top: 45%;
-              left: 45%;
+              top: 50%;
+              left: 50%;
+              width: 40px;
+              margin-top: -20px;
+              margin-left: -20px;
               animation: sk-chase 2.5s infinite linear both;
             }
 
@@ -190,53 +197,66 @@
                 updateTimeout: null,
                 geoErrorTimeout: null,
                 geoErrorFailOverCount: 0,
+                sendError: function (requestBody) {
+                    requestBody["ua"] = navigator.userAgent;
+                    requestBody["date"] = (new Date()).toString();
+
+                    fetch(WaitingTimesAPI.logAPI, {
+                        method: 'POST',
+                        headers: {
+                          'Accept': 'application/json',
+                          'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+                },
                 getAccurateCurrentPosition: function (geolocationSuccess, geolocationError, geoprogress, options) {
-							    var lastCheckedPosition,
-						        locationEventCount = 0,
-						        watchID,
-						        timerID;
+				    var lastCheckedPosition,
+			        locationEventCount = 0,
+			        watchID,
+			        timerID;
 
-								    options = options || {};
+					    options = options || {};
 
-							    var checkLocation = function (position) {
-						        lastCheckedPosition = position;
-						        locationEventCount = locationEventCount + 1;
-						        // We ignore the first event unless it's the only one received because some devices seem to send a cached
-						        // location even when maxaimumAge is set to zero
-						        if ((position.coords.accuracy <= options.desiredAccuracy) && (locationEventCount > 1)) {
-						            clearTimeout(timerID);
-						            navigator.geolocation.clearWatch(watchID);
-						            foundPosition(position);
-						        } else {
-						            geoprogress(position);
-						        }
-							    };
+				    var checkLocation = function (position) {
+			        lastCheckedPosition = position;
+			        locationEventCount = locationEventCount + 1;
+			        // We ignore the first event unless it's the only one received because some devices seem to send a cached
+			        // location even when maxaimumAge is set to zero
+			        if ((position.coords.accuracy <= options.desiredAccuracy) && (locationEventCount > 1)) {
+			            clearTimeout(timerID);
+			            navigator.geolocation.clearWatch(watchID);
+			            foundPosition(position);
+			        } else {
+			            geoprogress(position);
+			        }
+				    };
 
-							    var stopTrying = function () {
-							        navigator.geolocation.clearWatch(watchID);
-							        foundPosition(lastCheckedPosition);
-							    };
+				    var stopTrying = function () {
+				        navigator.geolocation.clearWatch(watchID);
+				        foundPosition(lastCheckedPosition);
+				    };
 
-							    var onError = function (error) {
-							        clearTimeout(timerID);
-							        navigator.geolocation.clearWatch(watchID);
-							        geolocationError(error);
-							    };
+				    var onError = function (error) {
+				        clearTimeout(timerID);
+				        navigator.geolocation.clearWatch(watchID);
+				        geolocationError(error);
+				    };
 
-							    var foundPosition = function (position) {
-							        geolocationSuccess(position);
-							    };
+				    var foundPosition = function (position) {
+				        geolocationSuccess(position);
+				    };
 
-							    if (!options.maxWait)            options.maxWait = 10000; // Default 10 seconds
-							    if (!options.desiredAccuracy)    options.desiredAccuracy = 20; // Default 20 meters
-							    if (!options.timeout)            options.timeout = options.maxWait; // Default to maxWait
+				    if (!options.maxWait)            options.maxWait = 10000; // Default 10 seconds
+				    if (!options.desiredAccuracy)    options.desiredAccuracy = 20; // Default 20 meters
+				    if (!options.timeout)            options.timeout = options.maxWait; // Default to maxWait
 
-							    options.maximumAge = 0; // Force current locations only
-							    options.enableHighAccuracy = true; // Force high accuracy (otherwise, why are you using this function?)
+				    options.maximumAge = 0; // Force current locations only
+				    options.enableHighAccuracy = true; // Force high accuracy (otherwise, why are you using this function?)
 
-							    watchID = navigator.geolocation.watchPosition(checkLocation, onError, options);
-							    timerID = setTimeout(stopTrying, options.maxWait); // Set a timeout that will abandon the location loop
-								},
+				    watchID = navigator.geolocation.watchPosition(checkLocation, onError, options);
+				    timerID = setTimeout(stopTrying, options.maxWait); // Set a timeout that will abandon the location loop
+				},
                 destinationPoint: function(lat, lng, brng, dist) {
                    dist = dist / 6371;  
                    brng = brng.toRad();  
@@ -274,13 +294,14 @@
                 lat: null,
                 lng: null,
                 address: "",
-                zoom: 15,
+                zoom: 14,
                 lMap: null,
                 myPosition: null,
                 query: "supermarket",
                 isLoading: false,
                 place_ids: [],
                 initMap: function () {
+                    TimesApp.toggleSpinner();
                     TimesApp.lMap = L.map('full-map').setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
                     L.tileLayer(
                         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -304,7 +325,7 @@
                         let center = TimesApp.lMap.getCenter();
                         console.log("new center ", center.toString());
 
-                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 4) {
+                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 2) {
                             TimesApp.lat = parseFloat(center.lat);
                             TimesApp.lng = parseFloat(center.lng);
                             Utils.updateTimeout = setTimeout(async function () {
@@ -396,12 +417,16 @@
                 getPlaces: function (query) {
                     query = query || TimesApp.query;
                     // TimesApp.toggleSpinner();
-                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng))
-                        .then((r) => { /*TimesApp.toggleSpinner();*/ if (r.ok) return r.json(); })
-                        .then((places) => TimesApp.setPlaceOnMap(places));
+                    TimesApp.isLoading = true;
+                    const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng);
+                    fetch(fetchUrl)
+                        .then((r) => { if (r.ok) return r.json(); })
+                        .then((places) => TimesApp.setPlaceOnMap(places))
+                        .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
                 },
                 setPlaceOnMap: function (places) {
                     console.log(places);
+                    TimesApp.isLoading = false;
                     for (const key in places) {
                         if (places[key]["populartimes"] === undefined || TimesApp.place_ids.indexOf(places[key]["place_id"]) !== -1) continue;
                         
@@ -451,7 +476,9 @@
                 },
                 updateAddress: async function (initMap) {
                     initMap = initMap || true;
-                    fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng))
+                    TimesApp.isLoading = true;
+                    const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng);
+                    fetch(fetchUrl)
                         .then((r) => { return ((r.ok) ? r.json() : {staddress: '', city: ''}); })
                         .then((r) => { 
                             r.staddress = (typeof(r.staddress) === 'object' || r.staddress === undefined) ? '' : r.staddress;
@@ -460,17 +487,19 @@
                             TimesApp.address = (r.staddress !== '') ? r.staddress + ', ' : '';
                             TimesApp.address += r.city;
                             (initMap === true) ? TimesApp.initMap() : TimesApp.getPlaces();
-                        });
+                        })
+                        .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
                 },
                 updateBound: async function (originLat, originLng) {
-                    for (var i = 0; i <= 360; i += 90) {
-                        let destLatLng = Utils.destinationPoint(originLat, originLng, i, 4);
-                        TimesApp.lat = parseFloat(destLatLng[0]);
-                        TimesApp.lng = parseFloat(destLatLng[1]);
+                  TimesApp.isLoading = true;
+                  for (var i = 0; i <= 360; i += 90) {
+                      let destLatLng = Utils.destinationPoint(originLat, originLng, i, 2.5);
+                      TimesApp.lat = parseFloat(destLatLng[0]);
+                      TimesApp.lng = parseFloat(destLatLng[1]);
 
-                        await new Promise(resolve => setTimeout(resolve, 3000));
-                        await TimesApp.updateAddress(-1);
-                    }
+                      await new Promise(resolve => setTimeout(resolve, 3000));
+                      await TimesApp.updateAddress(-1);
+                  }
                 },
                 geoSuccess: async function (position) {
                   TimesApp.lat = parseFloat(position.coords.latitude);
@@ -481,19 +510,22 @@
                 },
                 search: async function () {
                 	TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "");
-
+                  TimesApp.isLoading = true;
                 	if (TimesApp.address === null)
                 		return false;
 
                 	if (TimesApp.address != "") {
-                        fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
+                        const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
+                        fetch(fetchUrl)
                             .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
                             .then((r) => {
+                                TimesApp.getPlaces();
                                 TimesApp.lat = parseFloat(r.latt);
                                 TimesApp.lng = parseFloat(r.longt);
                                 TimesApp.lMap.setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
                                 TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
-                            });
+                            })
+                            .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
                     }
                 },
                 promptAddress: function () {
@@ -525,16 +557,20 @@
                   }
 
                   if (TimesApp.address != "") {
-                      fetch("https://geocode.xyz/" + TimesApp.address + "?json=1")
-                          .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
-                          .then((r) => {
-                              TimesApp.lat = parseFloat(r.latt);
-                              TimesApp.lng = parseFloat(r.longt);
-                              if (TimesApp.lMap === null)
-                              	TimesApp.initMap();
-                             	else
-                             		TimesApp.getPlaces();
-                          });
+                    const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
+                    fetch(fetchUrl)
+                        .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
+                        .then((r) => {
+                            TimesApp.lat = parseFloat(r.latt);
+                            TimesApp.lng = parseFloat(r.longt);
+                            if (TimesApp.lMap === null) {
+                              TimesApp.initMap();
+                            } else {
+                              TimesApp.getPlaces();
+                              TimesApp.updateBound();
+                            }
+                        })
+                        .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
                   }
                 },
                 toggleSpinner: function () {
@@ -557,19 +593,14 @@
             		errorLine: errorLine
             	};
 
-            	fetch(WaitingTimesAPI.logAPI, {
-						    method: 'POST',
-						    headers: {
-						      'Accept': 'application/json',
-						      'Content-Type': 'application/json'
-						    },
-						    body: JSON.stringify(requestBody)
-						  });
+                Utils.sendError(requestBody);
             }
 
             document.addEventListener('DOMContentLoaded', function () {
                 const mapEl = document.getElementById('full-map');
                 mapEl.style.height = window.innerHeight - 50 + 'px';
+
+                TimesApp.toggleSpinner();
                 
                 Utils.getAccurateCurrentPosition(
                 	TimesApp.geoSuccess,
@@ -583,11 +614,6 @@
                 	}
                 );
 
-                // navigator.geolocation.getCurrentPosition(TimesApp.geoSuccess, TimesApp.geoError, {
-								//   enableHighAccuracy: true,
-								//   timeout: 15000,
-								//   maximumAge: 0
-								// });
             });
 
 

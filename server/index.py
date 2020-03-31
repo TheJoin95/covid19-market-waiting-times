@@ -62,8 +62,6 @@ def worker_fulldetail():
 def get_places_from_google():
 	global q_detail, formattedPlaces
 
-	print(get_ipaddr())
-
 	QUERY_SEARCH = "{} near {} open now"
 
 	q = request.args.get("q") # supermarket or pharmacy
@@ -105,7 +103,6 @@ def get_places_from_google():
 @app.route("/logger", methods=["POST"])
 def save_client_log():
 	try:
-		print(request.data)
 		log = request.json
 		with(open("/tmp/covid-client-map.log", "a")) as f:
 			log["remote_addr"] = get_ipaddr()
@@ -159,10 +156,9 @@ def get_places_from_here():
 	return jsonify(formattedPlaces) """
 
 if __name__ == '__main__':
-	if (threading.active_count() <= 40):
-		for i in range(40):
-			t = threading.Thread(target=worker_fulldetail)
-			t.daemon = True
-			t.start()
+	while (threading.active_count() <= 60):
+		t = threading.Thread(target=worker_fulldetail)
+		t.daemon = True
+		t.start()
 
 	app.run(port=2354)
