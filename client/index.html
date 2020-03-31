@@ -290,10 +290,10 @@
             const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo-fr', 'api-geo-fr'];
             const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
-                geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
+                geocodeAPI: 'https://' + API_DOMAIN + '.thejoin.tech/geocode?lat=%s&lng=%s',
                 // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
                 logAPI: 'https://api-geo.thejoin.tech/logger',
-                getPlacesAPI: 'https://'+API_DOMAIN+'.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
+                getPlacesAPI: 'https://' + API_DOMAIN + '.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
                         i = 0;
@@ -743,7 +743,7 @@
                 	},
                 	{
                 		desiredAccuracy: 100,
-                		maxWait: 15000
+                		maxWait: 8000
                 	}
                 );
 

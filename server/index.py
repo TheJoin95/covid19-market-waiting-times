@@ -127,7 +127,7 @@ def save_client_log():
 		log = request.json
 		with(open("/tmp/covid-client-map.log", "a")) as f:
 			log["remote_addr"] = get_ipaddr()
-			f.write(json.dumps(log))
+			f.write(json.dumps(log) + "\n")
 			f.close()
 	except Exception as e:
 		print(e)
@@ -182,4 +182,4 @@ if __name__ == '__main__':
 		t.daemon = True
 		t.start()
 
-	app.run(port=2354, threaded=True, processes=5)
+	app.run(port=2354, threaded=True)
