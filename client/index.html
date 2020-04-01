@@ -487,7 +487,7 @@
                                 from + (to ? '&ndash;' + to : '+'));
                         }
 
-                        div.innerHTML = labels.join('<br>');
+                        div.innerHTML = "Minutes:<br>" + labels.join('<br>');
                         return div;
                     };
 
@@ -636,7 +636,7 @@
                     document.getElementById('help-modal').style.display='block';
                 },
                 sendHelp: function (message) {
-                    Utils.sendError({message: message});
+                    Utils.sendError({message: message, help: true});
                     document.querySelector('.modal-content div.container').innerHTML = '<h2>Message sent, thank you!</h2>';
                     setTimeout(function() {
                         document.getElementById('help-modal').style.display='none';
@@ -698,9 +698,10 @@
                             TimesApp.lng = parseFloat(r.longt);
                             if (TimesApp.lMap === null) {
                               TimesApp.initMap();
+                              TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                             } else {
                               TimesApp.getPlaces();
-                              TimesApp.updateBound();
+                              TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                             }
                         })
                         .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
