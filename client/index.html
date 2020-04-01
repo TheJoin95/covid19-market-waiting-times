@@ -68,13 +68,25 @@
 
             /* SPINNER */
             div#loading {
-                position: absolute;
-                top: 0;
-                left: 0;
-                height: 100%;
-                width: 100%;
-                z-index: 1000;
-                background: #9e9e9e61;
+              position: absolute;
+              top: 0;
+              left: 0;
+              height: 100%;
+              width: 100%;
+              z-index: 1000;
+              background: #9e9e9e61;
+            }
+
+            div#loading span {
+              text-align: center;
+              position: relative;
+              top: 50%;
+              left: 50%;
+              width: 160px;
+              display: block;
+              margin-top: 0px;
+              color: #333;
+              margin-left: -80px;
             }
 
             .sk-chase {
@@ -221,41 +233,132 @@
             }
             /* MODAL */
 
+            /* loading */
+						.progress {
+						  position: absolute;
+						  height: 4px;
+						  z-index: 10000;
+						  display: none;
+						  width: 100%;
+						  background-color: #2780ca;
+						  border-radius: 2px;
+						  background-clip: padding-box;
+						  margin: 0 0 1rem 0;
+						  overflow: hidden; 
+						}
+						 
+						.progress .indeterminate {
+						  background-color: #26a69a;
+						}
+				    .progress .indeterminate:before {
+				      content: '';
+				      position: absolute;
+				      background-color: inherit;
+				      top: 0;
+				      left: 0;
+				      bottom: 0;
+				      will-change: left, right;
+				      -webkit-animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+				      animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+				    }
+				    .progress .indeterminate:after {
+				      content: '';
+				      position: absolute;
+				      background-color: inherit;
+				      top: 0;
+				      left: 0;
+				      bottom: 0;
+				      will-change: left, right;
+				      -webkit-animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+              animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+				      -webkit-animation-delay: 1.15s;
+              animation-delay: 1.15s;
+				    }
+
+						@-webkit-keyframes indeterminate {
+						  0% {
+						    left: -35%;
+						    right: 100%; }
+						  60% {
+						    left: 100%;
+						    right: -90%; }
+						  100% {
+						    left: 100%;
+						    right: -90%; }
+						}
+						@keyframes indeterminate {
+						  0% {
+						    left: -35%;
+						    right: 100%; }
+						  60% {
+						    left: 100%;
+						    right: -90%; }
+						  100% {
+						    left: 100%;
+						    right: -90%; }
+						}
+						@-webkit-keyframes indeterminate-short {
+						  0% {
+						    left: -200%;
+						    right: 100%; }
+						  60% {
+						    left: 107%;
+						    right: -8%; }
+						  100% {
+						    left: 107%;
+						    right: -8%; }
+						}
+						@keyframes indeterminate-short {
+						  0% {
+						    left: -200%;
+						    right: 100%; }
+						  60% {
+						    left: 107%;
+						    right: -8%; }
+						  100% {
+						    left: 107%;
+						    right: -8%; }
+						}
+            /* loading */
+
             div#help-button {
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                z-index: 10000;
-                border-radius: 50%;
-                text-align: center;
-                background: #ffc950;
-                font-size: 1.2em;
-                padding: 1em;
-                border: 1px solid #fcd25e;
-                cursor: pointer;
-                width: 26px;
-                height: 26px;
+              position: fixed;
+              top: 10px;
+              right: 10px;
+              z-index: 10000;
+              border-radius: 50%;
+              text-align: center;
+              background: #ffc950;
+              font-size: 1.2em;
+              padding: 1em;
+              border: 1px solid #fcd25e;
+              cursor: pointer;
+              width: 26px;
+              height: 26px;
             }
 
             div#search-button {
-			    position: fixed;
-			    bottom: 10px;
-                text-center: center;
-			    right: 10px;
-			    z-index: 10000;
-			    border-radius: 50%;
-			    background: #2780ca;
-			    font-size: 1.2em;
-			    padding: 1em;
-			    border: 1px solid #35a9ff;
-			    cursor: pointer;
-			    width: 26px;
-			    height: 26px;
-			}
+					    position: fixed;
+					    bottom: 10px;
+		          text-center: center;
+					    right: 10px;
+					    z-index: 10000;
+					    border-radius: 50%;
+					    background: #2780ca;
+					    font-size: 1.2em;
+					    padding: 1em;
+					    border: 1px solid #35a9ff;
+					    cursor: pointer;
+					    width: 26px;
+					    height: 26px;
+						}
         </style>
     </head>
     <body>
-        <div id="help-button" onclick="TimesApp.showModalHelp();"><span>❓</span></div>
+			<div class="progress" id="top-progress-bar">
+			  <div class="indeterminate"></div>
+			</div>
+      <div id="help-button" onclick="TimesApp.showModalHelp();"><span>❓</span></div>
     	<div id="search-button" onclick="TimesApp.search();"><span>🔍</span></div>
         <div id="loading" style="display: none">
             <div class="sk-chase">
@@ -266,6 +369,7 @@
               <div class="sk-chase-dot"></div>
               <div class="sk-chase-dot"></div>
             </div>
+            <span>loading geodata</span>
         </div>
         <div id="full-map"></div>
         <footer>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">Open Source on Github</a></footer>
@@ -293,7 +397,7 @@
                 geocodeAPI: 'https://' + API_DOMAIN + '.thejoin.tech/geocode?lat=%s&lng=%s',
                 // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
                 logAPI: 'https://api-geo.thejoin.tech/logger',
-                getPlacesAPI: 'https://' + API_DOMAIN + '.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
+                getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
                         i = 0;
@@ -413,18 +517,39 @@
                 lat: null,
                 lng: null,
                 address: "",
-                zoom: 14,
+                zoom: 15,
                 lMap: null,
                 myPosition: null,
                 query: "supermarket",
                 isLoading: false,
                 place_ids: [],
+                icons: [],
+                setLoading: function(b) {
+                	TimesApp.isLoading = b;
+                	var display =  (b === true) ? 'block' : 'none';
+                	document.getElementById('top-progress-bar').style.display = display;
+                },
+                initIcon: function () {
+                  var assetsPrefix = "/assets/custom-marker/";
+                  const iconAssets = ['0', '1', '2', '3', '4', '5', '6', '7'];
+
+                  for (const key in iconAssets) {
+                    TimesApp.icons.push(L.icon({
+                        iconUrl: assetsPrefix + iconAssets[key] + '.png',
+
+                        iconSize:     [42, 42], // size of the icon
+                        iconAnchor:   [20, 32], // point of the icon which will correspond to marker's location
+                        popupAnchor:  [2, -20] // point from which the popup should open relative to the iconAnchor
+                    }));
+                  }
+                },
                 initMap: function () {
                     TimesApp.toggleSpinner();
+                    TimesApp.initIcon();
                     TimesApp.lMap = L.map('full-map').setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
                     L.tileLayer(
                         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            maxZoom: 15,
+                            maxZoom: 18,
                             minZoom: 14,
                             attribution: 'Map data <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
                         }
@@ -459,14 +584,23 @@
                     TimesApp.showLegend();
                     TimesApp.getPlaces();
                 },
+                // getMarkerPlaceColor: function (d) {
+                //     return d > 60 ? ['#BD0026', '#cc0c33'] :
+                //         d > 45  ? ['#800026', '#ff2929'] :
+                //         d > 30  ? ['#e33c17', '#fa4c25'] :
+                //         d > 25  ? ['#de691b', '#fc7e2a'] :
+                //         d > 15   ? ['#e6a910', '#ffbf1c'] :
+                //         d > 10   ? ['#d9e30e', '#ecf716'] :
+                //                     ['#1dbd00', '#1fcc00'];
+                // },
                 getMarkerPlaceColor: function (d) {
-                    return d > 60 ? ['#BD0026', '#cc0c33'] :
-                        d > 45  ? ['#800026', '#ff2929'] :
-                        d > 30  ? ['#e33c17', '#fa4c25'] :
-                        d > 25  ? ['#de691b', '#fc7e2a'] :
-                        d > 15   ? ['#e6a910', '#ffbf1c'] :
-                        d > 10   ? ['#d9e30e', '#ecf716'] :
-                                    ['#1dbd00', '#1fcc00'];
+                    return d > 60 ? [6, '#cc0c33'] :
+                        d > 45  ? [5, '#ff2929'] :
+                        d > 30  ? [4, '#fa4c25'] :
+                        d > 25  ? [3, '#fc7e2a'] :
+                        d > 15   ? [2, '#ffbf1c'] :
+                        d > 10   ? [1, '#ecf716'] :
+                                    [0, '#1fcc00'];
                 },
                 showLegend: function () {
                     var legend = L.control({position: 'bottomright'});
@@ -500,8 +634,11 @@
                     var maxTimeSpent, meanTimeSpent, minTimeSpent = 0;
 
                     if (place["time_spent"] !== undefined && place["time_spent"].length > 0) {
-                        maxTimeSpent = Math.max(...place["time_spent"]);
-                        meanTimeSpent = (place["time_spent"].reduce(function(a, b) { return a + b; }, 0)) / 2;
+                      place["time_spent"][0] = (place["time_spent"][0] == 1) ? 60 : place["time_spent"][0];
+                      place["time_spent"][1] = (place["time_spent"][1] == 1) ? 60 : place["time_spent"][1];
+                      maxTimeSpent = Math.max(...place["time_spent"]);
+                      minTimeSpent = Math.min(...place["time_spent"]);
+                      meanTimeSpent = (place["time_spent"].reduce(function(a, b) { return a + b; }, 0)) / 2;
                     }
 
                     const cPopularity = place["current_popularity"] || 0;
@@ -518,11 +655,14 @@
                     if (cPopularity <= 18)
                         meanIntersectPop = 0;
 
-                    if (cPopularity > 18 && cPopularity <= 35)
-                        meanIntersectPop = minTimeSpent;
+                    if (cPopularity > 18 && cPopularity <= 35 && minTimeSpent != maxTimeSpent)
+                      meanIntersectPop = minTimeSpent;
+                    else if (cPopularity > 18 && cPopularity <= 35 && minTimeSpent == maxTimeSpent)
+                      meanIntersectPop = ((cPopularity - popTimes) > 10) ? (Math.ceil((cPopularity - popTimes)/5)*5) : 5; // rounded to nearest multiple of 5
+                    else if(cPopularity > 35 && minTimeSpent == maxTimeSpent)
+                      meanIntersectPop = ((cPopularity - popTimes) > 15) ? (Math.ceil((cPopularity - popTimes)/5)*5) : 10; // rounded to nearest multiple of 5
 
                     var waitTime = Math.ceil(waitTimes + meanIntersectPop);
-
 
                     if (popTimes !== 0 && cPopularity > 18)
                         waitTime += 5; // relative error, white rumor
@@ -536,7 +676,7 @@
                 getPlaces: function (query) {
                     query = query || TimesApp.query;
                     // TimesApp.toggleSpinner();
-                    TimesApp.isLoading = true;
+                    TimesApp.setLoading(true);
                     const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng);
                     fetch(fetchUrl)
                         .then((r) => { if (r.ok) return r.json(); })
@@ -545,7 +685,7 @@
                 },
                 setPlaceOnMap: function (places) {
                     console.log(places);
-                    TimesApp.isLoading = false;
+                    TimesApp.setLoading(false);
                     for (const key in places) {
                         if (places[key]["populartimes"] === undefined || TimesApp.place_ids.indexOf(places[key]["place_id"]) !== -1) continue;
                         
@@ -559,22 +699,23 @@
                         if (isNaN(radius)) radius = 80;
                         
                         if (waitTimeArr[0] === 0) {
-                            colors = ["#ccc", "#777"];
+                            //colors = ["#ccc", "#777"];
+                            colors = ["7", "#777"];
                             radius = 80;
                             message = "<i>Closed</i><br/>" + message;
                         }
 
-                        const circleMarker = L.circle([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {
-                            color: colors[0],
-                            fillColor: colors[1],
-                            fillOpacity: 0.5,
-                            radius: radius
-                        });
+                        // const circleMarker = L.circle([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {
+                        //     color: colors[0],
+                        //     fillColor: colors[1],
+                        //     fillOpacity: 0.5,
+                        //     radius: radius
+                        // });
 
-                        const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]]);
+                        const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {icon: TimesApp.icons[colors[0]]});
                         
-                        circleMarker.bindPopup(message);
-                        circleMarker.addTo(TimesApp.lMap);
+                        // circleMarker.bindPopup(message);
+                        // circleMarker.addTo(TimesApp.lMap);
                         
                         pointMarker.bindPopup(message);
                         pointMarker.addTo(TimesApp.lMap);
@@ -595,7 +736,7 @@
                 },
                 updateAddress: async function (initMap) {
                     initMap = initMap || true;
-                    TimesApp.isLoading = true;
+                    TimesApp.setLoading(true);
                     const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng);
                     fetch(fetchUrl)
                         .then((r) => { return ((r.ok) ? r.json() : {staddress: '', city: ''}); })
@@ -610,7 +751,7 @@
                         .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
                 },
                 updateBound: async function (originLat, originLng) {
-                  TimesApp.isLoading = true;
+                  TimesApp.setLoading(true);
                   for (var i = 0; i <= 360; i += 90) {
                       let destLatLng = Utils.destinationPoint(originLat, originLng, i, 2.5);
                       TimesApp.lat = parseFloat(destLatLng[0]);
@@ -644,7 +785,7 @@
                 },
                 search: async function () {
                 	TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "");
-                  TimesApp.isLoading = true;
+                  TimesApp.setLoading(true);
                 	if (TimesApp.address === null)
                 		return false;
 
