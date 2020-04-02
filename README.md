@@ -1,35 +1,35 @@
 # Covid19 Waiting Times
 
-This project aims to avoid the gatherings of people in various supermarkets and pharmacies during the covid-19 pandemic. Based on the geolocation of the device, it will show the various points of interest such as supermarkets, pharmacies, clinics, bars etc., with an estimate of the waiting time and a forecast of the next hour.
+This project aims to avoid the gatherings of people in various supermarkets and pharmacies during the covid-19 pandemic. Based on the geolocation of the device, it will show various points of interest such as supermarkets, pharmacies, clinics, bars etc., with an estimate waiting time and a forecast of the next hour.
 
-**NOTE**: This project do not wanna be for a commercial use. This project want to help people to stay outside their house the less time possible and to avoid other people for the quarantine period.
+**NOTE**: This project does not wanna be for commercial use. This project wants to help people to stay outside their house as little time as possible and to avoid other people for the quarantine period.
 
 # How it works
 
-The Front-end side is super simple and use the Open Street Map with the Leaflet.js library.
+The Front-end side is super simple and uses Open Street Map with the Leaflet.js library.
 
-It use also the geocode.xyz API, client side, to retrieve the informations about the address and the city from the geo coordinates retrieve by the HTML5 API.
+It uses also geocode.xyz API, client side, to retrieve details about the address and the city from the geo-coordinates retrieve by the HTML5 API.
 
-The Back-end is powered by Flask, a micro-framework for build some simples API to retrieve data from Google Places.
+The Back-end is powered by Flask, a micro-framework for building some simple APIs to retrieve data from Google Places.
 
-**NOTE**: this project do not use the official Google APIs, but it is working by a sort of workaround / bug. We can call this "scraping", but it is not the right word.
+**NOTE**: this project does not use the official Google APIs, but it is working via a sort of workaround / bug. We can call this "scraping", but it is not the right word.
 
 # Data
 
-The data comes from Google, like Traffic for Maps, in real time and based on old data for the past week.
-The data are splitted in hours and week days.
+The data comes from Google, like Traffic for Maps, in real-time and based on old data for the past week.
+The data are split into hours and weekdays.
 
-It's using the same data that you visualize by the Google Search Place, inside the local business card.
+It's using the same data that you'd view on Google if you search a place, i.e. the data inside the local business card.
 How many time to wait, how popular is the place and when.. etc etc.
 
 # TODO
 
-- Add search input in overlay
-- Add sidebar to list all the visible places
+- Add search input in an overlay
+- Add a sidebar to list all the visible places
 - Change marker icon
 - Add a sort of cache on the backend (e.g. Redis with Geopos operator)
 - Add a way to store the place data to prevent an overload on the requested resource
-- Add search function to search a specific store
+- Add search function to search for a specific store
 - Add a refresh function
 - Add a prevent function to reload the same data in the same areas
 - Make a more accurate geolocation and marker on maps
