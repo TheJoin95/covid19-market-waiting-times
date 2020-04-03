@@ -651,20 +651,38 @@
 
 
                     // If there is no one, I do not need to calculate the mean on the timespent inside
-                    var meanIntersectPop = meanTimeSpent;
-                    if (cPopularity <= 18)
-                        meanIntersectPop = 0;
+                    // var meanIntersectPop = meanTimeSpent;
+                    // if (cPopularity <= 15)
+                    //     meanIntersectPop = 0;
+                    var meanIntersectPop = 0;
 
-                    if (cPopularity > 18 && cPopularity <= 35 && minTimeSpent != maxTimeSpent)
+                    const diffPopTimes = (popTimes - cPopularity);
+                    var increase = 0;
+                    if (cPopularity !== 0 && cPopularity > 15) {
+                    	if (diffPopTimes < 0) {
+                    		increase = maxTimeSpent;
+                    	} else if (diffPopTimes >= 0 && diffPopTimes < 5) {
+                    		increase = meanTimeSpent;
+                    	} else if(diffPopTimes >= 5 && diffPopTimes < (popTimes/2)) {
+                    		increase = minTimeSpent;
+                    	} else if (diffPopTimes >= (popTimes/2)) {
+                    		increase = 5;
+                    	}
+                    }
+
+                    meanIntersectPop += increase;
+
+                    // Need to eval popularity against expected popularity
+                    /*if (cPopularity > 15 && cPopularity <= 30 && minTimeSpent != maxTimeSpent)
                       meanIntersectPop = minTimeSpent;
-                    else if (cPopularity > 18 && cPopularity <= 35 && minTimeSpent == maxTimeSpent)
-                      meanIntersectPop = ((cPopularity - popTimes) > 10) ? (Math.ceil((cPopularity - popTimes)/5)*5) : 5; // rounded to nearest multiple of 5
-                    else if(cPopularity > 35 && minTimeSpent == maxTimeSpent)
-                      meanIntersectPop = ((cPopularity - popTimes) > 15) ? (Math.ceil((cPopularity - popTimes)/5)*5) : 10; // rounded to nearest multiple of 5
-
+                    else if (cPopularity > 15 && cPopularity <= 30 && minTimeSpent == maxTimeSpent)
+                      meanIntersectPop = (Math.abs(popTimes - cPopularity) >= 5) ? (Math.ceil(Math.abs(popTimes - cPopularity)/5)*5) : 5; // rounded to nearest multiple of 5
+                    else if(cPopularity > 30 && minTimeSpent == maxTimeSpent)
+                      meanIntersectPop = (Math.abs(popTimes - cPopularity) >= 10) ? (Math.ceil(Math.abs(popTimes - cPopularity)/5)*5) : 10; // rounded to nearest multiple of 5
+										*/
                     var waitTime = Math.ceil(waitTimes + meanIntersectPop);
 
-                    if (popTimes !== 0 && cPopularity > 18)
+                    if (popTimes !== 0 && cPopularity >= 15)
                         waitTime += 5; // relative error, white rumor
 
                     return [place["populartimes"][weekDay]["data"][hour], waitTime];
