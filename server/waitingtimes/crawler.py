@@ -196,7 +196,7 @@ def index_get(array, *argv):
         return None
 
 
-def add_optional_parameters(detail_json, detail, rating, rating_n, popularity, current_popularity, time_spent):
+def add_optional_parameters(detail_json, detail, rating, rating_n, popularity, current_popularity, time_spent, detailFromGoogle={}):
     """
     check for optional return parameters and add them to the result json
     :param detail_json:
@@ -234,6 +234,9 @@ def add_optional_parameters(detail_json, detail, rating, rating_n, popularity, c
     if time_spent:
         detail_json["time_spent"] = time_spent
 
+    if ("name" in detailFromGoogle):
+        detail_json.update(detailFromGoogle)
+
     return detail_json
 
 def make_google_search_request(query_string):
@@ -270,7 +273,7 @@ def make_google_search_request(query_string):
     jdata = json.loads(data)["d"]
     return json.loads(jdata[4:])
 
-def get_populartimes_from_search(place_identifier):
+def get_populartimes_from_search(place_identifier, get_detail=False):
     """
     request information for a place and parse current popularity
     :param place_identifier: name and address string
@@ -292,6 +295,19 @@ def get_populartimes_from_search(place_identifier):
 
     time_spent = index_get(info, 117, 0)
 
+    detail = {}
+    if (get_detail == True):
+        detail = {
+            "name": index_get(info, 11),
+            "address": index_get(info, 39),
+            "coordinates": {
+                "lat": index_get(info, 9, 2),
+                "lng": index_get(info, 9, 3)
+            },
+            "categories": index_get(info, 13),
+            "place_types": index_get(info, 76),
+        }
+
     # extract wait times and convert to minutes
     if time_spent:
 
@@ -309,10 +325,10 @@ def get_populartimes_from_search(place_identifier):
 
         time_spent = [int(t) for t in time_spent]
 
-    return rating, rating_n, popular_times, current_popularity, time_spent
+    return rating, rating_n, popular_times, current_popularity, time_spent, detail
 
 
-def get_by_detail(detail):
+def get_by_detail(detail, get_detail=False):
     place_identifier = "{} {}".format(detail["name"], detail["formatted_address"])
 
     detail_json = {
@@ -324,7 +340,7 @@ def get_by_detail(detail):
         "coordinates": detail["geometry"]["location"]
     }
 
-    detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier))
+    detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier, get_detail))
 
     return detail_json
 

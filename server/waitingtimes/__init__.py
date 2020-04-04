@@ -44,7 +44,7 @@ def get_places_from_here(query):
     return get_places_by_query(query)
 
 
-def get_by_fulldetail(place_detail):
+def get_by_fulldetail(place_detail, get_detail=False):
     """
     retrieves the current popularity for a given place
     :param place_detail
@@ -62,4 +62,4 @@ def get_by_fulldetail(place_detail):
     }
     :return: see readme
     """
-    return get_by_detail(place_detail)
+    return get_by_detail(place_detail, get_detail)

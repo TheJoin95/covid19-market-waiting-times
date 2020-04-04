@@ -372,7 +372,10 @@
             <span>loading geodata</span>
         </div>
         <div id="full-map"></div>
-        <footer><center><small>Waiting times are estimated</small></center>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">&#x1f517; Open Source on Github</a></footer>
+        <footer>
+          <center><small>Waiting times are estimated</small></center>
+          <center>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">&#x1f517; Open Source on Github</a></center>
+        </footer>
 
         <div id="help-modal" class="modal">
             <div class="modal-content animate-opacity card-4">
@@ -382,6 +385,7 @@
               </header>
               <div class="container">
                 <textarea placeholder="Write here your question or tips" rows="7"></textarea>
+                <small><i>Note: this is not a search box</i></small>
               </div>
               <footer class="container teal">
                 <span class="btn" onclick="TimesApp.sendHelp(document.querySelector('.modal-content textarea').value)">Send</span>
@@ -391,12 +395,13 @@
         </div>
 
         <script>
-            const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo', 'api-geo-fr'];
+            const API_DOMAIN_AVAILABLE = ['api-geo-fr', 'api-geo-fr', 'api-geo-fr'];
             const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
                 geocodeAPI: 'https://' + API_DOMAIN + '.thejoin.tech/geocode?lat=%s&lng=%s',
                 // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
                 logAPI: 'https://api-geo.thejoin.tech/logger',
+                getPlaceByNameAPI: 'https://api-geo.thejoin.tech/places/get-by-name?q=%s&address=%s',
                 getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
@@ -691,6 +696,21 @@
                     console.log("Getting pharmacy");
                     TimesApp.getPlaces("pharmacy");
                 },
+                getPlace: function (q, address) {
+                  TimesApp.setLoading(true);
+                    const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlaceByNameAPI, q, address);
+                    fetch(fetchUrl)
+                        .then((r) => { if (r.ok) return r.json(); })
+                        .then((places) => {
+                          const markers = TimesApp.setPlaceOnMap(places);
+                          if (markers.length > 0) {
+                            markers[markers.length-1].openPopup();
+                          } else {
+                            alert("Unfortunally " + q + " does not have any information about waiting times");
+                          }
+                        })
+                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+                },
                 getPlaces: function (query) {
                     query = query || TimesApp.query;
                     // TimesApp.toggleSpinner();
@@ -699,47 +719,51 @@
                     fetch(fetchUrl)
                         .then((r) => { if (r.ok) return r.json(); })
                         .then((places) => TimesApp.setPlaceOnMap(places))
-                        .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
+                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
                 },
                 setPlaceOnMap: function (places) {
-                    console.log(places);
-                    TimesApp.setLoading(false);
-                    for (const key in places) {
-                        if (places[key]["populartimes"] === undefined || TimesApp.place_ids.indexOf(places[key]["place_id"]) !== -1) continue;
-                        
-                        let waitTimeArr = TimesApp.getWaitTime(places[key]);
+                  console.log(places);
+                  TimesApp.setLoading(false);
+                  var pointMarkers = [];
 
-                        let waitTime = waitTimeArr[1];
-                        let radius = waitTime + 80;
-                        let colors = TimesApp.getMarkerPlaceColor(waitTime);
-                        let message = "<b>" + places[key]["name"] + "</b><br><small>" + places[key]["address"] + "</small><br/><i>" + waitTime + "min</i> of line";
+                  for (const key in places) {
+                    if (places[key]["populartimes"] === undefined || TimesApp.place_ids.indexOf(places[key]["place_id"]) !== -1) continue;
+                    
+                    let waitTimeArr = TimesApp.getWaitTime(places[key]);
 
-                        if (isNaN(radius)) radius = 80;
-                        
-                        if (waitTimeArr[0] === 0) {
-                            //colors = ["#ccc", "#777"];
-                            colors = ["7", "#777"];
-                            radius = 80;
-                            message = "<i>Closed</i><br/>" + message;
-                        }
+                    let waitTime = waitTimeArr[1];
+                    let radius = waitTime + 80;
+                    let colors = TimesApp.getMarkerPlaceColor(waitTime);
+                    let message = "<b>" + places[key]["name"] + "</b><br><small>" + places[key]["address"] + "</small><br/><i>" + waitTime + "min</i> of line";
 
-                        // const circleMarker = L.circle([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {
-                        //     color: colors[0],
-                        //     fillColor: colors[1],
-                        //     fillOpacity: 0.5,
-                        //     radius: radius
-                        // });
-
-                        const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {icon: TimesApp.icons[colors[0]]});
-                        
-                        // circleMarker.bindPopup(message);
-                        // circleMarker.addTo(TimesApp.lMap);
-                        
-                        pointMarker.bindPopup(message);
-                        pointMarker.addTo(TimesApp.lMap);
-                        
-                        TimesApp.place_ids.push(places[key]["place_id"]);
+                    if (isNaN(radius)) radius = 80;
+                    
+                    if (waitTimeArr[0] === 0) {
+                        //colors = ["#ccc", "#777"];
+                        colors = ["7", "#777"];
+                        radius = 80;
+                        message = "<i>Closed</i><br/>" + message;
                     }
+
+                    // const circleMarker = L.circle([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {
+                    //     color: colors[0],
+                    //     fillColor: colors[1],
+                    //     fillOpacity: 0.5,
+                    //     radius: radius
+                    // });
+
+                    const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {icon: TimesApp.icons[colors[0]]});
+                    
+                    // circleMarker.bindPopup(message);
+                    // circleMarker.addTo(TimesApp.lMap);
+                    
+                    pointMarker.bindPopup(message);
+                    pointMarker.addTo(TimesApp.lMap);
+                    pointMarkers.push(pointMarker);
+                    
+                    TimesApp.place_ids.push(places[key]["place_id"]);
+                  }
+                  return pointMarkers;
                 },
                 updateAddressAwait: async function (initMap) {
                     initMap = initMap || true;
@@ -766,7 +790,7 @@
                             TimesApp.address += r.city;
                             (initMap === true) ? TimesApp.initMap() : TimesApp.getPlaces();
                         })
-                        .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
+                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
                 },
                 updateBound: async function (originLat, originLng) {
                   TimesApp.setLoading(true);
@@ -810,10 +834,11 @@
                 	if (TimesApp.address != "") {
                         const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
                         fetch(fetchUrl)
-                            .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
+                            .then((r) => { return r.json(); })
+                            // .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
                             .then((r) => {
                                 if (r["error"] !== undefined) {
-                                  alert("No results. Check your address/city and try again");
+                                  alert("No results. Check your address/city and try again. Please write the city in english");
                                   Utils.sendError({url: fetchUrl, message: r["error"]});
                                   TimesApp.search();
                                   return false;
@@ -825,7 +850,7 @@
                                 TimesApp.lMap.setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
                                 TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                             })
-                            .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
+                            .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
                     }
                 },
                 promptAddress: function () {
@@ -858,10 +883,11 @@
                   if (TimesApp.address != "") {
                     const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
                     fetch(fetchUrl)
-                        .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
+                        // .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
+                        .then((r) => { return r.json(); })
                         .then((r) => {
                             if (r["error"] !== undefined) {
-                              alert("No results. Check your address/city and try again");
+                              alert("No results. Check your address/city and try again. Please write the city in english");
                               Utils.sendError({url: fetchUrl, message: r["error"]});
                               TimesApp.geoError();
                               return false;
@@ -877,7 +903,7 @@
                               TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                             }
                         })
-                        .catch((r) => Utils.sendError({url: fetchUrl, message: r}));
+                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
                   }
                 },
                 toggleSpinner: function () {

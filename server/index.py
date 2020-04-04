@@ -63,6 +63,36 @@ def get_place_from_place_name_address():
 	wait_times = waitingtimes.get_by_fulldetail(request.json)
 	return jsonify(wait_times)
 
+@app.route("/places/get-by-name", methods=["GET"])
+@cross_origin()
+def get_places_by_name():
+	places = []
+
+	q = request.args.get("q") # supermarket or pharmacy
+	address = request.args.get("address") # porta nuova, milano
+
+	if (q == None or address == None):
+		abort(400, "You need to provide your query string and your address")
+
+	item = {
+		"place_id": "",
+		"formatted_address": address,
+		"name": q,
+		"types": "",
+		"place_types": "",
+		"geometry": {
+			"location": {
+				"lat": "",
+				"lng": ""
+			}
+		}
+	}
+	result = waitingtimes.get_by_fulldetail(item, True)
+	result["place_id"] = hashlib.md5((str(result["coordinates"]["lat"])+str(result["coordinates"]["lng"])).encode("utf-8")).hexdigest()
+	places.append(result)
+
+	return jsonify(places)
+
 @app.route("/places/explore", methods=["GET"])
 @cross_origin()
 def get_places_from_google():
