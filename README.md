@@ -28,13 +28,12 @@ How many time to wait, how popular is the place and when.. etc etc.
 
 - Add search input in an overlay
 - Add a sidebar to list all the visible places
-- Change marker icon
-- Add a sort of cache on the backend (e.g. Redis with Geopos operator)
-- Add a way to store the place data to prevent an overload on the requested resource
-- Add search function to search for a specific store
+- Add a sort of cache on the backend (e.g. Redis with Geopos operator) **in progress**
+- Add a way to store the place data to prevent an overload on the requested resource **in progress**
+- Add search function to search for a specific store **in progress**
 - Add a refresh function
 - Add a prevent function to reload the same data in the same areas
-- Make a more accurate geolocation and marker on maps
+- Refactoring & Build & Uglify
 
 # Credits
 

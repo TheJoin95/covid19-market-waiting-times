@@ -378,20 +378,20 @@
         </footer>
 
         <div id="help-modal" class="modal">
-            <div class="modal-content animate-opacity card-4">
-              <header class="container teal"> 
-                <span onclick="document.getElementById('help-modal').style.display='none'" class="close-button display-topright">&times;</span>
-                <h2>Need help? Do you want to ask something?</h2>
-              </header>
-              <div class="container">
-                <textarea placeholder="Write here your question or tips" rows="7"></textarea>
-                <small><i>Note: this is not a search box</i></small>
-              </div>
-              <footer class="container teal">
-                <span class="btn" onclick="TimesApp.sendHelp(document.querySelector('.modal-content textarea').value)">Send</span>
-                <span class="btn" style="float: right" onclick="document.getElementById('help-modal').style.display='none'">Close</span>
-              </footer>
+          <div class="modal-content animate-opacity card-4">
+            <header class="container teal"> 
+              <span onclick="document.getElementById('help-modal').style.display='none'" class="close-button display-topright">&times;</span>
+              <h2>Need help? Do you want to ask something?</h2>
+            </header>
+            <div class="container">
+              <textarea placeholder="Write here your question or tips" rows="7"></textarea>
+              <small><i>Note: this is not a search box</i></small>
             </div>
+            <footer class="container teal">
+              <span class="btn" onclick="TimesApp.sendHelp(document.querySelector('.modal-content textarea').value)">Send</span>
+              <span class="btn" style="float: right" onclick="document.getElementById('help-modal').style.display='none'">Close</span>
+            </footer>
+          </div>
         </div>
 
         <script>
@@ -437,6 +437,59 @@
                         },
                         body: JSON.stringify(requestBody)
                     });
+                },
+                openModal: function (id, title, content, action) {
+                  var id = id || (new Date()).getTime();
+                  var h2 = title;
+
+                  var divModal = document.createElement('div');
+                  divModal.id = id;
+                  divModal.className = 'modal';
+
+                  var innerdivModalm = document.createElement('div');
+                  innerdivModalm.className = 'modal-content animate-opacity card-4';
+                  divModal.appendChild(innerdivModalm);    
+
+                  var headerModal = document.createElement('header');
+                  headerModal.className = 'container teal';
+                  innerdivModalm.appendChild(headerModal);
+                            
+                  var containerContentDiv = document.createElement('div');
+                  containerContentDiv.className = 'container';
+                  innerdivModalm.appendChild(containerContentDiv);
+
+                  containerContentDiv.innerHTML = content || '<textarea placeholder="Write here your question or tips" rows="7"></textarea><small><i>Note: this is not a search box</i></small>';
+
+                  var buttonM = document.createElement("span");
+                  buttonM.className = 'close-button display-topright';
+                  buttonM.setAttribute("onclick", "document.getElementById('"+id+"').style.display='none'");
+                  buttonM.innerHTML = "&times;";
+                  headerModal.appendChild(buttonM); 
+
+                  var headerM = document.createElement("H2");
+                  headerM.innerHTML = h2;
+                  headerModal.appendChild(headerM);
+
+                  var footer =  document.createElement('footer');
+                  footer.className = 'container teal';
+                  innerdivModalm.appendChild(footer);
+
+                  var closeButton = document.createElement("span");
+                  closeButton.className = 'btn';
+                  closeButton.style.float = "right";
+                  closeButton.setAttribute("onclick", "document.getElementById('"+ id +"').style.display='none'");
+                  closeButton.innerHTML = "Close";
+                  footer.appendChild(closeButton);
+
+                  var actionButton = document.createElement("span");
+                  actionButton.className = 'btn';
+                  actionButton.setAttribute("onclick", "TimesApp.sendHelp(document.querySelector('.modal-content textarea').value)");
+                  actionButton.innerHTML = "Close";
+                  footer.appendChild(actionButton);
+
+                  divModal.style.display = "block";
+
+                  document.getElementsByTagName('body')[0].appendChild(divModal); 
                 },
                 getAccurateCurrentPosition: function (geolocationSuccess, geolocationError, geoprogress, options) {
 				    var lastCheckedPosition,
