@@ -372,7 +372,7 @@
             <span>loading geodata</span>
         </div>
         <div id="full-map"></div>
-        <footer>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">Open Source on Github</a></footer>
+        <footer><center><small>Waiting times are estimated</small></center>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">&#x1f517; Open Source on Github</a></footer>
 
         <div id="help-modal" class="modal">
             <div class="modal-content animate-opacity card-4">
@@ -812,6 +812,13 @@
                         fetch(fetchUrl)
                             .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
                             .then((r) => {
+                                if (r["error"] !== undefined) {
+                                  alert("No results. Check your address/city and try again");
+                                  Utils.sendError({url: fetchUrl, message: r["error"]});
+                                  TimesApp.search();
+                                  return false;
+                                }
+                                
                                 TimesApp.getPlaces();
                                 TimesApp.lat = parseFloat(r.latt);
                                 TimesApp.lng = parseFloat(r.longt);
@@ -839,7 +846,7 @@
                   		TimesApp.initMap();
 
                   	// First failover test
-                  	if (Utils.geoErrorFailOverCount <= 2) {
+                  	if (Utils.geoErrorFailOverCount < 2) {
 	                  	Utils.geoErrorTimeout = setTimeout(function () {
 	                  		TimesApp.geoError();
 	                  	}, 1000);
@@ -853,6 +860,13 @@
                     fetch(fetchUrl)
                         .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
                         .then((r) => {
+                            if (r["error"] !== undefined) {
+                              alert("No results. Check your address/city and try again");
+                              Utils.sendError({url: fetchUrl, message: r["error"]});
+                              TimesApp.geoError();
+                              return false;
+                            }
+
                             TimesApp.lat = parseFloat(r.latt);
                             TimesApp.lng = parseFloat(r.longt);
                             if (TimesApp.lMap === null) {
