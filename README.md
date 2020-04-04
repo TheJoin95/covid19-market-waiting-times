@@ -4,6 +4,8 @@ This project aims to avoid the gatherings of people in various supermarkets and 
 
 **NOTE**: This project does not wanna be for commercial use. This project wants to help people to stay outside their house as little time as possible and to avoid other people for the quarantine period.
 
+![snippet](https://raw.githubusercontent.com/TheJoin95/covid19-market-waiting-times/master/client/assets/map.png)
+
 # How it works
 
 The Front-end side is super simple and uses Open Street Map with the Leaflet.js library.
