@@ -352,6 +352,16 @@
 					    width: 26px;
 					    height: 26px;
 						}
+            input[type=text] {
+              width: 100%;
+              padding: 12px 20px;
+              margin: 8px 0;
+              display: inline-block;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              outline: none;
+              box-sizing: border-box;
+            }
         </style>
     </head>
     <body>
@@ -377,13 +387,14 @@
           <center>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">&#x1f517; Open Source on Github</a></center>
         </footer>
 
-        <div id="help-modal" class="modal">
+        <!--<div id="help-modal" class="modal">
           <div class="modal-content animate-opacity card-4">
             <header class="container teal"> 
               <span onclick="document.getElementById('help-modal').style.display='none'" class="close-button display-topright">&times;</span>
               <h2>Need help? Do you want to ask something?</h2>
             </header>
             <div class="container">
+              <p>Did not find what you were looking for? <u onclick="Utils.searchByNameModal()">Search by name</u></p>
               <textarea placeholder="Write here your question or tips" rows="7"></textarea>
               <small><i>Note: this is not a search box</i></small>
             </div>
@@ -392,10 +403,10 @@
               <span class="btn" style="float: right" onclick="document.getElementById('help-modal').style.display='none'">Close</span>
             </footer>
           </div>
-        </div>
+        </div>-->
 
         <script>
-            const API_DOMAIN_AVAILABLE = ['api-geo-fr', 'api-geo-fr', 'api-geo-fr'];
+            const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo', 'api-geo-fr'];
             const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
                 geocodeAPI: 'https://' + API_DOMAIN + '.thejoin.tech/geocode?lat=%s&lng=%s',
@@ -438,9 +449,26 @@
                         body: JSON.stringify(requestBody)
                     });
                 },
-                openModal: function (id, title, content, action) {
+                searchByNameModal: function () {
+                  document.body.removeChild(document.querySelector('.modal'));
+                  Utils.openModal(
+                    "search-modal",
+                    "Search by name and address",
+                    '<input type="text" placeholder="Insert market or place name" id="place"><input type="text" placeholder="Insert address or city" id="address">',
+                    "Search",
+                    function searchByName () {
+                      TimesApp.getPlace(
+                        document.getElementById('place').value,
+                        document.getElementById('address').value
+                      );
+                      document.body.removeChild(document.querySelector('.modal'));
+                    }
+                  );
+                },
+                openModal: function (id, title, content, actionText, actionFn, closeFn) {
                   var id = id || (new Date()).getTime();
                   var h2 = title;
+                  var actionText = actionText || 'Send';
 
                   var divModal = document.createElement('div');
                   divModal.id = id;
@@ -458,7 +486,7 @@
                   containerContentDiv.className = 'container';
                   innerdivModalm.appendChild(containerContentDiv);
 
-                  containerContentDiv.innerHTML = content || '<textarea placeholder="Write here your question or tips" rows="7"></textarea><small><i>Note: this is not a search box</i></small>';
+                  containerContentDiv.innerHTML = content || '<p>Did not find what you were looking for? <u style="cursor: pointer" onclick="Utils.searchByNameModal()">Search by name</u></p><textarea placeholder="Write here your question or tips" rows="7"></textarea><small><i>Note: this is not a search box</i></small>';
 
                   var buttonM = document.createElement("span");
                   buttonM.className = 'close-button display-topright';
@@ -477,14 +505,24 @@
                   var closeButton = document.createElement("span");
                   closeButton.className = 'btn';
                   closeButton.style.float = "right";
-                  closeButton.setAttribute("onclick", "document.getElementById('"+ id +"').style.display='none'");
+                  if (closeFn === undefined) {
+                    closeButton.setAttribute("onclick", "document.getElementById('"+ id +"').style.display='none'");
+                  }else {
+                    closeButton.addEventListener('click', closeFn);
+                  }
+
                   closeButton.innerHTML = "Close";
                   footer.appendChild(closeButton);
 
                   var actionButton = document.createElement("span");
                   actionButton.className = 'btn';
-                  actionButton.setAttribute("onclick", "TimesApp.sendHelp(document.querySelector('.modal-content textarea').value)");
-                  actionButton.innerHTML = "Close";
+                  if (actionFn === undefined) {
+                    actionButton.setAttribute("onclick", "TimesApp.sendHelp(document.querySelector('.modal-content textarea').value)");
+                  } else {
+                    actionButton.addEventListener('click', actionFn);
+                  }
+
+                  actionButton.innerHTML = actionText;
                   footer.appendChild(actionButton);
 
                   divModal.style.display = "block";
@@ -708,10 +746,6 @@
                     popTimes = place["populartimes"][weekDay]["data"][hour];
 
 
-                    // If there is no one, I do not need to calculate the mean on the timespent inside
-                    // var meanIntersectPop = meanTimeSpent;
-                    // if (cPopularity <= 15)
-                    //     meanIntersectPop = 0;
                     var meanIntersectPop = 0;
 
                     const diffPopTimes = (popTimes - cPopularity);
@@ -730,14 +764,6 @@
 
                     meanIntersectPop += increase;
 
-                    // Need to eval popularity against expected popularity
-                    /*if (cPopularity > 15 && cPopularity <= 30 && minTimeSpent != maxTimeSpent)
-                      meanIntersectPop = minTimeSpent;
-                    else if (cPopularity > 15 && cPopularity <= 30 && minTimeSpent == maxTimeSpent)
-                      meanIntersectPop = (Math.abs(popTimes - cPopularity) >= 5) ? (Math.ceil(Math.abs(popTimes - cPopularity)/5)*5) : 5; // rounded to nearest multiple of 5
-                    else if(cPopularity > 30 && minTimeSpent == maxTimeSpent)
-                      meanIntersectPop = (Math.abs(popTimes - cPopularity) >= 10) ? (Math.ceil(Math.abs(popTimes - cPopularity)/5)*5) : 10; // rounded to nearest multiple of 5
-										*/
                     var waitTime = Math.ceil(waitTimes + meanIntersectPop);
 
                     if (popTimes !== 0 && cPopularity >= 15)
@@ -766,7 +792,6 @@
                 },
                 getPlaces: function (query) {
                     query = query || TimesApp.query;
-                    // TimesApp.toggleSpinner();
                     TimesApp.setLoading(true);
                     const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng);
                     fetch(fetchUrl)
@@ -792,24 +817,13 @@
                     if (isNaN(radius)) radius = 80;
                     
                     if (waitTimeArr[0] === 0) {
-                        //colors = ["#ccc", "#777"];
                         colors = ["7", "#777"];
                         radius = 80;
                         message = "<i>Closed</i><br/>" + message;
                     }
 
-                    // const circleMarker = L.circle([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {
-                    //     color: colors[0],
-                    //     fillColor: colors[1],
-                    //     fillOpacity: 0.5,
-                    //     radius: radius
-                    // });
-
                     const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {icon: TimesApp.icons[colors[0]]});
-                    
-                    // circleMarker.bindPopup(message);
-                    // circleMarker.addTo(TimesApp.lMap);
-                    
+
                     pointMarker.bindPopup(message);
                     pointMarker.addTo(TimesApp.lMap);
                     pointMarkers.push(pointMarker);
@@ -869,7 +883,9 @@
                   await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                 },
                 showModalHelp: function () {
-                    document.getElementById('help-modal').style.display='block';
+                    if (document.querySelector('.modal') !== null)
+                      document.body.removeChild(document.querySelector('.modal'));
+                    Utils.openModal("help-modal", "Need help? Do you want to ask something?");
                 },
                 sendHelp: function (message) {
                     Utils.sendError({message: message, help: true});
@@ -888,7 +904,6 @@
                         const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
                         fetch(fetchUrl)
                             .then((r) => { return r.json(); })
-                            // .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
                             .then((r) => {
                                 if (r["error"] !== undefined) {
                                   alert("No results. Check your address/city and try again. Please write the city in english");
@@ -936,7 +951,6 @@
                   if (TimesApp.address != "") {
                     const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
                     fetch(fetchUrl)
-                        // .then((r) => { return ((r.ok) ? r.json() : {lat: 0, lng: 0}); })
                         .then((r) => { return r.json(); })
                         .then((r) => {
                             if (r["error"] !== undefined) {
@@ -1012,7 +1026,11 @@
             ga('set', 'anonymizeIp', true);
             ga('send', 'pageview');
             
-            navigator.serviceWorker.register('sw.js');
+            try {
+              navigator.serviceWorker.register('sw.js');
+            } catch (e) {
+              console.log(e);
+            }
         </script>
     </body>
 </html>
