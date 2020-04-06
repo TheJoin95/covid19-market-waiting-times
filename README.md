@@ -33,10 +33,15 @@ How many time to wait, how popular is the place and when.. etc etc.
 - Add a refresh function
 - Add a prevent function to reload the same data in the same areas
 - Refactoring & Build & Uglify **in progress**
+- Add autosuggest on search city/address
+- Add nominatim API as a fallback for geocoding
+- Add geocoding data from geocode API in client localStorage as a cache
 
 # Credits
 
 The waitingtimes lib is based on the [populartimes python library](https://github.com/m-wrzr/populartimes/).
-The geolocation utility comes from the [greg's repo](https://github.com/gregsramblings/getAccurateCurrentPosition).
+The geolocation client utility comes from the [greg's repo](https://github.com/gregsramblings/getAccurateCurrentPosition).
+
+The geolocation API used on the backend site is provided from [ArcGIS](https://developers.arcgis.com/).
 
 Cheers.
