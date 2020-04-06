@@ -30,10 +30,9 @@ How many time to wait, how popular is the place and when.. etc etc.
 - Add a sidebar to list all the visible places
 - Add a sort of cache on the backend (e.g. Redis with Geopos operator) **in progress**
 - Add a way to store the place data to prevent an overload on the requested resource **in progress**
-- Add search function to search for a specific store **in progress**
 - Add a refresh function
 - Add a prevent function to reload the same data in the same areas
-- Refactoring & Build & Uglify
+- Refactoring & Build & Uglify **in progress**
 
 # Credits
 

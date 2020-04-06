@@ -406,7 +406,7 @@
         </div>-->
 
         <script>
-            const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo', 'api-geo-fr'];
+            const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo-fr'];
             const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
                 geocodeAPI: 'https://' + API_DOMAIN + '.thejoin.tech/geocode?lat=%s&lng=%s',
@@ -486,7 +486,7 @@
                   containerContentDiv.className = 'container';
                   innerdivModalm.appendChild(containerContentDiv);
 
-                  containerContentDiv.innerHTML = content || '<p>Did not find what you were looking for? <u style="cursor: pointer" onclick="Utils.searchByNameModal()">Search by name</u></p><textarea placeholder="Write here your question or tips" rows="7"></textarea><small><i>Note: this is not a search box</i></small>';
+                  containerContentDiv.innerHTML = content || '<p>Did not find what you were looking for? <u style="cursor: pointer" onclick="Utils.searchByNameModal()">Search by name</u></p><input type="text" id="email" placeholder="Insert an email for an answer or leave blank" /><textarea placeholder="Write here your question or tips" rows="7"></textarea><small><i>Note: this is not a search box</i></small>';
 
                   var buttonM = document.createElement("span");
                   buttonM.className = 'close-button display-topright';
@@ -517,7 +517,7 @@
                   var actionButton = document.createElement("span");
                   actionButton.className = 'btn';
                   if (actionFn === undefined) {
-                    actionButton.setAttribute("onclick", "TimesApp.sendHelp(document.querySelector('.modal-content textarea').value)");
+                    actionButton.setAttribute("onclick", "TimesApp.sendHelp(document.querySelector('.modal-content textarea').value, document.querySelector('.modal-content #email').value)");
                   } else {
                     actionButton.addEventListener('click', actionFn);
                   }
@@ -727,7 +727,7 @@
                     const hour = (new Date()).getHours();
                     const weekDay = ((new Date()).getDay() === 0) ? 6 : (new Date()).getDay() - 1;
 
-                    var maxTimeSpent, meanTimeSpent, minTimeSpent = 0;
+                    var maxTimeSpent = meanTimeSpent = minTimeSpent = 0;
 
                     if (place["time_spent"] !== undefined && place["time_spent"].length > 0) {
                       place["time_spent"][0] = (place["time_spent"][0] == 1) ? 60 : place["time_spent"][0];
@@ -749,8 +749,8 @@
                     var meanIntersectPop = 0;
 
                     const diffPopTimes = (popTimes - cPopularity);
-                    var increase = 0;
-                    if (cPopularity !== 0 && cPopularity > 15) {
+                    var increase = (popTimes > 0) ? meanTimeSpent : 0;
+                    if (cPopularity !== 0 && cPopularity > 15 && waitTimes > 0) {
                     	if (diffPopTimes < 0) {
                     		increase = maxTimeSpent;
                     	} else if (diffPopTimes >= 0 && diffPopTimes < 5) {
@@ -768,6 +768,9 @@
 
                     if (popTimes !== 0 && cPopularity >= 15)
                         waitTime += 5; // relative error, white rumor
+
+                    if (waitTime === 0 && meanTimeSpent === 0)
+                    	waitTime = 'No information about ';
 
                     return [place["populartimes"][weekDay]["data"][hour], waitTime];
                 },
@@ -810,15 +813,15 @@
                     let waitTimeArr = TimesApp.getWaitTime(places[key]);
 
                     let waitTime = waitTimeArr[1];
-                    let radius = waitTime + 80;
+                    // let radius = waitTime + 80;
                     let colors = TimesApp.getMarkerPlaceColor(waitTime);
                     let message = "<b>" + places[key]["name"] + "</b><br><small>" + places[key]["address"] + "</small><br/><i>" + waitTime + "min</i> of line";
 
-                    if (isNaN(radius)) radius = 80;
+                    // if (isNaN(radius)) radius = 80;
                     
                     if (waitTimeArr[0] === 0) {
                         colors = ["7", "#777"];
-                        radius = 80;
+                        // radius = 80;
                         message = "<i>Closed</i><br/>" + message;
                     }
 
@@ -887,8 +890,9 @@
                       document.body.removeChild(document.querySelector('.modal'));
                     Utils.openModal("help-modal", "Need help? Do you want to ask something?");
                 },
-                sendHelp: function (message) {
-                    Utils.sendError({message: message, help: true});
+                sendHelp: function (message, email) {
+                    var email = email || "";
+                    Utils.sendError({message: message, email: email, help: true});
                     document.querySelector('.modal-content div.container').innerHTML = '<h2>Message sent, thank you!</h2>';
                     setTimeout(function() {
                         document.getElementById('help-modal').style.display='none';
