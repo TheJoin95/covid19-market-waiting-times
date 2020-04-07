@@ -452,16 +452,17 @@
         </footer>
 
         <script>
-            const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo'];
+            const API_DOMAIN_AVAILABLE = ['api-geo-fr', 'api-geo-fr', 'api-geo-fr', 'api-geo-fr', 'api-geo-fr', 'api-geo-fr', 'api-geo'];
             const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
             		fallbackGeocodeAPI: 'https://nominatim.openstreetmap.org/search.php?q=%s&format=json',
-                geocodeAPI: 'https://' + API_DOMAIN + '.thejoin.tech/geocode?lat=%s&lng=%s',
+                geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
+                geocodeAPIClient: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=%s,%s',
                 // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
                 logAPI: 'https://api-geo.thejoin.tech/logger',
                 getPlaceByNameAPI: 'https://api-geo.thejoin.tech/places/get-by-name?q=%s&address=%s',
                 // getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
-                getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s',
+                getPlacesAPI: 'https://' + API_DOMAIN + '.thejoin.tech/places/explore?q=%s&address=%s',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
                         i = 0;
@@ -496,6 +497,13 @@
                         },
                         body: JSON.stringify(requestBody)
                     });
+                },
+                setDefaultLocation: function (address, lat, lng) {
+                  var obj = {"address": address, "latt": lat, "longt": lng};
+                  localStorage.setItem("defaultLocation", JSON.stringify(obj));
+                },
+                getDefaultLocation: function () {
+                  return JSON.parse(localStorage.getItem("defaultLocation"));
                 },
                 searchByNameModal: function () {
                   document.body.removeChild(document.querySelector('.modal'));
@@ -905,8 +913,40 @@
                 updateAddress: async function (initMap) {
                     initMap = initMap || true;
                     TimesApp.setLoading(true);
-                    const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng);
-                    fetch(fetchUrl)
+                    var availableUrls = [
+                      WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng),
+                      WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat),
+                      WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat)
+                    ];
+
+                    var keyUrl = Math.floor(Math.random() * availableUrls.length);
+                    const fetchUrl = availableUrls[keyUrl];
+
+                    var r = await fetch(fetchUrl);
+                    var json = { staddress: '', city: ''};
+                    if((r.ok)) {
+                      json = await r.json();
+                    } else {
+                      Utils.sendError({url: fetchUrl, message: r.toString()});
+                      return false;
+                    }
+                    
+                    json.staddress = (typeof(json.staddress) === 'object' || json.staddress === undefined) ? '' : json.staddress;
+                    json.city = (typeof(json.city) === 'object' || json.city === undefined) ? '' : json.city;
+
+                    if (json.staddress === '' && json.address !== undefined)
+                      json.staddress = (json.address["Address"] === undefined) ? '' : json.address["Address"];
+
+                    if (json.city === '' && json.address !== undefined)
+                      json.city = (json.address["City"] === undefined) ? '' : json.address["City"];
+
+                    TimesApp.address = (json.staddress !== '') ? json.staddress + ', ' : '';
+                    TimesApp.address += json.city;
+                    (initMap === true) ? TimesApp.initMap() : TimesApp.getPlaces();
+                  
+                    //.catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+
+                    /*fetch(fetchUrl)
                         .then((r) => { return ((r.ok) ? r.json() : {staddress: '', city: ''}); })
                         .then((r) => { 
                             r.staddress = (typeof(r.staddress) === 'object' || r.staddress === undefined) ? '' : r.staddress;
@@ -916,7 +956,7 @@
                             TimesApp.address += r.city;
                             (initMap === true) ? TimesApp.initMap() : TimesApp.getPlaces();
                         })
-                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));*/
 
                     ga('send', 'event', 'Request', 'Geocode', WaitingTimesAPI.geocodeAPI);
                 },
@@ -1043,11 +1083,13 @@
                   	ga('send', 'event', 'Geolocation', 'GeoError', TimesApp.address);
                     const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
 
+                    // var json = Utils.getDefaultLocation();
+                    // if (json === null) {
                     var r = await fetch(fetchUrl);   
-                  	var json = await r.json();
-                  	if (!r.ok || (json['error'] !== undefined && json['error']['code'] === '006')) {
-                  		json = await TimesApp.fallbackGeocodeCall(TimesApp.address);
-                  	}
+                    var json = await r.json();
+                    if (!r.ok || (json['error'] !== undefined && json['error']['code'] === '006')) {
+                      json = await TimesApp.fallbackGeocodeCall(TimesApp.address);
+                    }
                         
                     if (json["error"] !== undefined) {
                       setTimeout(function () {
@@ -1057,6 +1099,8 @@
                       }, 2000);
                       return false;
                     }
+                      //Utils.setDefaultLocation(TimesApp.address, json.latt, json.longt);
+                    // }
 
                     TimesApp.lat = parseFloat(json.latt);
                     TimesApp.lng = parseFloat(json.longt);
