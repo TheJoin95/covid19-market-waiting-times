@@ -321,6 +321,70 @@
 						}
             /* loading */
 
+            /* rating */
+            .rate {
+						  border-radius: 8px;
+						  font-size: 20px;
+						  padding: 8px;
+						}
+						input[type="radio"] {
+						  box-shadow: none;
+						}
+						.rate {
+						  height: auto;
+						  display: inline-flex;
+						  flex-direction: row-reverse;
+					    align-items: center;
+					    justify-content: center;
+					    width: 100%;
+					    margin: auto;
+						  /*align-items: flex-start;
+						  justify-content: flex-end;*/
+						}
+						.rate:not(:checked) > input {
+						      position: relative;
+						    margin-left: -29px;
+						    top: 15px;
+						    left: -5px;
+						    width: 19px;
+						    padding-right: 0px;
+						    z-index: -10;
+						}
+						.rate:not(:checked) > label {
+						  float:right;
+						  width:1em;
+						  overflow:hidden;
+						  white-space:nowrap;
+						  cursor:pointer;
+						  font-size: 3rem;
+						  color:#ccc;
+						  height: 3rem;
+						}
+						.rate:not(:checked) > label::before {
+						  content: '★ ';
+						  position: relative;
+						  top: -15px;
+						  left: 2px;
+						}
+						.rate > input:checked ~ label {
+						  color: #ffc700;
+						}
+						.rate > input:checked:focus + label, .rate > input:focus + label {
+						  outline: -webkit-focus-ring-color auto 5px;
+						}
+						.rate:not(:checked) > label:hover,
+						.rate:not(:checked) > label:hover ~ label {
+						  color: #deb217;
+						}
+						.rate > input:checked + label:hover,
+						.rate > input:checked + label:hover ~ label,
+						.rate > input:checked ~ label:hover,
+						.rate > input:checked ~ label:hover ~ label,
+						.rate > label:hover ~ input:checked ~ label {
+						  color: #c59b08;
+						}
+            /* rating */
+
             div#help-button {
               position: fixed;
               top: 10px;
@@ -387,29 +451,11 @@
           <center>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">&#x1f517; Open Source on Github</a></center>
         </footer>
 
-        <!--<div id="help-modal" class="modal">
-          <div class="modal-content animate-opacity card-4">
-            <header class="container teal"> 
-              <span onclick="document.getElementById('help-modal').style.display='none'" class="close-button display-topright">&times;</span>
-              <h2>Need help? Do you want to ask something?</h2>
-            </header>
-            <div class="container">
-              <p>Did not find what you were looking for? <u onclick="Utils.searchByNameModal()">Search by name</u></p>
-              <textarea placeholder="Write here your question or tips" rows="7"></textarea>
-              <small><i>Note: this is not a search box</i></small>
-            </div>
-            <footer class="container teal">
-              <span class="btn" onclick="TimesApp.sendHelp(document.querySelector('.modal-content textarea').value)">Send</span>
-              <span class="btn" style="float: right" onclick="document.getElementById('help-modal').style.display='none'">Close</span>
-            </footer>
-          </div>
-        </div>-->
-
         <script>
-            // add https://nominatim.openstreetmap.org/reverse.php?lat=43.8182161&lon=11.1341926&format=json
             const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo'];
             const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
+            		fallbackGeocodeAPI: 'https://nominatim.openstreetmap.org/search.php?q=%s&format=json',
                 geocodeAPI: 'https://' + API_DOMAIN + '.thejoin.tech/geocode?lat=%s&lng=%s',
                 // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
                 logAPI: 'https://api-geo.thejoin.tech/logger',
@@ -506,7 +552,9 @@
 
                   var closeButton = document.createElement("span");
                   closeButton.className = 'btn';
-                  closeButton.style.float = "right";
+                  if (actionText !== -1)
+                  	closeButton.style.float = "right";
+                  
                   if (closeFn === undefined) {
                     closeButton.setAttribute("onclick", "document.getElementById('"+ id +"').style.display='none'");
                   }else {
@@ -516,16 +564,18 @@
                   closeButton.innerHTML = "Close";
                   footer.appendChild(closeButton);
 
-                  var actionButton = document.createElement("span");
-                  actionButton.className = 'btn';
-                  if (actionFn === undefined) {
-                    actionButton.setAttribute("onclick", "TimesApp.sendHelp(document.querySelector('.modal-content textarea').value, document.querySelector('.modal-content #email').value)");
-                  } else {
-                    actionButton.addEventListener('click', actionFn);
-                  }
+                  if (actionText !==-1) {
+	                  var actionButton = document.createElement("span");
+	                  actionButton.className = 'btn';
+	                  if (actionFn === undefined) {
+	                    actionButton.setAttribute("onclick", "TimesApp.sendHelp(document.querySelector('.modal-content textarea').value, document.querySelector('.modal-content #email').value)");
+	                  } else {
+	                    actionButton.addEventListener('click', actionFn);
+	                  }
 
-                  actionButton.innerHTML = actionText;
-                  footer.appendChild(actionButton);
+	                  actionButton.innerHTML = actionText;
+	                  footer.appendChild(actionButton);
+                  }
 
                   divModal.style.display = "block";
 
@@ -752,14 +802,14 @@
 
                     const diffPopTimes = (popTimes - cPopularity);
                     var increase = (popTimes > 0) ? meanTimeSpent : 0;
-                    if (cPopularity !== 0 && cPopularity > 15 && waitTimes > 0) {
+                    if (cPopularity !== 0 && (popTimes/cPopularity) <= 2 && waitTimes > 0) {
                     	if (diffPopTimes < 0) {
                     		increase = maxTimeSpent;
-                    	} else if (diffPopTimes >= 0 && diffPopTimes < 5) {
+                    	} else if (diffPopTimes >= 0 && diffPopTimes < (popTimes/4)) {
                     		increase = meanTimeSpent;
-                    	} else if(diffPopTimes >= 5 && diffPopTimes < (popTimes/2)) {
+                    	} else if(diffPopTimes > (popTimes/4) && diffPopTimes <= (popTimes/3)) {
                     		increase = minTimeSpent;
-                    	} else if (diffPopTimes >= (popTimes/2)) {
+                    	} else if (diffPopTimes > (popTimes/3)) {
                     		increase = 5;
                     	}
                     }
@@ -768,7 +818,7 @@
 
                     var waitTime = Math.ceil(waitTimes + meanIntersectPop);
 
-                    if (popTimes !== 0 && cPopularity >= 15)
+                    if (popTimes !== 0 && cPopularity >= 18)
                         waitTime += 5; // relative error, white rumor
 
                     if (waitTime === 0 && meanTimeSpent === 0)
@@ -886,17 +936,27 @@
                     TimesApp.geoError();
                     return false;
                   }
-                  
                   TimesApp.lat = parseFloat(position.coords.latitude);
                   TimesApp.lng = parseFloat(position.coords.longitude);
 
                   await TimesApp.updateAddressAwait();
                   await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+                  ga('send', 'event', 'Geolocation', 'GeoSuccess', 'true');
                 },
                 showModalHelp: function () {
                     if (document.querySelector('.modal') !== null)
                       document.body.removeChild(document.querySelector('.modal'));
                     Utils.openModal("help-modal", "Need help? Do you want to ask something?");
+                },
+                sendReview: function (rate) {
+                	var rate = rate || '0';
+                	ga('send', 'event', 'Review', 'Rate', rate);
+                	Utils.sendError({rate: rate});
+                	localStorage.setItem("sended_review", "yes");
+                	document.querySelector('.modal-content div.container').innerHTML = '<h2>Feedback sent, thank you!</h2>';
+                  setTimeout(function() {
+                      document.body.removeChild(document.getElementById('rating-modal'));
+                  }, 1200);
                 },
                 sendHelp: function (message, email) {
                     var email = email || "";
@@ -905,6 +965,19 @@
                     setTimeout(function() {
                         document.getElementById('help-modal').style.display='none';
                     }, 1200);
+                },
+                fallbackGeocodeCall: async function (address) {
+                	var r = await fetch(WaitingTimesAPI.format(WaitingTimesAPI.fallbackGeocodeAPI, address));
+                	var json = await r.json();
+
+                	if (json.length > 0 && json[0]['lat'] !== undefined) {
+                		json['latt'] = json[0]['lat'];
+                		json['longt'] = json[0]['lon'];
+                	} else {
+                		json["error"] = true;
+                	}
+
+                	return json;
                 },
                 search: async function () {
                 	TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "");
@@ -915,31 +988,33 @@
                 	if (TimesApp.address != "") {
                 				ga('send', 'event', 'Request', 'Search', TimesApp.address);
                         const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
-                        fetch(fetchUrl)
-                            .then((r) => { return r.json(); })
-                            .then((r) => {
-                                if (r["error"] !== undefined) {
-                                  setTimeout(function () {
-                                    alert("No results. Check your address/city and try again. Please write the city in english");
-                                    Utils.sendError({url: fetchUrl, message: r["error"]});
-                                    TimesApp.search();
-                                  }, 2000);
-                                  return false;
-                                }
-                                
-                                TimesApp.getPlaces();
-                                TimesApp.lat = parseFloat(r.latt);
-                                TimesApp.lng = parseFloat(r.longt);
-                                TimesApp.lMap.setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
-                                TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
-                            })
-                            .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+
+                        var r = await fetch(fetchUrl);   
+                      	var json = await r.json();
+                      	if (!r.ok || (json['error'] !== undefined && json['error']['code'] === '006')) {
+                      		json = await TimesApp.fallbackGeocodeCall(TimesApp.address);
+                      	}
+                            
+                        if (json["error"] !== undefined) {
+                          setTimeout(function () {
+                            alert("No results. Check your address/city and try again. Please write the city in english");
+                            Utils.sendError({url: fetchUrl, message: json["error"]});
+                            TimesApp.search();
+                          }, 2000);
+                          return false;
+                        }
+                        
+                        TimesApp.getPlaces();
+                        TimesApp.lat = parseFloat(json.latt);
+                        TimesApp.lng = parseFloat(json.longt);
+                        TimesApp.lMap.setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
+                        TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                     }
                 },
                 promptAddress: function () {
                 	return prompt("This app need your gps position or at least your address or your city:", "");
                 },
-                geoError: function (e) {
+                geoError: async function (e) {
                   clearTimeout(Utils.geoErrorTimeout);
                   TimesApp.address = TimesApp.promptAddress();
 
@@ -963,10 +1038,45 @@
                   	TimesApp.address = TimesApp.address.trim();
                   }
 
+
                   if (TimesApp.address != "") {
+                  	ga('send', 'event', 'Geolocation', 'GeoError', TimesApp.address);
                     const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
-                    fetch(fetchUrl)
-                        .then((r) => { return r.json(); })
+
+                    var r = await fetch(fetchUrl);   
+                  	var json = await r.json();
+                  	if (!r.ok || (json['error'] !== undefined && json['error']['code'] === '006')) {
+                  		json = await TimesApp.fallbackGeocodeCall(TimesApp.address);
+                  	}
+                        
+                    if (json["error"] !== undefined) {
+                      setTimeout(function () {
+                        alert("No results. Check your address/city and try again. Please write the city in english");
+                        Utils.sendError({url: fetchUrl, message: json["error"]});
+                        TimesApp.search();
+                      }, 2000);
+                      return false;
+                    }
+
+                    TimesApp.lat = parseFloat(json.latt);
+                    TimesApp.lng = parseFloat(json.longt);
+                    if (TimesApp.lMap === null) {
+                      TimesApp.initMap();
+                      TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+                    } else {
+                      TimesApp.getPlaces();
+                      TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+                    }
+
+                    /*fetch(fetchUrl)
+                        .then(async (r) => {
+                        	var json = await r.json();
+                        	if (json['error'] !== undefined && json['error']['code'] === '006') {
+                        		json = await TimesApp.fallbackGeocodeCall(TimesApp.address);
+                        	}
+
+                        	return json;
+                        })
                         .then((r) => {
                             if (r["error"] !== undefined) {
                               setTimeout(function () {
@@ -987,7 +1097,7 @@
                               TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
                             }
                         })
-                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));*/
                   }
                 },
                 toggleSpinner: function () {
@@ -1031,9 +1141,29 @@
                 	}
                 );
 
+                if (localStorage.getItem('sended_review') !== 'yes') {
+	                setTimeout(function () {
+	                	Utils.openModal('rating-modal', 'Please, take time to rate this project', `
+											<h4>Your feedback is very important to understand if the estimates are correct or not. Together we can build something useful!</h4>
+											<div class="rate">
+											  <input type="radio" id="star5" name="rate" value="5">
+											  <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star5" data-value="5" title="5 stars">5 stars</label>
+											  <input type="radio" id="star4" name="rate" value="4">
+											  <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star4" data-value="4" title="4 stars">4 stars</label>
+											  <input type="radio" id="star3" name="rate" value="3">
+											  <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star3" data-value="3" title="3 stars">3 stars</label>
+											  <input type="radio" id="star2" name="rate" value="2">
+											  <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star2" data-value="2" title="2 stars">2 stars</label>
+											  <input type="radio" id="star1" name="rate" value="1">
+											  <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star1" data-value="1" title="1 star">1 star</label>
+											</div>
+											`, -1);
+	                }, 100 * 1000);
+                }
             });
 
-            window.addEventListener('appinstalled', function() { 
+            window.addEventListener('appinstalled', function() {
+            	ga('send', 'event', 'PWA', 'Installed', 'true');
 						  Utils.sendError({"pwa_installed": true});
 						});
 

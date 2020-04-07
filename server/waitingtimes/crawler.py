@@ -46,7 +46,8 @@ def get_info_from_geocode(lat, lng):
     if (os.environ.get('HERE_PLACE_API_KEY') == None):
         raise Exception("You need to add an environment variable for HERE_PLACE_API_KEY")
 
-    return get_info_from_geocode_arcgis(lat, lng)
+    if (randrange(0,5) != 0):
+        return get_info_from_geocode_arcgis(lat, lng)
 
     info = json.loads(requests.get(GEOCODE_HERE_URL.format(lat, lng, os.environ.get('HERE_PLACE_API_KEY'))).text)
 

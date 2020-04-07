@@ -34,8 +34,9 @@ How many time to wait, how popular is the place and when.. etc etc.
 - Add a prevent function to reload the same data in the same areas
 - Refactoring & Build & Uglify **in progress**
 - Add autosuggest on search city/address
-- Add nominatim API as a fallback for geocoding
-- Add geocoding data from geocode API in client localStorage as a cache
+- Add nominatim API as a fallback for geocoding **testing**
+- Add geocoding data from geocode API in client localStorage as a cache **in progress**
+- Add history as #5
 
 # Credits
 
