@@ -12,6 +12,15 @@
         <meta property="og:image" content="https://covid19-waiting-time.thejoin.tech/assets/map.png"/>
         <meta property="og:description" content="A project to help people stand in line at the market as little as possible"/>
         <meta property="og:url" content="https://covid19-waiting-time.thejoin.tech" />
+        
+        <script data-ad-client="ca-pub-9563589123138123" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <!--<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <script>
+          (adsbygoogle = window.adsbygoogle || []).push({
+            google_ad_client: "ca-pub-5221298562415460",
+            enable_page_level_ads: true
+          });
+        </script>-->
 
         <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
 
@@ -452,7 +461,7 @@
         </footer>
 
         <script>
-            const API_DOMAIN_AVAILABLE = ['api-geo-fr', 'api-geo-fr', 'api-geo-fr', 'api-geo-fr', 'api-geo-fr', 'api-geo-fr', 'api-geo'];
+            const API_DOMAIN_AVAILABLE = ['api-geo'];
             const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
             		fallbackGeocodeAPI: 'https://nominatim.openstreetmap.org/search.php?q=%s&format=json',
@@ -462,7 +471,8 @@
                 logAPI: 'https://api-geo.thejoin.tech/logger',
                 getPlaceByNameAPI: 'https://api-geo.thejoin.tech/places/get-by-name?q=%s&address=%s',
                 // getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
-                getPlacesAPI: 'https://' + API_DOMAIN + '.thejoin.tech/places/explore?q=%s&address=%s',
+                getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s',
+                getPlacesAPIFallback: 'https://api-geo-fr.thejoin.tech/places/explore-redis?q=%s&address=%s',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
                         i = 0;
@@ -810,7 +820,7 @@
 
                     const diffPopTimes = (popTimes - cPopularity);
                     var increase = (popTimes > 0) ? meanTimeSpent : 0;
-                    if (cPopularity !== 0 && (popTimes/cPopularity) <= 2 && waitTimes > 0) {
+                    if (cPopularity !== 0 && (popTimes/cPopularity) <= 2.3 && waitTimes > 0) {
                     	if (diffPopTimes < 0) {
                     		increase = maxTimeSpent;
                     	} else if (diffPopTimes >= 0 && diffPopTimes < (popTimes/4)) {
@@ -858,12 +868,25 @@
                     query = query || TimesApp.query;
                     TimesApp.setLoading(true);
                     // const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng);
-                    const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address);
-                    ga('send', 'event', 'Request', 'Places', TimesApp.address);
-                    fetch(fetchUrl)
-                        .then((r) => { if (r.ok) return r.json(); })
-                        .then((places) => TimesApp.setPlaceOnMap(places))
-                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+                    if (Math.floor(Math.random() * 11) == 10) {
+                      var headers = new Headers();
+                      headers.append('x-geo-lat', TimesApp.lat);
+                      headers.append('x-geo-lng', TimesApp.lng);
+                      const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPIFallback, query, TimesApp.address);
+                      ga('send', 'event', 'Request', 'Places', TimesApp.address);
+                      fetch(fetchUrl, {headers: headers})
+                          .then((r) => { if (r.ok) return r.json(); })
+                          .then((places) => TimesApp.setPlaceOnMap(places))
+                          .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+                    } else {
+                      const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address);
+                      ga('send', 'event', 'Request', 'Places', TimesApp.address);
+                      fetch(fetchUrl)
+                          .then((r) => { if (r.ok) return r.json(); })
+                          .then((places) => TimesApp.setPlaceOnMap(places))
+                          .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+                    }
+
                 },
                 setPlaceOnMap: function (places) {
                   console.log(places);
@@ -958,7 +981,7 @@
                         })
                         .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));*/
 
-                    ga('send', 'event', 'Request', 'Geocode', WaitingTimesAPI.geocodeAPI);
+                    ga('send', 'event', 'Request', 'Geocode', ((keyUrl == 0) ? WaitingTimesAPI.geocodeAPI : WaitingTimesAPI.geocodeAPIClient));
                 },
                 updateBound: async function (originLat, originLng) {
                   TimesApp.setLoading(true);

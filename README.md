@@ -29,6 +29,8 @@ In the future it will then perhaps be possible to give an estimate on the follow
 
 In fact, the same data that you would view on Google are used, i.e. the data within the local business.
 
+Please, note that sometimes a place can have a parking area or other stuff where the geolocation can make some mistakes. I can not detect where the people are, if they are people or car, how many people are in the line etc etc. The estimates are based on the data that come from Google with an additional formula to get an approx time to wait. This error can change from a place to another.
+
 # TODO
 
 - Add search input in an overlay
@@ -42,6 +44,8 @@ In fact, the same data that you would view on Google are used, i.e. the data wit
 - Add nominatim API as a fallback for geocoding **testing**
 - Add geocoding data from geocode API in client localStorage as a cache **in progress**
 - Add history as #5
+- Testing endpoint with redis cache **in progress**
+- Need to optimize the load avg to grant the access to 600 users in 30min
 
 # Credits
 
