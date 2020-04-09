@@ -820,12 +820,12 @@
 
                     const diffPopTimes = (popTimes - cPopularity);
                     var increase = (popTimes > 0) ? meanTimeSpent : 0;
-                    if (cPopularity !== 0 && (popTimes/cPopularity) <= 2.3 && waitTimes > 0) {
-                    	if (diffPopTimes < 0) {
-                    		increase = maxTimeSpent;
-                    	} else if (diffPopTimes >= 0 && diffPopTimes < (popTimes/4)) {
+                    if (cPopularity !== 0 && (popTimes/cPopularity) <= 2 && waitTimes > 0) {
+                    	if (diffPopTimes <= 0) {
+                    		increase = maxTimeSpent + (Math.ceil((cPopularity/2)/5)*5);
+                    	} else if (diffPopTimes > 0 && diffPopTimes < (popTimes/5)) {
                     		increase = meanTimeSpent;
-                    	} else if(diffPopTimes > (popTimes/4) && diffPopTimes <= (popTimes/3)) {
+                    	} else if(diffPopTimes >= (popTimes/5) && diffPopTimes <= (popTimes/3)) {
                     		increase = minTimeSpent;
                     	} else if (diffPopTimes > (popTimes/3)) {
                     		increase = 5;
@@ -868,7 +868,7 @@
                     query = query || TimesApp.query;
                     TimesApp.setLoading(true);
                     // const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng);
-                    if (Math.floor(Math.random() * 11) == 10) {
+                    if (Math.floor(Math.random() * 16) == 10) {
                       var headers = new Headers();
                       headers.append('x-geo-lat', TimesApp.lat);
                       headers.append('x-geo-lng', TimesApp.lng);
