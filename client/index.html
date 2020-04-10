@@ -14,13 +14,6 @@
         <meta property="og:url" content="https://covid19-waiting-time.thejoin.tech" />
         
         <script data-ad-client="ca-pub-9563589123138123" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        <!--<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        <script>
-          (adsbygoogle = window.adsbygoogle || []).push({
-            google_ad_client: "ca-pub-5221298562415460",
-            enable_page_level_ads: true
-          });
-        </script>-->
 
         <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
 
@@ -735,14 +728,14 @@
                         let center = TimesApp.lMap.getCenter();
                         console.log("new center ", center.toString());
 
-                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 2) {
+                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 2.5) {
                             TimesApp.lat = parseFloat(center.lat);
                             TimesApp.lng = parseFloat(center.lng);
                             Utils.updateTimeout = setTimeout(async function () {
                                 await TimesApp.updateAddress(-1);
                                 await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+                            		TimesApp.getPharmacies();
                             }, 1000);
-                            TimesApp.getPharmacies();
                         }
 
                     });
@@ -825,9 +818,9 @@
                     		increase = maxTimeSpent + (Math.ceil((cPopularity/2)/5)*5);
                     	} else if (diffPopTimes > 0 && diffPopTimes < (popTimes/5)) {
                     		increase = meanTimeSpent;
-                    	} else if(diffPopTimes >= (popTimes/5) && diffPopTimes <= (popTimes/3)) {
+                    	} else if(diffPopTimes >= (popTimes/5) && diffPopTimes <= (popTimes/2)) {
                     		increase = minTimeSpent;
-                    	} else if (diffPopTimes > (popTimes/3)) {
+                    	} else if (diffPopTimes > (popTimes/2)) {
                     		increase = 5;
                     	}
                     }
@@ -862,7 +855,15 @@
                             alert("Unfortunally " + q + " does not have any information about waiting times");
                           }
                         })
-                        .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+                        .catch((r) => Utils.sendError({url: fetchUrl, singlePlace: true, message: r.toString()}));
+                },
+                getPlacesFallback: async function () {
+                	const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI.replace('api-geo-fr', 'api-geo-uk'), TimesApp.query, TimesApp.address);
+                  ga('send', 'event', 'Request', 'Places', TimesApp.address);
+                  fetch(fetchUrl)
+                      .then((r) => { if (r.ok) return r.json(); })
+                      .then((places) => TimesApp.setPlaceOnMap(places))
+                      .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
                 },
                 getPlaces: function (query) {
                     query = query || TimesApp.query;
@@ -877,14 +878,14 @@
                       fetch(fetchUrl, {headers: headers})
                           .then((r) => { if (r.ok) return r.json(); })
                           .then((places) => TimesApp.setPlaceOnMap(places))
-                          .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+                          .catch((r) => TimesApp.getPlacesFallback());
                     } else {
                       const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address);
                       ga('send', 'event', 'Request', 'Places', TimesApp.address);
                       fetch(fetchUrl)
                           .then((r) => { if (r.ok) return r.json(); })
                           .then((places) => TimesApp.setPlaceOnMap(places))
-                          .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));
+                          .catch((r) => TimesApp.getPlacesFallback());
                     }
 
                 },
@@ -950,7 +951,8 @@
                     if((r.ok)) {
                       json = await r.json();
                     } else {
-                      Utils.sendError({url: fetchUrl, message: r.toString()});
+                    	let error = await r.json();
+                      Utils.sendError({url: fetchUrl, updateAddress: true, message: error.toString()});
                       return false;
                     }
                     
@@ -1061,7 +1063,7 @@
                         if (json["error"] !== undefined) {
                           setTimeout(function () {
                             alert("No results. Check your address/city and try again. Please write the city in english");
-                            Utils.sendError({url: fetchUrl, message: json["error"]});
+                            Utils.sendError({url: fetchUrl, search: true, message: json["error"]});
                             TimesApp.search();
                           }, 2000);
                           return false;
@@ -1117,7 +1119,7 @@
                     if (json["error"] !== undefined) {
                       setTimeout(function () {
                         alert("No results. Check your address/city and try again. Please write the city in english");
-                        Utils.sendError({url: fetchUrl, message: json["error"]});
+                        Utils.sendError({url: fetchUrl, geoError: true, message: json["error"]});
                         TimesApp.search();
                       }, 2000);
                       return false;
