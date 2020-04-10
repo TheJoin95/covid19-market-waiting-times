@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 server/waitingtimes/waitingtimes.py.bak
+server/covid19.ini.save
