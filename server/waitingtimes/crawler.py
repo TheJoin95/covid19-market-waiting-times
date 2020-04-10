@@ -9,12 +9,14 @@ import re
 import calendar
 import requests
 import os
+from random import randrange
 
 HERE_BASE_URL = "https://places.ls.hereapi.com/places/v1/"
 HERE_GEOCODE_BASE_URL = "https://revgeocode.search.hereapi.com/v1/"
 BROWSE_URL = HERE_BASE_URL + "browse?in={},{};r={}&result_types=place&tf=plain&cs=&size={}&cat={}&apiKey={}"
 GEOCODE_URL = "https://geocode.xyz/{},{}?geoit=json&auth={}"
 GEOCODE_HERE_URL = HERE_GEOCODE_BASE_URL + "revgeocode?at={},{}&lang=it-IT&apiKey={}"
+GEOCODE_ARCGIS_URL = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location={},{}"
 
 COMMON_HEADERS = {
     "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -25,6 +27,21 @@ COMMON_HEADERS = {
 USER_AGENT = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) "
                             "Chrome/80.0.3987.149 Safari/537.36"}
+
+
+def get_info_from_geocode_arcgis(lat, lng):
+    info = json.loads(requests.get(GEOCODE_ARCGIS_URL.format(lng, lat)).text)
+
+    if ("address" not in info):
+        raise Exception("No info from geocode")
+
+    if ("Address" in info["address"]):
+        info["staddress"] = info["address"]["Address"]
+
+    if ("City" in info["address"]):
+        info["city"] = info["address"]["City"]
+
+    return info
 
 # def get_info_from_geocode(lat, lng):
 #     if (os.environ.get('GEOCODE_API_KEY') == None):
@@ -40,6 +57,9 @@ USER_AGENT = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
 def get_info_from_geocode(lat, lng):
     if (os.environ.get('HERE_PLACE_API_KEY') == None):
         raise Exception("You need to add an environment variable for HERE_PLACE_API_KEY")
+
+    if (randrange(0,3) != 0):
+        return get_info_from_geocode_arcgis(lat, lng)
 
     info = json.loads(requests.get(GEOCODE_HERE_URL.format(lat, lng, os.environ.get('HERE_PLACE_API_KEY'))).text)
 

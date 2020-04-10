@@ -5,15 +5,28 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address, get_ipaddr
 from flask_cors import CORS, cross_origin
 
+import uwsgidecorators
+import redis
+
 from queue import Queue
 import threading
 
 import waitingtimes
 import hashlib
 import json
+import re
 
 app = Flask(__name__)
 q_detail = Queue()
+
+typeRegex = r"(wholesale)|(restaurant)|(^shop)|(pharmacy)|(discount)|(cafe)|(delivery)|(office)|(food)|(medical)|(grocery)|(bakery)|(hospital)|(^supermarket)|(health)|(doctor)|(grocers)"
+redisAvailable = True
+r = None
+try:
+	r = redis.Redis(host='localhost', port=6379, db=2)
+	rPersistence = redis.Redis(host='localhost', port=6379, db=3)
+except Exception as e:
+	redisAvailable = False
 
 limiter = Limiter(
     app,
@@ -52,7 +65,11 @@ def worker_fulldetail():
 	while True:
 		item = q_detail.get()
 		try:
-			formattedPlaces.append(waitingtimes.get_by_fulldetail(item))
+			result = waitingtimes.get_by_fulldetail(item)
+			formattedPlaces.append(result)
+			setKeyRedis(result["place_id"], json.dumps(result), 60*30)
+			setKeyRedis(result["place_id"], json.dumps(result))
+			geoAddKeyRedis(result["place_id"], result["coordinates"]["lat"], result["coordinates"]["lng"])
 		except Exception as e:
 			print(e)
 		q_detail.task_done()
@@ -88,37 +105,102 @@ def get_places_from_google():
 			if (place["name"] == None):
 				continue
 
-				formattedPlaces.append({
-					"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
-					"formatted_address": place["address"],
-					"name": place["name"],
-					"types": place["categories"],
-					"place_types": place["place_types"],
-					"geometry": {
-						"location": {
-							"lat": place["location"]["lat"],
-							"lng": place["location"]["lng"]
-						}
+			obj = {
+				"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
+				"formatted_address": place["address"],
+				"name": place["name"],
+				"types": place["categories"],
+				"place_types": place["place_types"],
+				"geometry": {
+					"location": {
+						"lat": place["location"]["lat"],
+						"lng": place["location"]["lng"]
 					}
-				})
-			
-			# q_detail.put({
-			# 	"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
-			# 	"formatted_address": place["address"],
-			# 	"name": place["name"],
-			# 	"types": place["categories"],
-			# 	"place_types": place["place_types"],
-			# 	"geometry": {
-			# 		"location": {
-			# 			"lat": place["location"]["lat"],
-			# 			"lng": place["location"]["lng"]
-			# 		}
-			# 	}
-			# })
+				}
+			}
 
-		# q_detail.join()
+			q_detail.put(obj)
+
+		q_detail.join()
 
 	return jsonify(formattedPlaces)
+
+@app.route("/places/explore-redis", methods=["GET"])
+@cross_origin()
+def get_places_from_google_redis():
+	global q_detail, formattedPlaces
+
+	QUERY_SEARCH = "{} near {} open now"
+
+	q = request.args.get("q") # supermarket or pharmacy
+	address = request.args.get("address") # porta nuova, milano
+
+	if (q == None or address == None):
+		abort(400, "You need to provide your query string and your address")
+
+	lat = request.headers.get('x-geo-lat')
+	lng = request.headers.get("x-geo-lng")
+	places = []
+	if (lat != None and lng != None):
+		places = getPlaceInRadius(lat, lng)
+
+	formattedPlaces = []
+	if len(places) < 25 or places == None:
+		try:
+			places = waitingtimes.get_places_from_google(QUERY_SEARCH.format(q, address))
+		except Exception as e:
+			abort(500, e)
+	else:
+		tmpPlaces = []
+		for el in places:
+			tmpPlace = getPlaceFromRedis(el.decode())
+			if (tmpPlace != None and ("populartimes" in tmpPlace)):
+				formattedPlaces.append(tmpPlace)
+			else:
+				tmpPlaces.append(tmpPlace)
+		if (len(tmpPlaces) > 0):
+			places = tmpPlaces
+
+	if (len(places) > 0):
+		for place in places:
+			if (place == None or "name" not in place or place["name"] == None):
+				continue
+
+			locationKey = "location"
+			if ("coordinates" in place):
+				locationKey = "coordinates"
+			elif ("geometry" in place):
+				place["location"] = place["geometry"]["location"]
+
+			addressKey = "address"
+			if ("formatted_address" in place):
+				addressKey = "formatted_address"
+
+			typesKey = "categories"
+			if ("types" in place):
+				typesKey = "types"
+
+			obj = {
+				"place_id": hashlib.md5((str(place[locationKey]["lat"])+str(place[locationKey]["lng"])).encode("utf-8")).hexdigest(),
+				"formatted_address": place[addressKey],
+				"name": place["name"],
+				"types": place[typesKey],
+				"place_types": place["place_types"],
+				"geometry": {
+					"location": {
+						"lat": place[locationKey]["lat"],
+						"lng": place[locationKey]["lng"]
+					}
+				}
+			}
+
+			setKeyRedis(obj["place_id"], json.dumps(obj))
+			q_detail.put(obj)
+
+		q_detail.join()
+
+	return jsonify(formattedPlaces)
+
 
 @app.route("/logger", methods=["POST"])
 @cross_origin()
@@ -134,52 +216,73 @@ def save_client_log():
 
 	return jsonify({"ok": 200})
 
-""" @app.route("/places/browse", methods=["GET"])
-def get_places_from_here():
-	lat = request.args.get("lat")
-	lng = request.args.get("lng")
-	if (lng == None or lat == None):
-		abort(400, "You need to provide at least your gps coords (lat, lng)")
+
+def getPlaceFromRedis (key):
+	global r, rPersistence
+	place = r.get(key)
+	if (place == None):
+		place = rPersistence.get(key)
+
+	if (place != None):
+		place = json.loads(place.decode())
+
+	return place
+
+def getPlaceInRadius (lat, lng, distance=10):
+	global r
+	return r.georadius(
+		"places",
+		lng,
+		lat,
+		distance,
+		unit="km",
+		withdist=False,
+		count=45,
+		sort="ASC"
+	)
+
+def setKeyRedis (key, value, ttl=0):
+	global r, rPersistence
+
+	place = json.loads(value)
+	fail = False
+	if ("place_types" in place and place["place_types"] != None):
+		typeList = []
+		for j in range(0, len(place["place_types"])):
+			for v in place["place_types"][j]:
+				typeList.append(v)
+
+		types = ",".join(typeList)
+		if (re.search(typeRegex, types) == None):
+			return False
 
 	try:
-		places = waitingtimes.get_places_from_here({
-	    "types": ["food-drink", "pharmacy", "post-office", "postal-area"],
-	    "location": {
-	        "lat": lat,
-	        "lng": lng
-	    },
-	    "radius": 6000
-	  })
+		connectionToUse = r
+		if (ttl == 0):
+			connectionToUse = rPersistence
+
+		connectionToUse.set(key, value)
+		if (ttl > 0):
+			connectionToUse.expire(key, ttl)
 	except Exception as e:
-		abort(500, e)
+		print("error key on " + str(e))
 
-	formattedPlaces = []
+def geoAddKeyRedis (key, lat, lng):
+	global r
+	try:
+		r.geoadd('places',lng, lat, key)
+	except Exception as e:
+		print("error geo on " + str(e))
 
-	if (len(places) > 0):
-		for x in range(0, len(places)-1):
-			print("processing: " + places[x]["title"])
-			formattedPlaces.append(
-				waitingtimes.get_by_fulldetail({
-				"accepted_place_type": ["bakery", "bank", "bar", "cafe", "doctor", "drugstore", "food", "health", "hospital", "meal_delivery", "meal_takeaway", "pharmacy", "post_office", "postal_code", "postal_town", "restaurant", "shopping_mall", "supermarket", "grocery_store", "discount_supermarket", "supermarket", "grocery"],
-			    "place_id": places[x]["id"],
-			    "formatted_address": places[x]["vicinity"].replace("\n", " "),
-			    "name": places[x]["title"],
-			    "types": places[x]["category"]["id"],
-			    "geometry": {
-			        "location": {
-			            "lat": places[x]["position"][0],
-			            "lng": places[x]["position"][1]
-			        }
-			    }
-				})
-			)
-
-	return jsonify(formattedPlaces) """
-
-if __name__ == '__main__':
-	while (threading.active_count() <= 60):
+@uwsgidecorators.postfork
+@uwsgidecorators.thread
+def initThread():
+	while (threading.active_count() <= 400):
 		t = threading.Thread(target=worker_fulldetail)
 		t.daemon = True
 		t.start()
 
-	app.run(port=2354)
+if __name__ == '__main__':
+	initThread()
+
+	app.run(host="0.0.0.0")

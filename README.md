@@ -33,6 +33,7 @@ How many time to wait, how popular is the place and when.. etc etc.
 - Add a refresh function
 - Add a prevent function to reload the same data in the same areas
 - Make a more accurate geolocation and marker on maps
+- Add history #5
 
 # Credits
 
