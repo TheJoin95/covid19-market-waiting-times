@@ -46,6 +46,7 @@ Please, note that sometimes a place can have a parking area or other stuff where
 - Add history as #5
 - Testing endpoint with redis cache **in progress**
 - Need to optimize the load avg to grant the access to 600 users in 30min
+- Add category filters and force estimation
 
 # Credits
 
