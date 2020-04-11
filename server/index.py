@@ -19,7 +19,7 @@ import re
 app = Flask(__name__)
 q_detail = Queue()
 
-typeRegex = r"(wholesale)|(restaurant)|(^shop)|(pharmacy)|(discount)|(cafe)|(delivery)|(office)|(food)|(medical)|(grocery)|(bakery)|(hospital)|(^supermarket)|(health)|(doctor)|(grocers)"
+typeRegex = r"(convenience)|(department_store)|(hypermarket)|(^shop)|(pharmacy)|(discount)|(cafe)|(delivery)|(food)|(medical)|(grocery)|(bakery)|(hospital)|(^supermarket)|(health)|(doctor)|(grocers)"
 redisAvailable = True
 r = None
 try:
@@ -67,9 +67,11 @@ def worker_fulldetail():
 		try:
 			result = waitingtimes.get_by_fulldetail(item)
 			formattedPlaces.append(result)
-			setKeyRedis(result["place_id"], json.dumps(result), 60*30)
-			setKeyRedis(result["place_id"], json.dumps(result))
-			geoAddKeyRedis(result["place_id"], result["coordinates"]["lat"], result["coordinates"]["lng"])
+			if (isAdmittedPlace(result)):
+				setKeyRedis(result["place_id"], json.dumps(result), 60*15)
+				setKeyRedis(result["place_id"], json.dumps(result))
+				if ("populartimes" in result):
+					geoAddKeyRedis(result["place_id"], result["coordinates"]["lat"], result["coordinates"]["lng"])
 		except Exception as e:
 			print(e)
 		q_detail.task_done()
@@ -142,7 +144,10 @@ def get_places_from_google_redis():
 	lng = request.headers.get("x-geo-lng")
 	places = []
 	if (lat != None and lng != None):
-		places = getPlaceInRadius(lat, lng)
+		places = getPlaceInRadius(float(lat), float(lng))
+
+	if (places != None):
+		places = [i for i in places if i]
 
 	formattedPlaces = []
 	if len(places) < 25 or places == None:
@@ -154,15 +159,22 @@ def get_places_from_google_redis():
 		tmpPlaces = []
 		for el in places:
 			tmpPlace = getPlaceFromRedis(el.decode())
+			if (tmpPlace == None):
+				r.zrem("places", el)
+				continue
 			if (tmpPlace != None and ("populartimes" in tmpPlace)):
 				formattedPlaces.append(tmpPlace)
-			else:
+			elif ("time_spent" in tmpPlace or "time_wait" in tmpPlace):
 				tmpPlaces.append(tmpPlace)
-		if (len(tmpPlaces) > 0):
-			places = tmpPlaces
+		# if (len(tmpPlaces) > 0):
+		# 	places = tmpPlaces
 
 	if (len(places) > 0):
 		for place in places:
+			try:
+				place = place.decode()
+			except (UnicodeDecodeError, AttributeError):
+				pass
 			if (place == None or "name" not in place or place["name"] == None):
 				continue
 
@@ -194,7 +206,6 @@ def get_places_from_google_redis():
 				}
 			}
 
-			setKeyRedis(obj["place_id"], json.dumps(obj))
 			q_detail.put(obj)
 
 		q_detail.join()
@@ -228,7 +239,7 @@ def getPlaceFromRedis (key):
 
 	return place
 
-def getPlaceInRadius (lat, lng, distance=10):
+def getPlaceInRadius (lat, lng, distance=20):
 	global r
 	return r.georadius(
 		"places",
@@ -237,16 +248,15 @@ def getPlaceInRadius (lat, lng, distance=10):
 		distance,
 		unit="km",
 		withdist=False,
-		count=45,
+		count=180,
 		sort="ASC"
 	)
 
-def setKeyRedis (key, value, ttl=0):
-	global r, rPersistence
+def isAdmittedPlace (place):
+	if ("place_types" in place):
+		if (place["place_types"] == None):
+			return False
 
-	place = json.loads(value)
-	fail = False
-	if ("place_types" in place and place["place_types"] != None):
 		typeList = []
 		for j in range(0, len(place["place_types"])):
 			for v in place["place_types"][j]:
@@ -255,6 +265,10 @@ def setKeyRedis (key, value, ttl=0):
 		types = ",".join(typeList)
 		if (re.search(typeRegex, types) == None):
 			return False
+	return True
+
+def setKeyRedis (key, value, ttl=0):
+	global r, rPersistence
 
 	try:
 		connectionToUse = r
