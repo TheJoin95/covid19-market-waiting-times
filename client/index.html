@@ -439,7 +439,7 @@
 					    padding: 5px 0;
             }
             @media only screen and (max-width: 640px) {
-            	#search-button, #help-button {
+            	div#search-button, div#help-button {
             		padding: 0.5em;
             	}
             }
@@ -470,7 +470,6 @@
         <div id="banner">Due to the high traffic volume, the map may be slow and may not show some places. The project is open source, if anyone wants to help, they can write <a href="https://github.com/TheJoin95/covid19-market-waiting-times/issues" target="_blank">here</a>. Thank you.</div>
 
         <script>
-        	// address and city suggest : http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=via%20bisenzio%20campi%20bisenzio&maxSuggestions=10&category=city,address&countryCode=&searchExtent=&location=&distance=&f=pjson
             const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo-uk'];
             const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
@@ -483,6 +482,7 @@
                 // getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
                 getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s',
                 getPlacesAPIFallback: 'https://api-geo-fr.thejoin.tech/places/explore-redis?q=%s&address=%s',
+                searchSuggestAPI: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=%s&maxSuggestions=10&category=city,address&countryCode=&searchExtent=&location=&distance=&f=json',
                 format: function (str) {
                     var args = [].slice.call(arguments, 1),
                         i = 0;
@@ -517,6 +517,22 @@
                         },
                         body: JSON.stringify(requestBody)
                     });
+                },
+                searchSuggest: async function (el) {
+                	if (el.value.length > 3) {
+	                	var fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.searchSuggestAPI, el.value);
+	                	var r = await fetch(fetchUrl);
+	                	if (r.ok) {
+	                		var json = await r.json();
+	                		var addresses = [];
+	                		if (json["suggestions"].length > 0) {
+	                			for (let i in json["suggestions"]) {
+	                				addresses.push(json["suggestions"][i]["text"]);
+	                			}
+	                			// render addresses
+	                		}
+	                	}
+                	}
                 },
                 setDefaultLocation: function (address, lat, lng) {
                   var obj = {"address": address, "latt": lat, "longt": lng};
