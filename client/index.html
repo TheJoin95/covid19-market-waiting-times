@@ -438,6 +438,11 @@
 					    color: #f2f2f2;
 					    padding: 5px 0;
             }
+            @media only screen and (max-width: 640px) {
+            	#search-button, #help-button {
+            		padding: 0.5em;
+            	}
+            }
         </style>
     </head>
     <body>
@@ -465,6 +470,7 @@
         <div id="banner">Due to the high traffic volume, the map may be slow and may not show some places. The project is open source, if anyone wants to help, they can write <a href="https://github.com/TheJoin95/covid19-market-waiting-times/issues" target="_blank">here</a>. Thank you.</div>
 
         <script>
+        	// address and city suggest : http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=via%20bisenzio%20campi%20bisenzio&maxSuggestions=10&category=city,address&countryCode=&searchExtent=&location=&distance=&f=pjson
             const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo-uk'];
             const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
             const WaitingTimesAPI = {
@@ -740,7 +746,7 @@
                         let center = TimesApp.lMap.getCenter();
                         console.log("new center ", center.toString());
 
-                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 2.5) {
+                        if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 3) {
                             TimesApp.lat = parseFloat(center.lat);
                             TimesApp.lng = parseFloat(center.lng);
                             Utils.updateTimeout = setTimeout(async function () {
@@ -845,7 +851,7 @@
                           increase = 5;
                         }
                       }
-                    } else if (waitTimes == 0 && TimesApp.fullEstimation == false) {
+                    } else if (waitTimes == 0) {
                       increase = 0;
                     } else if (cPopularity == 0 && TimesApp.fullEstimation == false) {
                       waitTime = 0;
@@ -946,7 +952,7 @@
                         message = "<i>Closed</i><br/>" + message;
                     }
 
-                    var icon = (typeof(waitTime) === 'string') ? TimesApp.icons[8] : TimesApp.icons[colors[0]];
+                    var icon = (typeof(waitTime) === 'string' && colors[0] != '7') ? TimesApp.icons[8] : TimesApp.icons[colors[0]];
 
                     const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {icon: icon});
 
@@ -1011,7 +1017,7 @@
                 },
                 updateBound: async function (originLat, originLng) {
                   TimesApp.setLoading(true);
-                  for (var i = 0; i <= 360; i += 90) {
+                  for (var i = 0; i <= 360; i += 120) {
                       let destLatLng = Utils.destinationPoint(originLat, originLng, i, 2.5);
                       TimesApp.lat = parseFloat(destLatLng[0]);
                       TimesApp.lng = parseFloat(destLatLng[1]);

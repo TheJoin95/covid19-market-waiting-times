@@ -35,18 +35,19 @@ Please, note that sometimes a place can have a parking area or other stuff where
 
 - Add search input in an overlay
 - Add a sidebar to list all the visible places
-- Add a sort of cache on the backend (e.g. Redis with Geopos operator) **in progress**
+- Add a sort of cache on the backend (e.g. Redis with Geopos operator) **testing**
 - Add a way to store the place data to prevent an overload on the requested resource **in progress**
 - Add a refresh function
 - Add a prevent function to reload the same data in the same areas
 - Refactoring & Build & Uglify **in progress**
-- Add autosuggest on search city/address
+- Add autosuggest on search city/address **in progress**
 - Add nominatim API as a fallback for geocoding **testing**
 - Add geocoding data from geocode API in client localStorage as a cache **in progress**
 - Add history as #5
 - Testing endpoint with redis cache **in progress**
-- Need to optimize the load avg to grant the access to 600 users in 30min
+- Need to optimize the load avg to grant the access to 800 users in 30min
 - Add category filters and force estimation
+- Refacotring UI/UX
 
 # Credits
 
