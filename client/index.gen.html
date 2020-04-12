@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Covid-19 - Supermarket Waiting Times</title>
+        <meta name="author" content="https://github.com/TheJoin95/covid19-market-waiting-times/">
+        <link rel="icon" type="image/png" href="/assets/icon-resize.png">
+        <meta name="description" content="A project to help people stand in line at the market as little as possible" />
+        <meta charset="utf-8">
+        <link rel="manifest" href="manifest.json">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta property="og:title" content="Covid-19 - Supermarket Waiting Times"/>
+        <meta property="og:image" content="https://covid19-waiting-time.thejoin.tech/assets/map.png"/>
+        <meta property="og:description" content="A project to help people stand in line at the market as little as possible"/>
+        <meta property="og:url" content="https://covid19-waiting-time.thejoin.tech" />
+        
+        <script data-ad-client="ca-pub-9563589123138123" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+        <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin=""/>
+
+        <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+        crossorigin=""></script>
+
+        <style>
+        <!-- build:include dist/assets/css/main.min.css -->
+        <!-- /build -->
+        </style>
+    </head>
+    <body>
+			<div class="progress" id="top-progress-bar">
+			  <div class="indeterminate"></div>
+			</div>
+      <div id="help-button" onclick="TimesApp.showModalHelp();"><span>❓</span></div>
+    	<div id="search-button" onclick="TimesApp.search();"><span>🔍</span></div>
+        <div id="loading" style="display: none">
+            <div class="sk-chase">
+              <div class="sk-chase-dot"></div>
+              <div class="sk-chase-dot"></div>
+              <div class="sk-chase-dot"></div>
+              <div class="sk-chase-dot"></div>
+              <div class="sk-chase-dot"></div>
+              <div class="sk-chase-dot"></div>
+            </div>
+            <span>loading geodata</span>
+        </div>
+        <div id="full-map"></div>
+        <footer>
+          <center><small>Waiting times are estimated</small></center>
+          <center>Made with ❤ in Florence | <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank">&#x1f517; Open Source on Github</a></center>
+        </footer>
+        <div id="banner">Due to the high traffic volume, the map may be slow and may not show some places. The project is open source, if anyone wants to help, they can write <a href="https://github.com/TheJoin95/covid19-market-waiting-times/issues" target="_blank">here</a>. Thank you.</div>
+
+        <script>
+          <!-- build:include dist/index.min.js -->
+          <!-- /build -->
+        </script>
+    </body>
+</html>
