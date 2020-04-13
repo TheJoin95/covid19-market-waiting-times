@@ -31,6 +31,9 @@ In fact, the same data that you would view on Google are used, i.e. the data wit
 
 Please, note that sometimes a place can have a parking area or other stuff where the geolocation can make some mistakes. I can not detect where the people are, if they are people or car, how many people are in the line etc etc. The estimates are based on the data that come from Google with an additional formula to get an approx time to wait. This error can change from a place to another.
 
+# Other contributors
+Many thanks to [ptoone](https://github.com/ptoone), that run [thexyz](https://www.thexyz.com/) a secure, private email hosting service, for support the project by mantain a VPS in US/CA region.
+
 # TODO
 
 - Add search input in an overlay
@@ -39,7 +42,6 @@ Please, note that sometimes a place can have a parking area or other stuff where
 - Add a way to store the place data to prevent an overload on the requested resource **in progress**
 - Add a refresh function
 - Add a prevent function to reload the same data in the same areas
-- Refactoring & Build & Uglify **in progress**
 - Add autosuggest on search city/address **in progress**
 - Add nominatim API as a fallback for geocoding **testing**
 - Add geocoding data from geocode API in client localStorage as a cache **in progress**
@@ -48,6 +50,11 @@ Please, note that sometimes a place can have a parking area or other stuff where
 - Need to optimize the load avg to grant the access to 800 users in 30min
 - Add category filters and force estimation #6
 - Refacotring UI/UX
+- Add modal popup marker
+- Add on marker popup a form for user feedback about lines
+- Add a modal or a splashscreen giving info about the project
+- Change modal asking the geodata/search
+
 
 # Credits
 
