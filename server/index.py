@@ -208,8 +208,12 @@ def get_places_from_here():
 
 if __name__ == '__main__':
 	while (threading.active_count() <= 60):
-		t = threading.Thread(target=worker_fulldetail)
-		t.daemon = True
-		t.start()
+		break
+		try:
+			t = threading.Thread(target=worker_fulldetail)
+			t.daemon = True
+			t.start()
+		except Exception as e:
+			print(e)
 
 	app.run(port=2354, threaded=True)
