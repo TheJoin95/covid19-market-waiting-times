@@ -1,0 +1,79 @@
+.modal {
+  z-index: 100000;
+  display: none;
+  padding-top: 100px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.animate-opacity {
+  animation: opac 0.8s;
+}
+
+.card-4 {
+  box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.2), 0 4px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.modal-content {
+  margin: auto;
+  background-color: #fff;
+  position: relative;
+  padding: 0;
+  outline: 0;
+  width: 600px;
+  max-width: 100%;
+}
+
+.modal-content textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 5px;
+  border: 1px solid #f2f2f2;
+  resize: none;
+}
+
+.teal {
+  color: #fff!important;
+  background-color: #009688!important;
+}
+
+.container,
+.panel {
+  padding: 0.01em 16px;
+}
+
+.display-topright {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.close-button {
+  border: none;
+  font-size: 2.4em;
+  display: inline-block;
+  padding: 8px 16px;
+  vertical-align: middle;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background-color: inherit;
+  text-align: center;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.modal-content .btn {
+  padding: 10px 10px;
+  background: #028276;
+  margin: 10px;
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 5px;
+}

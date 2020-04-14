@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Covid-19 - Supermarket Waiting Times</title>
+  <!-- build:include partials/meta.html --><!-- /build -->
+  <!-- build:include partials/head.html --><!-- /build -->
+</head>
+<body>
+  <div class="progress" id="top-progress-bar">
+    <div class="indeterminate"></div>
+  </div>
+  <div id="help-button" onclick="TimesApp.showModalHelp();"><span>❓</span></div>
+  <div id="search-button" onclick="TimesApp.search();"><span>🔍</span></div>
+  <!-- build:include partials/loader.html --><!-- /build -->
+  <div id="full-map"></div>
+  <!-- build:include partials/footer.html --><!-- /build -->
+  <!-- build:include partials/banner.html --><!-- /build -->
+  <script src='index.min.js'></script>
+</body>
+</html>
