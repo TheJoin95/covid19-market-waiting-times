@@ -391,7 +391,9 @@ const TimesApp = {
           increase = meanTimeSpent;
         } else if (diffPopTimes >= (popTimes / 5) && diffPopTimes <= (popTimes / 2.9)) {
           increase = minTimeSpent;
-        } else if (diffPopTimes > (popTimes / 2.9)) {
+        } else if (diffPopTimes > (popTimes / 2.9) && diffPopTimes <= (popTimes / 1.8)) {
+          increase = (Math.ceil((minTimeSpent / 2) / 5) * 5);
+        } else if (diffPopTimes > (popTimes / 1.8)) {
           increase = 0;
           waitTimes = (Math.ceil((waitTimes * 20 / 100) / 5) * 5);
         }
@@ -424,7 +426,7 @@ const TimesApp = {
   },
   getPharmacies: function() {
     console.log("Getting pharmacy");
-    // TimesApp.getPlaces("pharmacy");
+    TimesApp.getPlaces("pharmacy");
   },
   getPlace: function(q, address) {
     TimesApp.setLoading(true);
@@ -595,7 +597,7 @@ const TimesApp = {
   },
   updateBound: async function(originLat, originLng) {
     TimesApp.setLoading(true);
-    for (var i = 360; i <= 360; i += 120) {
+    for (var i = 0; i <= 360; i += 120) {
       let destLatLng = Utils.destinationPoint(originLat, originLng, i, 2.5);
       TimesApp.lat = parseFloat(destLatLng[0]);
       TimesApp.lng = parseFloat(destLatLng[1]);
