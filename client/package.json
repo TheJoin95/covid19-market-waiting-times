@@ -3,18 +3,20 @@
   "version": "1.0.0",
   "description": "A project to help people stand in line at the market as little as possible",
   "main": "Gruntfile.js",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "grunt": "^1.1.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-cssmin": "^3.0.0",
     "grunt-contrib-htmlmin": "^3.1.0",
+    "grunt-contrib-sass": "^1.0.0",
     "grunt-contrib-uglify": "^4.0.1",
-    "grunt-processhtml": "^0.4.2"
-  },
-  "devDependencies": {
-    "grunt-contrib-uglify-es": "^3.3.0"
+    "grunt-contrib-uglify-es": "^3.3.0",
+    "grunt-processhtml": "^0.4.2",
+    "node-sass": "^4.13.1"
   },
   "scripts": {
+    "start": "grunt --debug",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
