@@ -32,7 +32,7 @@ module.exports = function (grunt) {
            }
          },
          files: {
-           'dist/index.min.html': ['index.html']
+           'dist/index.min.html': ['index.gen.html']
          }
        }
      },
@@ -43,7 +43,7 @@ module.exports = function (grunt) {
            collapseWhitespace: true
          },
          files: {
-           'dist/index.html': 'dist/index.min.html'
+           'index.html': 'dist/index.min.html'
          }
        }
      },

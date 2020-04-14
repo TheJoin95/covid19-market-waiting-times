@@ -1,14 +1,14 @@
-const API_DOMAIN_AVAILABLE = ['api-geo', 'api-geo-uk'];
+const API_DOMAIN_AVAILABLE = ['api-geo-fr', 'api-geo-ny'];
 const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
 const WaitingTimesAPI = {
   fallbackGeocodeAPI: 'https://nominatim.openstreetmap.org/search.php?q=%s&format=json',
-  geocodeAPI: 'https://' + API_DOMAIN + '.thejoin.tech/geocode?lat=%s&lng=%s',
+  geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
   geocodeAPIClient: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=%s,%s',
   // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
   logAPI: 'https://api-geo.thejoin.tech/logger',
   getPlaceByNameAPI: 'https://api-geo.thejoin.tech/places/get-by-name?q=%s&address=%s',
   // getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
-  getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s',
+  getPlacesAPI: 'https://'+API_DOMAIN+'.thejoin.tech/places/explore?q=%s&address=%s',
   getPlacesAPIFallback: 'https://api-geo-fr.thejoin.tech/places/explore-redis?q=%s&address=%s',
   searchSuggestAPI: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=%s&maxSuggestions=10&category=city,address&countryCode=&searchExtent=&location=&distance=&f=json',
   format: function(str) {
@@ -276,7 +276,7 @@ const TimesApp = {
     L.tileLayer(
       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
-        minZoom: 14,
+        minZoom: 13,
         attribution: 'Map data <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
       }
     ).addTo(TimesApp.lMap);
@@ -424,7 +424,7 @@ const TimesApp = {
   },
   getPharmacies: function() {
     console.log("Getting pharmacy");
-    TimesApp.getPlaces("pharmacy");
+    // TimesApp.getPlaces("pharmacy");
   },
   getPlace: function(q, address) {
     TimesApp.setLoading(true);
@@ -451,7 +451,7 @@ const TimesApp = {
       }));
   },
   getPlacesFallback: async function() {
-    const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI.replace('api-geo-fr', 'api-geo'), TimesApp.query, TimesApp.address);
+    const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI.replace('api-geo-fr', 'api-geo-uk').replace('api-geo-ny', 'api-geo-uk'), TimesApp.query, TimesApp.address);
     ga('send', 'event', 'Request', 'Places', TimesApp.address);
     fetch(fetchUrl)
       .then((r) => {
@@ -468,7 +468,7 @@ const TimesApp = {
     var useFallback = useFallback || false;
     TimesApp.setLoading(true);
     // const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng);
-    if (Math.floor(Math.random() * 16) == 10 || useFallback) {
+    if (useFallback) {
       var headers = new Headers();
       headers.append('x-geo-lat', TimesApp.lat);
       headers.append('x-geo-lng', TimesApp.lng);
@@ -484,8 +484,8 @@ const TimesApp = {
         .catch((r) => TimesApp.getPlacesFallback());
     } else {
       var placeUrl = WaitingTimesAPI.getPlacesAPI;
-      if (Math.floor(Math.random() * 16) == 10)
-        placeUrl = placeUrl.replace('api-geo-fr', 'api-geo-uk');
+      // if (Math.floor(Math.random() * 21) == 10)
+      //   placeUrl = placeUrl.replace('api-geo-fr', 'api-geo-uk');
 
       const fetchUrl = WaitingTimesAPI.format(placeUrl, query, TimesApp.address);
       ga('send', 'event', 'Request', 'Places', TimesApp.address);
@@ -553,16 +553,13 @@ const TimesApp = {
   updateAddress: async function(initMap) {
     initMap = initMap || true;
     TimesApp.setLoading(true);
-    var availableUrls = [
-      WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng),
-      WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat),
-      WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat),
-      WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat),
-      WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat)
-    ];
 
-    var keyUrl = Math.floor(Math.random() * availableUrls.length);
-    const fetchUrl = availableUrls[keyUrl];
+    var fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat);
+    var keyUrl = 1;
+    if (Math.floor(Math.random() * 9) == 5) {
+      keyUrl = 0;
+      fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng);
+    }
 
     var r = await fetch(fetchUrl);
     var json = {
@@ -598,7 +595,7 @@ const TimesApp = {
   },
   updateBound: async function(originLat, originLng) {
     TimesApp.setLoading(true);
-    for (var i = 0; i <= 360; i += 120) {
+    for (var i = 360; i <= 360; i += 120) {
       let destLatLng = Utils.destinationPoint(originLat, originLng, i, 2.5);
       TimesApp.lat = parseFloat(destLatLng[0]);
       TimesApp.lng = parseFloat(destLatLng[1]);
@@ -638,11 +635,15 @@ const TimesApp = {
   },
   sendHelp: function(message, email) {
     var email = email || "";
-    Utils.sendError({
-      message: message,
-      email: email,
-      help: true
-    });
+
+    if (message != '' || email != '') {
+      Utils.sendError({
+        message: message,
+        email: email,
+        help: true
+      });
+    }
+
     document.querySelector('.modal-content div.container').innerHTML = '<h2>Message sent, thank you!</h2>';
     setTimeout(function() {
       document.getElementById('help-modal').style.display = 'none';
@@ -663,10 +664,10 @@ const TimesApp = {
   },
   search: async function() {
     TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "");
-    TimesApp.setLoading(true);
     if (TimesApp.address === null)
       return false;
 
+    TimesApp.setLoading(true);
     if (TimesApp.address != "") {
       ga('send', 'event', 'Request', 'Search', TimesApp.address);
       const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
@@ -841,20 +842,20 @@ document.addEventListener('DOMContentLoaded', function() {
   if (localStorage.getItem('sended_review') !== 'yes') {
     setTimeout(function() {
       Utils.openModal('rating-modal', 'Please, take time to rate this project', `
-                                            <h4>Your feedback is very important to understand if the estimates are correct or not. Together we can build something useful!</h4>
-                                            <div class="rate">
-                                              <input type="radio" id="star5" name="rate" value="5">
-                                              <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star5" data-value="5" title="5 stars">5 stars</label>
-                                              <input type="radio" id="star4" name="rate" value="4">
-                                              <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star4" data-value="4" title="4 stars">4 stars</label>
-                                              <input type="radio" id="star3" name="rate" value="3">
-                                              <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star3" data-value="3" title="3 stars">3 stars</label>
-                                              <input type="radio" id="star2" name="rate" value="2">
-                                              <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star2" data-value="2" title="2 stars">2 stars</label>
-                                              <input type="radio" id="star1" name="rate" value="1">
-                                              <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star1" data-value="1" title="1 star">1 star</label>
-                                            </div>
-                                            `, -1);
+        <h4>Your feedback is very important to understand if the estimates are correct or not. Together we can build something useful!</h4>
+        <div class="rate">
+          <input type="radio" id="star5" name="rate" value="5">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star5" data-value="5" title="5 stars">5 stars</label>
+          <input type="radio" id="star4" name="rate" value="4">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star4" data-value="4" title="4 stars">4 stars</label>
+          <input type="radio" id="star3" name="rate" value="3">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star3" data-value="3" title="3 stars">3 stars</label>
+          <input type="radio" id="star2" name="rate" value="2">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star2" data-value="2" title="2 stars">2 stars</label>
+          <input type="radio" id="star1" name="rate" value="1">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star1" data-value="1" title="1 star">1 star</label>
+        </div>
+      `, -1);
     }, 100 * 1000);
   }
 });
