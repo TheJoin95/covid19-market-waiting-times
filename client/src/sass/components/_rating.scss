@@ -1,0 +1,71 @@
+.rate {
+  border-radius: 8px;
+  font-size: 20px;
+  padding: 8px;
+}
+
+input[type="radio"] {
+  box-shadow: none;
+}
+
+.rate {
+  height: auto;
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: auto;
+  /*align-items: flex-start;
+                          justify-content: flex-end;*/
+}
+
+.rate:not(:checked)>input {
+  position: relative;
+  margin-left: -29px;
+  top: 15px;
+  left: -5px;
+  width: 19px;
+  padding-right: 0px;
+  z-index: -10;
+}
+
+.rate:not(:checked)>label {
+  float: right;
+  width: 1em;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 3rem;
+  color: #ccc;
+  height: 3rem;
+}
+
+.rate:not(:checked)>label::before {
+  content: '★ ';
+  position: relative;
+  top: -15px;
+  left: 2px;
+}
+
+.rate>input:checked~label {
+  color: #ffc700;
+}
+
+.rate>input:checked:focus+label,
+.rate>input:focus+label {
+  outline: -webkit-focus-ring-color auto 5px;
+}
+
+.rate:not(:checked)>label:hover,
+.rate:not(:checked)>label:hover~label {
+  color: #deb217;
+}
+
+.rate>input:checked+label:hover,
+.rate>input:checked+label:hover~label,
+.rate>input:checked~label:hover,
+.rate>input:checked~label:hover~label,
+.rate>label:hover~input:checked~label {
+  color: #c59b08;
+}

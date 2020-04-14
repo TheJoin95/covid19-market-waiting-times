@@ -1,0 +1,104 @@
+@import 'global';
+
+#full-map {
+  width: 100%;
+  height: 200px;
+}
+
+.info {
+  padding: 6px 8px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+.info h4 {
+  margin: 0 0 5px;
+  color: #777;
+}
+
+.legend {
+  text-align: left;
+  line-height: 18px;
+  color: #555;
+}
+
+.legend i {
+  /*width: 18px;*/
+  /*height: 18px;*/
+  width: 16px;
+  height: 16px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.7;
+}
+
+
+/* SPINNER */
+
+@import 'components/spinner';
+
+// MODAL
+
+@import 'components/modal';
+
+
+// Loading
+
+@import 'components/loader';
+
+// Rating
+
+@import 'components/rating';
+
+
+div#help-button {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 10000;
+  border-radius: 50%;
+  text-align: center;
+  background: #ffc950;
+  font-size: 1.2em;
+  padding: 1em;
+  border: 1px solid #fcd25e;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+}
+
+div#search-button {
+  position: fixed;
+  bottom: 10px;
+  text-center: center;
+  right: 10px;
+  z-index: 10000;
+  border-radius: 50%;
+  background: #2780ca;
+  font-size: 1.2em;
+  padding: 1em;
+  border: 1px solid #35a9ff;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+}
+
+#banner {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  z-index: 10000;
+  background: #26a69a;
+  text-align: center;
+  color: #f2f2f2;
+  padding: 5px 0;
+}
+
+@media only screen and (max-width: 640px) {
+  div#search-button,
+  div#help-button {
+    padding: 0.5em;
+  }
+}
