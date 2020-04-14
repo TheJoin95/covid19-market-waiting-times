@@ -31,6 +31,30 @@ In fact, the same data that you would view on Google are used, i.e. the data wit
 
 Please, note that sometimes a place can have a parking area or other stuff where the geolocation can make some mistakes. I can not detect where the people are, if they are people or car, how many people are in the line etc etc. The estimates are based on the data that come from Google with an additional formula to get an approx time to wait. This error can change from a place to another.
 
+# Start the Flask server
+
+First of all you need to clone the repository on master branch.
+
+Then install python >= 3.5 and its dev packages.
+```
+apt-get update
+apt-get install python3-distutils python3.6 build-essential python3.6-dev
+```
+
+Then we can install the python package manager: pip.
+```
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python3.6 get-pip.py 
+```
+
+After installing pip, we need to install all these packages:
+```
+pip3.6 install flask flask-limiter flask-cors requests
+```
+
+Then we can start our dev server:
+`python3.6 server/index.py`
+
 # Other contributors
 Many thanks to [ptoone](https://github.com/ptoone), that run [thexyz](https://www.thexyz.com/) a secure, private email hosting service, for support the project by mantain a VPS in US/CA region.
 
