@@ -107,8 +107,10 @@ def get_places_from_google():
 			if (place["name"] == None):
 				continue
 
+			place_id = hashlib.md5((str(place["name"])+str(place["address"])+str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest()
+
 			obj = {
-				"place_id": hashlib.md5((str(place["location"]["lat"])+str(place["location"]["lng"])).encode("utf-8")).hexdigest(),
+				"place_id": place_id,
 				"formatted_address": place["address"],
 				"name": place["name"],
 				"types": place["categories"],
@@ -164,6 +166,7 @@ def get_places_from_google_redis():
 				continue
 			if (tmpPlace != None and ("populartimes" in tmpPlace)):
 				formattedPlaces.append(tmpPlace)
+				pushInQueue(tmpPlace["place_id"])
 			elif ("time_spent" in tmpPlace or "time_wait" in tmpPlace):
 				tmpPlaces.append(tmpPlace)
 		# if (len(tmpPlaces) > 0):
@@ -192,8 +195,10 @@ def get_places_from_google_redis():
 			if ("types" in place):
 				typesKey = "types"
 
+			place_id = hashlib.md5((str(place["name"])+str(place["address"])+str(place[locationKey]["lat"])+str(place[locationKey]["lng"])).encode("utf-8")).hexdigest()
+
 			obj = {
-				"place_id": hashlib.md5((str(place[locationKey]["lat"])+str(place[locationKey]["lng"])).encode("utf-8")).hexdigest(),
+				"place_id": place_id,
 				"formatted_address": place[addressKey],
 				"name": place["name"],
 				"types": place[typesKey],
@@ -228,6 +233,12 @@ def save_client_log():
 	return jsonify({"ok": 200})
 
 
+def pushInQueue (placeId):
+	global r
+	if (r.get('refresh:' + placeId) == None):
+		r.rpush('queue:places', placeId)
+		setKeyRedis('refresh:' + placeId, placeId, 60*10)
+
 def getPlaceFromRedis (key):
 	global r, rPersistence
 	place = r.get(key)
@@ -239,7 +250,7 @@ def getPlaceFromRedis (key):
 
 	return place
 
-def getPlaceInRadius (lat, lng, distance=20):
+def getPlaceInRadius (lat, lng, distance=15):
 	global r
 	return r.georadius(
 		"places",
@@ -248,7 +259,7 @@ def getPlaceInRadius (lat, lng, distance=20):
 		distance,
 		unit="km",
 		withdist=False,
-		count=180,
+		count=150,
 		sort="ASC"
 	)
 
