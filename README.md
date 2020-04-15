@@ -56,6 +56,7 @@ Then we can start our dev server:
 `python3.6 server/index.py`
 
 # Other contributors
+[danieldafoe](https://github.com/danieldafoe) for helping me on the frontend side.
 Many thanks to [ptoone](https://github.com/ptoone), that run [thexyz](https://www.thexyz.com/) a secure, private email hosting service, for support the project by mantain a VPS in US/CA region.
 
 # TODO
