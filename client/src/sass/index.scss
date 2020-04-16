@@ -57,11 +57,13 @@
 @import 'components/rating';
 
 $circle-btn-vars: (
-  size: 55px
+  size: 5rem
 );
 
 #search-button,
-#help-button {
+#help-button,
+#search-place-button,
+#info-button {
   border-radius: 50%;
   box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.2);
   cursor: pointer;
@@ -71,10 +73,19 @@ $circle-btn-vars: (
   right: 10px;
   text-align: center;
   width: map-get($map: $circle-btn-vars, $key: size);
-  z-index: 10000;
+  z-index: 999;
 
   span {
-    font-size: 3.5rem;
+    font-size: 2.5rem;
+    line-height: 5rem;
+  }
+}
+
+#info-button {
+  span {
+    font-size: 2.5rem;
+    line-height: 3.5rem;
+    color: #2780ca;
   }
 }
 
@@ -90,8 +101,24 @@ $circle-btn-vars: (
   border: 1px solid #35a9ff;
 }
 
+#search-place-button {
+  bottom: 7rem;
+  background: #2780ca;
+  border: 1px solid #35a9ff;
+}
+
+#info-button {
+  top: 7rem;
+  background: #ffffff;
+  left: 5px;
+  width: 3.5rem;
+  height: 3.5rem;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+}
+
 #banner {
   position: absolute;
+  display: none;
   bottom: 0;
   width: 100%;
   z-index: 10000;
@@ -103,7 +130,16 @@ $circle-btn-vars: (
 
 @media only screen and (max-width: 640px) {
   div#search-button,
+  div#search-place-button,
   div#help-button {
-    padding: 0.5em;
+    padding: 0.4em;
+
+    span {
+      font-size: 2.5rem;
+      line-height: 3rem;
+    }
+  }
+  .modal {
+    padding-top: 2rem;
   }
 }

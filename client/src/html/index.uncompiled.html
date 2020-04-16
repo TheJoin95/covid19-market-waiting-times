@@ -10,8 +10,10 @@
   <div class="progress" id="top-progress-bar">
     <div class="indeterminate"></div>
   </div>
-  <div id="help-button" onclick="TimesApp.showModalHelp();"><span>❓</span></div>
-  <div id="search-button" onclick="TimesApp.search();"><span>🔍</span></div>
+  <div id="info-button" onclick="Utils.showWelcomeModal();"><span>🛈</span></div>
+  <div id="help-button" onclick="TimesApp.showModalHelp();"><span>&#x2753;</span></div>
+  <div id="search-place-button" onclick="Utils.searchByNameModal();"><span>&#128722;</span></div>
+  <div id="search-button" onclick="TimesApp.search();"><span>&#x1F50E;</span></div>
   <!-- build:include partials/loader.html --><!-- /build -->
   <div id="full-map"></div>
   <!-- build:include partials/footer.html --><!-- /build -->

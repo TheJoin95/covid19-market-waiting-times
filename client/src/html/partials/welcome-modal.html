@@ -1,25 +1,52 @@
-<div id='welcome-modal' class='welcome-modal' role='dialog' aria-modal='true' tabindex='-1'>
-  <div class='welcome-modal__window'>
-    <h1 class='welcome-modal__title'>Welcome, social distancer! 👋</h1>
-    <div class='welcome-modal__body'>
+<div id="welcome-modal" class="welcome-modal" role="dialog" aria-modal="true" tabindex="-1">
+  <div class="welcome-modal__window">
+    <button type="button" class="close-button display-topright" onclick="Utils.hideWelcomeModal();">×</button>
+    <h1 class="welcome-modal__title">Welcome, social distancer! 👋</h1>
+    <div class="welcome-modal__body">
+      <div class="welcome-modal__helper">
+        <p class="d-block text-left">
+          <a class="btn btn--info" href="https://github.com/TheJoin95/covid19-market-waiting-times/blob/master/FAQ.md" target="_blank">
+            <span class="info-color">🛈</span> FAQ
+          </a>
+        </p>
+        <p class="pull-right">
+          <a class="btn btn--info" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LDJAYNBVGBZHS&source=url" target="_blank">
+            <span class="heart-color">❤</span> <b>Sponsor</b>
+          </a>
+        </p>
+      </div>
       <p>
-        To help you stay safe during the COVID-19 pandemic, we’ve created this tool to tell you the
-        estimated wait time of line-ups at your local supermarkets and pharmacies.
+        To help you stay safe during the COVID-19 pandemic, we"ve created this tool to tell you the
+        estimated wait time of line-ups at your local supermarkets, grocery store, pharmacies and other place of interest.
       </p>
       <p>
-        Each market and pharmacy is indicated by a marker on the map; the average wait time is
+        Each place is indicated by a marker on the map; the estimated wait time is
         indicated by the colour of the marker. The legend tells you the wait time indicated by each
         coloured marker.
       </p>
       <p>
         Less line-ups, more safety.
       </p>
-    </div>
-    <div class='welcome-modal__actions'>
-      <button type='button' class='btn btn--primary' onclick='hideWelcomeModal()'>
-        Get Started
-      </button>
+      <div class="welcome-modal__actions">
+        <button type="button" class="btn btn--primary" onclick="Utils.hideWelcomeModal()">
+          Get Started
+        </button>
+      </div>
+      <p>
+        This is an <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank"><b>open-source tool</b></a>
+        made with <span class="heart-color">❤</span> in Florence.
+        Any help or feedback is appreciated.
+      </p>
+      <p>
+        Due to the high traffic volume, the map may be slow and may not show some places.
+        Any bug fix or feature request please 
+        <a href="https://github.com/TheJoin95/covid19-market-waiting-times/issues" target="_blank"><b>report here</b></a>.
+        Thank you.
+      </p>
+      <center>
+        <i><small>The waiting times are estimated</small></i>
+      </center>
     </div>
   </div>
-  <div class='welcome-modal__overlay'></div>
+  <div class="welcome-modal__overlay"></div>
 </div>
