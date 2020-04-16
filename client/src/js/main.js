@@ -27,57 +27,6 @@ Number.prototype.toDeg = function() {
   return this * 180 / Math.PI;
 }
 
-
-
-// DOMContentLoaded
-
-document.addEventListener('DOMContentLoaded', function () {
-  console.log(shouldShowWelcomeModal());
-  if (shouldShowWelcomeModal()) {
-    showWelcomeModal();
-  }
-
-  const mapEl = document.getElementById('full-map');
-  mapEl.style.height = window.innerHeight - 50 + 'px';
-
-  TimesApp.toggleSpinner();
-
-  Utils.getAccurateCurrentPosition(
-    TimesApp.geoSuccess,
-    TimesApp.geoError,
-    function (p) {
-      console.log(p);
-    }, {
-    desiredAccuracy: 100,
-    maxWait: 8000
-  }
-  );
-
-  setTimeout(function () {
-    document.getElementById('banner').style.display = "none";
-  }, 40 * 1000);
-
-  if (localStorage.getItem('sended_review') !== 'yes') {
-    setTimeout(function () {
-      Utils.openModal('rating-modal', 'Please, take time to rate this project', `
-        <h4>Your feedback is very important to understand if the estimates are correct or not. Together we can build something useful!</h4>
-        <div class="rate">
-          <input type="radio" id="star5" name="rate" value="5">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star5" data-value="5" title="5 stars"><span class='sr-only'>5 stars</span></label>
-          <input type="radio" id="star4" name="rate" value="4">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star4" data-value="4" title="4 stars"><span class='sr-only'>4 stars</span></label>
-          <input type="radio" id="star3" name="rate" value="3">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star3" data-value="3" title="3 stars"><span class='sr-only'>3 stars</span></label>
-          <input type="radio" id="star2" name="rate" value="2">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star2" data-value="2" title="2 stars"><span class='sr-only'>2 stars</span></label>
-          <input type="radio" id="star1" name="rate" value="1">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star1" data-value="1" title="1 star"><span class='sr-only'>1 star</span></label>
-        </div>
-      `, -1);
-    }, 100 * 1000);
-  }
-});
-
 // Lat, Lng, Angle, Range in Km => get point of destination
 // usage: destinationPoint(43.81, 11.13, 90, 10)
 const Utils = {
@@ -124,8 +73,36 @@ const Utils = {
   getDefaultLocation: function() {
     return JSON.parse(localStorage.getItem("defaultLocation"));
   },
+  shouldShowWelcomeModal: function () {
+    var hasSeenWelcomeModal = window.localStorage.getItem("hasSeenWelcomeModal");
+
+    if (hasSeenWelcomeModal) {
+      return hasSeenWelcomeModal === 'true' ? false : true;
+    }
+
+    return true;
+  },
+  showWelcomeModal: function () {
+    var welcomeModal = document.getElementById('welcome-modal');
+    welcomeModal.classList.add('show');
+    welcomeModal.focus();
+
+    if (TimesApp.lMap !== null) {
+      document.querySelector('.welcome-modal__actions').style.display = "none";
+    }
+  },
+  hideWelcomeModal: function () {
+    var welcomeModal = document.getElementById("welcome-modal");
+    welcomeModal.classList.remove("show");
+    if (TimesApp.lMap === null) {
+      window.localStorage.setItem('hasSeenWelcomeModal', 'true');
+      TimesApp.initGeodata();
+    }
+  },
   searchByNameModal: function() {
-    document.body.removeChild(document.querySelector('.modal'));
+    if (document.querySelector('.modal') !== null)
+      document.body.removeChild(document.querySelector('.modal'));
+    
     Utils.openModal(
       "search-modal",
       "Search by name and address",
@@ -349,7 +326,7 @@ const TimesApp = {
       clearTimeout(Utils.updateTimeout);
       let center = TimesApp.lMap.getCenter();
       console.log("new center ", center.toString());
-
+      console.log(e.type);
       if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 3 || e.type == 'zoomend') {
         TimesApp.lat = parseFloat(center.lat);
         TimesApp.lng = parseFloat(center.lng);
@@ -385,7 +362,7 @@ const TimesApp = {
   },
   showLegend: function() {
     var legend = L.control({
-      position: 'bottomright'
+      position: 'bottomleft'
     });
 
     legend.onAdd = function(map) {
@@ -395,6 +372,10 @@ const TimesApp = {
         labels = [],
         from, to;
 
+      labels.push(
+        '<i style="background: #3f8ee2"></i> No info'
+      );
+      
       for (var i = 0; i < grades.length; i++) {
         from = grades[i];
         to = grades[i + 1];
@@ -665,6 +646,7 @@ const TimesApp = {
       await new Promise(resolve => setTimeout(resolve, 3000));
       await TimesApp.updateAddress(-1);
     }
+    TimesApp.setLoading(false);
   },
   geoSuccess: async function(position) {
     if (position === undefined) {
@@ -857,6 +839,19 @@ const TimesApp = {
           .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));*/
     }
   },
+  initGeodata: function () {
+    TimesApp.toggleSpinner();
+    Utils.getAccurateCurrentPosition(
+      TimesApp.geoSuccess,
+      TimesApp.geoError,
+      function (p) {
+        console.log(p);
+      }, {
+        desiredAccuracy: 100,
+        maxWait: 8000
+      }
+    );
+  },
   toggleSpinner: function() {
     const spinnerEl = document.getElementById('loading');
     let displayProp = 'block';
@@ -866,6 +861,44 @@ const TimesApp = {
     spinnerEl.style.display = displayProp;
   }
 };
+
+
+// DOMContentLoaded
+
+document.addEventListener('DOMContentLoaded', function () {
+  if (Utils.shouldShowWelcomeModal()) {
+    Utils.showWelcomeModal();
+  } else {
+    TimesApp.initGeodata();
+  }
+
+  const mapEl = document.getElementById('full-map');
+  mapEl.style.height = window.innerHeight + 'px';
+
+  // setTimeout(function () {
+  //   document.getElementById('banner').style.display = "none";
+  // }, 30 * 1000);
+
+  if (localStorage.getItem('sended_review') !== 'yes') {
+    setTimeout(function () {
+      Utils.openModal('rating-modal', 'Please, take time to rate this project', `
+        <h4>Your feedback is very important to understand if the estimates are correct or not. Together we can build something useful!</h4>
+        <div class="rate">
+          <input type="radio" id="star5" name="rate" value="5">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star5" data-value="5" title="5 stars"><span class='sr-only'>5 stars</span></label>
+          <input type="radio" id="star4" name="rate" value="4">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star4" data-value="4" title="4 stars"><span class='sr-only'>4 stars</span></label>
+          <input type="radio" id="star3" name="rate" value="3">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star3" data-value="3" title="3 stars"><span class='sr-only'>3 stars</span></label>
+          <input type="radio" id="star2" name="rate" value="2">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star2" data-value="2" title="2 stars"><span class='sr-only'>2 stars</span></label>
+          <input type="radio" id="star1" name="rate" value="1">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star1" data-value="1" title="1 star"><span class='sr-only'>1 star</span></label>
+        </div>
+      `, -1);
+    }, 120 * 1000);
+  }
+});
 
 window.onerror = function(errorMessage, errorUrl, errorLine) {
 
@@ -908,28 +941,4 @@ try {
   navigator.serviceWorker.register('sw.js');
 } catch (e) {
   console.log(e);
-}
-
-// Welcome Banner Modal
-
-function shouldShowWelcomeModal() {
-  var hasSeenWelcomeModal = window.localStorage.getItem("hasSeenWelcomeModal");
-
-  if (hasSeenWelcomeModal) {
-    return hasSeenWelcomeModal === 'true' ? false : true;
-  }
-
-  return true;
-}
-
-function showWelcomeModal() {
-  window.localStorage.setItem('hasSeenWelcomeModal', 'true');
-  var welcomeModal = document.getElementById('welcome-modal');
-  welcomeModal.classList.add('show');
-  welcomeModal.focus();
-}
-
-function hideWelcomeModal() {
-  var welcomeModal = document.getElementById("welcome-modal");
-  welcomeModal.classList.remove("show");
 }
