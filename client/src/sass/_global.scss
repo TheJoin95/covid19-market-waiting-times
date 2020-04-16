@@ -1,8 +1,15 @@
+* {
+  box-sizing: border-box;
+}
+
 html {
   font-family: 'Raleway', sans-serif;
+  font-size: 62.5%;
 }
 
 body {
+  font-size: 1.6em;
+  line-height: 1.45;
   margin: 0;
 }
 
@@ -16,3 +23,6 @@ input[type=text] {
   outline: none;
   box-sizing: border-box;
 }
+
+// Buttons
+@import 'components/button';
