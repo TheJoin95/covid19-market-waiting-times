@@ -6,6 +6,22 @@ It is an open source project and it will be always in free to use.
 In the area where I live (Florence, Italy) it saves me (and other thousands people) a lot of time by selecting the best time to go at the supermarket.
 It could may be not too much accurate, but give it a chance.
 
+- [How do you get the data / waiting times?](#how-do-you-get-the-data--waiting-times)
+- [Why use your map instead of Googling the place?](#why-use-your-map-instead-of-googling-the-place)
+- [Where your map will work?](#where-your-map-will-work)
+- [Is there an accessible version of the site?](#is-there-an-accessible-version-of-the-site)
+- [How can I save the map on my home screen? Why I can not download it from the App Store?](#how-can-i-save-the-map-on-my-home-screen-why-i-can-not-download-it-from-the-app-store)
+- [Do you store any sensible data?](#do-you-store-any-sensible-data)
+- [Do you follow me with GPS?](#do-you-follow-me-with-gps)
+- [I activated the GPS but the map is still positioning in another area](#i-activated-the-gps-but-the-map-is-still-positioning-in-another-area)
+- [What are the button meaning?](#what-are-the-button-meaning)
+- [I can not find my place, how can I do?](#i-can-not-find-my-place-how-can-i-do)
+- [Are also grocery stores included? What are the place categories included?](#are-also-grocery-stores-included-what-are-the-place-categories-included)
+- [I still can not find my place, can you add it, please?](#i-still-can-not-find-my-place-can-you-add-it-please)
+- [I would like to submit a feature request, how can I do?](#i-would-like-to-submit-a-feature-request-how-can-i-do)
+- [I found a bug, how can I tell you?](#i-would-like-to-submit-a-feature-request-how-can-i-do)
+- [I would like to support you, how can I do it?](#i-would-like-to-submit-a-feature-request-how-can-i-do)
+
 ## How do you get the data / waiting times?
 
 The data comes from Google, like Traffic for Maps, in real time. The data are also based on the data of the past week, to have a history (Google based), the time spent inside a place and the estimated waiting time to be able to complete the purchase.
