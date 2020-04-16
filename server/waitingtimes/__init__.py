@@ -33,7 +33,7 @@ def get_places_from_here(query):
     retrieve a list of places
     {
         "types": ["food-drink", "pharmacy", "post-office", "postal-area"],
-        "accepted-place-type": ["bakery", "bank", "bar", "cafe", "doctor", "drugstore", "food", "health", "hospital", "meal_delivery", "meal_takeaway", "pharmacy", "post_office", "postal_code", "postal_town", "restaurant", "shopping_mall", "supermarket", "grocery_store", "discount_supermarket", "supermarket", "grocery"],
+        "accepted-place-type": ["bakery", "liquor_store", "bank", "bar", "cafe", "doctor", "drugstore", "food", "health", "hospital", "meal_delivery", "meal_takeaway", "pharmacy", "post_office", "postal_code", "postal_town", "restaurant", "shopping_mall", "supermarket", "grocery_store", "discount_supermarket", "supermarket", "grocery"],
         "location": {
             "lat": 43.33,
             "lng": 11.23
