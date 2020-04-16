@@ -414,8 +414,9 @@ const TimesApp = {
       waitTimes = place["time_wait"][weekDay]["data"][hour];
 
     popTimes = place["populartimes"][weekDay]["data"][hour];
-
-
+    if ((new Date()).getMinutes() >= 40 && place["populartimes"][weekDay]["data"][hour+1] !== undefined && place["populartimes"][weekDay]["data"][hour+1] != 0)
+      popTimes = Math.floor((popTimes + place["populartimes"][weekDay]["data"][hour+1]) / 2);
+    
     var meanIntersectPop = 0;
 
     const diffPopTimes = (popTimes - cPopularity);
