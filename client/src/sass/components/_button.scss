@@ -1,0 +1,28 @@
+$btn-vars: (
+  radius: 4px,
+  primary-bg: #2F735A,
+  primary-bg-active: #094030,
+  primary-fg: #fff,
+);
+
+.btn {
+  border: 0;
+  border-radius: map-get($map: $btn-vars, $key: radius);
+  cursor: pointer;
+  font-size: 1.6rem;
+  padding: 1rem;
+  min-height: 50px;
+  min-width: 150px;
+  transition: 150ms ease background-color;
+
+  &--primary {
+    background-color: map-get($map: $btn-vars, $key: primary-bg);
+    color: map-get($map: $btn-vars, $key: primary-fg);
+
+    &:active,
+    &:focus,
+    &:hover {
+      background-color: map-get($map: $btn-vars, $key: primary-bg-active);
+    }
+  }
+}

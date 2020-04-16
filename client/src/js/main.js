@@ -27,6 +27,57 @@ Number.prototype.toDeg = function() {
   return this * 180 / Math.PI;
 }
 
+
+
+// DOMContentLoaded
+
+document.addEventListener('DOMContentLoaded', function () {
+  console.log(shouldShowWelcomeModal());
+  if (shouldShowWelcomeModal()) {
+    showWelcomeModal();
+  }
+
+  const mapEl = document.getElementById('full-map');
+  mapEl.style.height = window.innerHeight - 50 + 'px';
+
+  TimesApp.toggleSpinner();
+
+  Utils.getAccurateCurrentPosition(
+    TimesApp.geoSuccess,
+    TimesApp.geoError,
+    function (p) {
+      console.log(p);
+    }, {
+    desiredAccuracy: 100,
+    maxWait: 8000
+  }
+  );
+
+  setTimeout(function () {
+    document.getElementById('banner').style.display = "none";
+  }, 40 * 1000);
+
+  if (localStorage.getItem('sended_review') !== 'yes') {
+    setTimeout(function () {
+      Utils.openModal('rating-modal', 'Please, take time to rate this project', `
+        <h4>Your feedback is very important to understand if the estimates are correct or not. Together we can build something useful!</h4>
+        <div class="rate">
+          <input type="radio" id="star5" name="rate" value="5">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star5" data-value="5" title="5 stars"><span class='sr-only'>5 stars</span></label>
+          <input type="radio" id="star4" name="rate" value="4">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star4" data-value="4" title="4 stars"><span class='sr-only'>4 stars</span></label>
+          <input type="radio" id="star3" name="rate" value="3">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star3" data-value="3" title="3 stars"><span class='sr-only'>3 stars</span></label>
+          <input type="radio" id="star2" name="rate" value="2">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star2" data-value="2" title="2 stars"><span class='sr-only'>2 stars</span></label>
+          <input type="radio" id="star1" name="rate" value="1">
+          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star1" data-value="1" title="1 star"><span class='sr-only'>1 star</span></label>
+        </div>
+      `, -1);
+    }, 100 * 1000);
+  }
+});
+
 // Lat, Lng, Angle, Range in Km => get point of destination
 // usage: destinationPoint(43.81, 11.13, 90, 10)
 const Utils = {
@@ -112,7 +163,8 @@ const Utils = {
 
     containerContentDiv.innerHTML = content || '<p>Did not find what you were looking for? <br/><u style="cursor: pointer" onclick="Utils.searchByNameModal()">Tap here to search by name 🔍</u></p><input type="text" id="email" placeholder="Insert an email for an answer or leave blank" /><textarea placeholder="Write here your question or tips" rows="7"></textarea><small><i>Note: this is not a search box</i></small>';
 
-    var buttonM = document.createElement("span");
+    var buttonM = document.createElement("button");
+    buttonM.setAttribute("type", "button");
     buttonM.className = 'close-button display-topright';
     buttonM.setAttribute("onclick", "document.getElementById('" + id + "').style.display='none'");
     buttonM.innerHTML = "&times;";
@@ -122,11 +174,12 @@ const Utils = {
     headerM.innerHTML = h2;
     headerModal.appendChild(headerM);
 
-    var footer = document.createElement('footer');
+    var footer = document.createElement('div');
     footer.className = 'container teal';
     innerdivModalm.appendChild(footer);
 
-    var closeButton = document.createElement("span");
+    var closeButton = document.createElement("button");
+    closeButton.setAttribute('type', 'button');
     closeButton.className = 'btn';
     if (actionText !== -1)
       closeButton.style.float = "right";
@@ -141,7 +194,8 @@ const Utils = {
     footer.appendChild(closeButton);
 
     if (actionText !== -1) {
-      var actionButton = document.createElement("span");
+      var actionButton = document.createElement("button");
+      actionButton.setAttribute("type", "button");
       actionButton.className = 'btn';
       if (actionFn === undefined) {
         actionButton.setAttribute("onclick", "TimesApp.sendHelp(document.querySelector('.modal-content textarea').value, document.querySelector('.modal-content #email').value)");
@@ -820,48 +874,6 @@ window.onerror = function(errorMessage, errorUrl, errorLine) {
   Utils.sendError(requestBody);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  const mapEl = document.getElementById('full-map');
-  mapEl.style.height = window.innerHeight - 50 + 'px';
-
-  TimesApp.toggleSpinner();
-
-  Utils.getAccurateCurrentPosition(
-    TimesApp.geoSuccess,
-    TimesApp.geoError,
-    function(p) {
-      console.log(p);
-    }, {
-      desiredAccuracy: 100,
-      maxWait: 8000
-    }
-  );
-
-  setTimeout(function() {
-    document.getElementById('banner').style.display = "none";
-  }, 40 * 1000);
-
-  if (localStorage.getItem('sended_review') !== 'yes') {
-    setTimeout(function() {
-      Utils.openModal('rating-modal', 'Please, take time to rate this project', `
-        <h4>Your feedback is very important to understand if the estimates are correct or not. Together we can build something useful!</h4>
-        <div class="rate">
-          <input type="radio" id="star5" name="rate" value="5">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star5" data-value="5" title="5 stars">5 stars</label>
-          <input type="radio" id="star4" name="rate" value="4">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star4" data-value="4" title="4 stars">4 stars</label>
-          <input type="radio" id="star3" name="rate" value="3">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star3" data-value="3" title="3 stars">3 stars</label>
-          <input type="radio" id="star2" name="rate" value="2">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star2" data-value="2" title="2 stars">2 stars</label>
-          <input type="radio" id="star1" name="rate" value="1">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star1" data-value="1" title="1 star">1 star</label>
-        </div>
-      `, -1);
-    }, 100 * 1000);
-  }
-});
-
 window.addEventListener('appinstalled', function() {
   ga('send', 'event', 'PWA', 'Installed', 'true');
   Utils.sendError({
@@ -890,4 +902,28 @@ try {
   navigator.serviceWorker.register('sw.js');
 } catch (e) {
   console.log(e);
+}
+
+// Welcome Banner Modal
+
+function shouldShowWelcomeModal() {
+  var hasSeenWelcomeModal = window.localStorage.getItem("hasSeenWelcomeModal");
+
+  if (hasSeenWelcomeModal) {
+    return hasSeenWelcomeModal === 'true' ? false : true;
+  }
+
+  return true;
+}
+
+function showWelcomeModal() {
+  window.localStorage.setItem('hasSeenWelcomeModal', 'true');
+  var welcomeModal = document.getElementById('welcome-modal');
+  welcomeModal.classList.add('show');
+  welcomeModal.focus();
+}
+
+function hideWelcomeModal() {
+  var welcomeModal = document.getElementById("welcome-modal");
+  welcomeModal.classList.remove("show");
 }

@@ -32,11 +32,10 @@ input[type="radio"] {
 
 .rate:not(:checked)>label {
   float: right;
-  width: 1em;
-  overflow: hidden;
+  width: 1.2em;
   white-space: nowrap;
   cursor: pointer;
-  font-size: 3rem;
+  font-size: 4rem;
   color: #ccc;
   height: 3rem;
 }

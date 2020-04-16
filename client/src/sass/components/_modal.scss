@@ -1,3 +1,7 @@
+$modal-vars: (
+  btn-fg: #fff
+);
+
 .modal {
   z-index: 100000;
   display: none;
@@ -43,7 +47,10 @@
   background-color: #009688!important;
 }
 
-.container,
+.container {
+  padding: 1rem;
+}
+
 .panel {
   padding: 0.01em 16px;
 }
@@ -70,10 +77,9 @@
 }
 
 .modal-content .btn {
-  padding: 10px 10px;
   background: #028276;
-  margin: 10px;
-  display: inline-block;
-  cursor: pointer;
-  border-radius: 5px;
+  color: map-get($map: $modal-vars, $key: btn-fg);
+  // display: inline-block;
+  // margin: 10px;
+  // padding: 10px 10px;
 }
