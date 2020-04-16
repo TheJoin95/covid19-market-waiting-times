@@ -62,6 +62,8 @@ Many thanks to [ptoone](https://github.com/ptoone), that run [thexyz](https://ww
 # TODO
 
 - Add search input in an overlay
+- Add update time in popup marker **in progress**
+- Get geoip information to searh place in region **in progress**
 - Add a sidebar to list all the visible places
 - Add a sort of cache on the backend (e.g. Redis with Geopos operator) **testing**
 - Add a way to store the place data to prevent an overload on the requested resource **in progress**
