@@ -79,6 +79,8 @@ Many thanks to [ptoone](https://github.com/ptoone), that run [thexyz](https://ww
 - Add on marker popup a form for user feedback about lines
 - Add a modal or a splashscreen giving info about the project
 - Change modal asking the geodata/search
+- change way to search store
+- guarantee accessibility
 
 
 # Credits

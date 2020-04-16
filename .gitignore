@@ -1,5 +1,6 @@
 # npm
 client/node_modules
+client/.sass-cache
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

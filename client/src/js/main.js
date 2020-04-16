@@ -239,6 +239,7 @@ const Utils = {
 };
 
 const TimesApp = {
+  startBoundIndex: 361,
   lat: null,
   lng: null,
   address: "",
@@ -281,7 +282,7 @@ const TimesApp = {
       }
     ).addTo(TimesApp.lMap);
 
-    TimesApp.lMap.zoomControl.remove()
+    // TimesApp.lMap.zoomControl.remove();
 
     TimesApp.myPosition = L.circle([TimesApp.lat, TimesApp.lng], {
       color: '#0696c1',
@@ -290,16 +291,17 @@ const TimesApp = {
       radius: 50
     }).bindPopup("Your position").addTo(TimesApp.lMap);
 
-    TimesApp.lMap.on("moveend", async function() {
+    TimesApp.lMap.on("moveend zoomend", async function(e) {
       clearTimeout(Utils.updateTimeout);
       let center = TimesApp.lMap.getCenter();
       console.log("new center ", center.toString());
 
-      if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 3) {
+      if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 3 || e.type == 'zoomend') {
         TimesApp.lat = parseFloat(center.lat);
         TimesApp.lng = parseFloat(center.lng);
         Utils.updateTimeout = setTimeout(async function() {
           await TimesApp.updateAddress(-1);
+          TimesApp.getPlaces(null, true);
           await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
           TimesApp.getPharmacies();
         }, 1000);
@@ -383,7 +385,7 @@ const TimesApp = {
 
     const diffPopTimes = (popTimes - cPopularity);
     var increase = (popTimes > 0) ? meanTimeSpent : 0;
-    if (cPopularity !== 0 && waitTimes > 0) {
+    if (cPopularity !== 0) {
       if ((popTimes / cPopularity) <= 2.95) {
         if (diffPopTimes <= 0) {
           increase = maxTimeSpent + (Math.ceil((cPopularity / 2) / 5) * 5);
@@ -426,7 +428,7 @@ const TimesApp = {
   },
   getPharmacies: function() {
     console.log("Getting pharmacy");
-    TimesApp.getPlaces("pharmacy");
+    // TimesApp.getPlaces("pharmacy");
   },
   getPlace: function(q, address) {
     TimesApp.setLoading(true);
@@ -482,7 +484,11 @@ const TimesApp = {
         .then((r) => {
           if (r.ok) return r.json();
         })
-        .then((places) => TimesApp.setPlaceOnMap(places))
+        .then((places) => {
+          TimesApp.startBoundIndex = places.length <= 40 ? 120 : 361;
+          TimesApp.setPlaceOnMap(places);
+          TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
+        })
         .catch((r) => TimesApp.getPlacesFallback());
     } else {
       var placeUrl = WaitingTimesAPI.getPlacesAPI;
@@ -558,7 +564,7 @@ const TimesApp = {
 
     var fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat);
     var keyUrl = 1;
-    if (Math.floor(Math.random() * 9) == 5) {
+    if (Math.floor(Math.random() * 15) == 5) {
       keyUrl = 0;
       fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng);
     }
@@ -597,7 +603,7 @@ const TimesApp = {
   },
   updateBound: async function(originLat, originLng) {
     TimesApp.setLoading(true);
-    for (var i = 0; i <= 360; i += 120) {
+    for (var i = 361; i <= 360; i += 120) {
       let destLatLng = Utils.destinationPoint(originLat, originLng, i, 2.5);
       TimesApp.lat = parseFloat(destLatLng[0]);
       TimesApp.lng = parseFloat(destLatLng[1]);
@@ -748,7 +754,7 @@ const TimesApp = {
             geoError: true,
             message: json["error"]
           });
-          TimesApp.search();
+          TimesApp.geoError();
         }, 2000);
         return false;
       }
