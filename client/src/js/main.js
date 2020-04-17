@@ -109,6 +109,11 @@ const Utils = {
       '<input type="text" placeholder="Insert market or place name" id="place"><input type="text" placeholder="Insert address or city" id="address">',
       "Search",
       function searchByName() {
+        if (document.getElementById('place').value == '' || document.getElementById('address').value == '') {
+          alert("Please, specify a place name and a place address.");
+          return false;
+        }
+
         TimesApp.getPlace(
           document.getElementById('place').value,
           document.getElementById('address').value
@@ -565,6 +570,15 @@ const TimesApp = {
         message = "<i>Closed</i><br/>" + message;
       }
 
+      if (places[key]["updatetime"] !== undefined) {
+        var date = new Date(places[key]["updatetime"] * 1000);
+        var hours = date.getHours();
+        var minutes = "0" + date.getMinutes();
+        var seconds = "0" + date.getSeconds();
+        var formattedTime = hours + ':' + minutes.substr(-2);
+        message += " - <i>Last update at</i> " + formattedTime;
+      }
+      
       var icon = (typeof(waitTime) === 'string' && colors[0] != '7') ? TimesApp.icons[8] : TimesApp.icons[colors[0]];
 
       const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {
