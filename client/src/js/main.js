@@ -6,7 +6,7 @@ const WaitingTimesAPI = {
   geocodeAPIClient: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=%s,%s',
   // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
   logAPI: 'https://api-geo.thejoin.tech/logger',
-  getPlaceByNameAPI: 'https://api-geo.thejoin.tech/places/get-by-name?q=%s&address=%s',
+  getPlaceByNameAPI: 'https://api-geo-ny.thejoin.tech/places/get-by-name?q=%s&address=%s',
   // getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
   getPlacesAPI: 'https://'+API_DOMAIN+'.thejoin.tech/places/explore?q=%s&address=%s',
   getPlacesAPIFallback: 'https://api-geo-fr.thejoin.tech/places/explore-redis?q=%s&address=%s',
@@ -423,12 +423,11 @@ const TimesApp = {
       popTimes = Math.floor((popTimes + place["populartimes"][weekDay]["data"][hour+1]) / 2);
     
     var meanIntersectPop = 0;
-
     const diffPopTimes = (popTimes - cPopularity);
     var increase = (popTimes > 0) ? meanTimeSpent : 0;
     if (cPopularity !== 0) {
       if ((popTimes / cPopularity) <= 3.3) {
-        if (diffPopTimes <= 0) {
+        if (diffPopTimes <= 0 && waitTime > 10) {
           increase = maxTimeSpent + (Math.ceil((cPopularity / 2) / 5) * 5);
         } else if (diffPopTimes > 0 && diffPopTimes < (popTimes / 5)) {
           increase = meanTimeSpent;
@@ -437,7 +436,7 @@ const TimesApp = {
         } else if (diffPopTimes > (popTimes / 2.9) && diffPopTimes <= (popTimes / 1.8)) {
           increase = (Math.ceil((minTimeSpent / 2) / 5) * 5);
         } else if (diffPopTimes > (popTimes / 1.8) && diffPopTimes <= (popTimes / 1.5)) {
-          increase = (Math.ceil((minTimeSpent / 2) / 5) * 5);
+          increase = (Math.ceil((minTimeSpent / 3) / 5) * 5);
         } else if (diffPopTimes > (popTimes / 1.5)) {
           increase = 0;
           waitTimes = (Math.ceil((waitTimes * 20 / 100) / 5) * 5);
