@@ -427,7 +427,7 @@ const TimesApp = {
     const diffPopTimes = (popTimes - cPopularity);
     var increase = (popTimes > 0) ? meanTimeSpent : 0;
     if (cPopularity !== 0) {
-      if ((popTimes / cPopularity) <= 2.95) {
+      if ((popTimes / cPopularity) <= 3.3) {
         if (diffPopTimes <= 0) {
           increase = maxTimeSpent + (Math.ceil((cPopularity / 2) / 5) * 5);
         } else if (diffPopTimes > 0 && diffPopTimes < (popTimes / 5)) {
@@ -436,12 +436,14 @@ const TimesApp = {
           increase = minTimeSpent;
         } else if (diffPopTimes > (popTimes / 2.9) && diffPopTimes <= (popTimes / 1.8)) {
           increase = (Math.ceil((minTimeSpent / 2) / 5) * 5);
-        } else if (diffPopTimes > (popTimes / 1.8)) {
+        } else if (diffPopTimes > (popTimes / 1.8) && diffPopTimes <= (popTimes / 1.5)) {
+          increase = (Math.ceil((minTimeSpent / 2) / 5) * 5);
+        } else if (diffPopTimes > (popTimes / 1.5)) {
           increase = 0;
           waitTimes = (Math.ceil((waitTimes * 20 / 100) / 5) * 5);
         }
       } else {
-        if (cPopularity >= (popTimes / 2.9)) {
+        if (cPopularity >= (popTimes / 3.3)) {
           increase = minTimeSpent;
         } else {
           waitTimes = 0;
