@@ -6,6 +6,7 @@ const WaitingTimesAPI = {
   geocodeAPIClient: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=%s,%s',
   // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
   logAPI: 'https://api-geo.thejoin.tech/logger',
+  feedbackAPI: "https://api-geo-fr.thejoin.tech/send-feedback",
   getPlaceByNameAPI: 'https://api-geo-ny.thejoin.tech/places/get-by-name?q=%s&address=%s',
   // getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
   getPlacesAPI: 'https://'+API_DOMAIN+'.thejoin.tech/places/explore?q=%s&address=%s',
@@ -33,6 +34,16 @@ const Utils = {
   updateTimeout: null,
   geoErrorTimeout: null,
   geoErrorFailOverCount: 0,
+  sendFeedback: function (body) {
+    fetch(WaitingTimesAPI.feedbackAPI, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+  },
   sendError: function(requestBody) {
     requestBody["ua"] = navigator.userAgent;
     requestBody["date"] = (new Date()).toString();
@@ -134,15 +145,19 @@ const Utils = {
     var timeRangeEl = document.querySelector("#time-range");
     timeRangeEl.value = waitTimeArr[1];
   },
-  hidePlaceModal: function () {
+  hidePlaceModal: function (update) {
+    var update = update || false;
     var placeModal = document.getElementById("place-modal");
     placeModal.classList.remove("show");
-    /*Utils.sendFeedback({
-      "place_id": placeModal.getAttribute("data-place-id"),
-      "value": {
-        "min_estimated": document.querySelector("#time-range").value
-      }
-    });*/
+    if (update) {
+      Utils.sendFeedback({
+        "place_id": placeModal.getAttribute("data-place-id"),
+        "value": {
+          "estimate_person": 0,
+          "estimate_wait_min": parseInt(document.querySelector("#time-range").value)
+        }
+      });
+    }
   },
   searchByNameModal: function() {
     if (document.querySelector('.modal') !== null)
@@ -615,6 +630,13 @@ const TimesApp = {
         colors = ["7", "#777"];
         // radius = 80;
         message = "<i>Closed</i><br/>" + message;
+      }
+      
+      if (places[key]["user_feedback"] !== undefined && places[key]["user_feedback"]["estimate_wait_min"] !== undefined) {
+        waitTime = places[key]["user_feedback"]["estimate_wait_min"];
+        waitTimeArr[1] = waitTime;
+        colors = TimesApp.getMarkerPlaceColor(waitTime);
+        places[key]["updatetime"] = places[key]["user_feedback"]["updatetime"];
       }
 
       if (places[key]["updatetime"] !== undefined) {
