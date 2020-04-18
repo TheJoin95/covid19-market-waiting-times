@@ -543,10 +543,9 @@ const TimesApp = {
       })
       .then((places) => {
         const markers = TimesApp.setPlaceOnMap(places);
-        if (markers.length > 0) {
-          markers[markers.length - 1].openPopup();
-        } else if (places[0]["populartimes"] !== undefined && places[0]["populartimes"] !== null) {
+        if (TimesApp.mapMarkers[places[0]["place_id"]] !== undefined) {
           TimesApp.lMap.setView([places[0]["coordinates"]["lat"], places[0]["coordinates"]["lng"]], TimesApp.zoom);
+          TimesApp.mapMarkers[places[0]["place_id"]].fireEvent('click');
         } else {
           alert("Unfortunally " + q + " does not have any information about waiting times");
         }
