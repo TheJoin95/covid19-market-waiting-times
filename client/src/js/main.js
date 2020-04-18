@@ -99,6 +99,51 @@ const Utils = {
       TimesApp.initGeodata();
     }
   },
+  showPlaceModal: function (place, waitTimeArr) {
+    console.log(place);
+    var placeModal = document.getElementById('place-modal');
+    placeModal.classList.add('show');
+    placeModal.focus();
+    placeModal.setAttribute("data-place-id", place["place_id"]);
+
+    var formattedTime = "recent";
+    if (place["updatetime"] !== undefined) {
+      var date = new Date(place["updatetime"] * 1000);
+      var hours = date.getHours();
+      var minutes = "0" + date.getMinutes();
+      formattedTime = hours + ':' + minutes.substr(-2);
+    }
+
+    var waitTime = waitTimeArr[1];
+    var isClosed = (waitTimeArr[0] === 0) ? true : false;
+    var noInfo = (typeof(waitTime) === 'string' && !isClosed) ? true : false;
+    waitTime = (isClosed) ? "Closed" : waitTime;
+
+    var modalTitleEl = document.querySelector(".place-modal__title");
+    modalTitleEl.innerHTML = place["name"];
+    var modalSubtitleEl = document.querySelector(".place-modal__subtitle");
+    modalSubtitleEl.innerHTML = place["address"];
+    var modalBadgeEl = document.querySelector(".place-modal__badge div");
+    var badgeText = (isClosed) ? "Closed" : (waitTime + " min");
+    badgeText = (noInfo) ? "No info" : badgeText;
+    modalBadgeEl.setAttribute("class", "text-center bg-" + waitTime.toString().toLowerCase() + "min");
+    var timeMinEl = document.querySelector("#time-min");
+    timeMinEl.innerHTML = badgeText;
+    var updateTimeEl = document.querySelector("#place-modal time");
+    updateTimeEl.innerHTML = formattedTime;
+    var timeRangeEl = document.querySelector("#time-range");
+    timeRangeEl.value = waitTimeArr[1];
+  },
+  hidePlaceModal: function () {
+    var placeModal = document.getElementById("place-modal");
+    placeModal.classList.remove("show");
+    /*Utils.sendFeedback({
+      "place_id": placeModal.getAttribute("data-place-id"),
+      "value": {
+        "min_estimated": document.querySelector("#time-range").value
+      }
+    });*/
+  },
   searchByNameModal: function() {
     if (document.querySelector('.modal') !== null)
       document.body.removeChild(document.querySelector('.modal'));
@@ -276,6 +321,7 @@ const Utils = {
 
 const TimesApp = {
   startBoundIndex: 361,
+  mapMarkers: {},
   lat: null,
   lng: null,
   address: "",
@@ -586,9 +632,12 @@ const TimesApp = {
         icon: icon
       });
 
-      pointMarker.bindPopup(message);
-      pointMarker.addTo(TimesApp.lMap);
+      // pointMarker.bindPopup(message);
+      pointMarker.addTo(TimesApp.lMap).on('click', function () {
+        Utils.showPlaceModal(places[key], waitTimeArr);
+      });
       pointMarkers.push(pointMarker);
+      TimesApp.mapMarkers[places[key]["place_id"]] = pointMarker;
 
       TimesApp.place_ids.push(places[key]["place_id"]);
     }

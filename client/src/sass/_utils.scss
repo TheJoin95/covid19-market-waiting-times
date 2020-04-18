@@ -2,6 +2,10 @@
   display: block !important;
 }
 
+.clearfix {
+  clear: both;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -26,8 +30,16 @@
   float: left;
 }
 
+.mt-1 {
+  margin-top: 1rem;
+}
+
 .text-left {
   text-align: left;
+}
+
+.text-center {
+  text-align: center;
 }
 
 .text-right {

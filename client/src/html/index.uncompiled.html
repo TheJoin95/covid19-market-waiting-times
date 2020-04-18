@@ -7,25 +7,11 @@
 </head>
 <body>
   <!-- build:include partials/welcome-modal.html --><!-- /build -->
+  <!-- build:include partials/place-modal.html --><!-- /build -->
   <div class="progress" id="top-progress-bar">
     <div class="indeterminate"></div>
   </div>
-  <div id="info-button" onclick="Utils.showWelcomeModal();"><span><i class="fas fa-info-circle"></i></span></div>
-  <div id="help-button" onclick="TimesApp.showModalHelp();"><span>&#x2753;</span></div>
-  <div id="search-place-button" onclick="Utils.searchByNameModal();"><span><i class="fas fa-store"></i></span></div>
-  <div id="search-button" onclick="TimesApp.search();"><span>&#x1F50E;</span></div>
-
-  <div id="whatsapp-button">
-    <a target="_blank" href="https://api.whatsapp.com/send?phone=&text=Hey, take a look at this waiting time map https://covid19-waiting-time.thejoin.tech/&source=&data=&app_absent=">
-      <span><i class="fab fa-whatsapp"></i></span>
-    </a>
-  </div>
-
-  <div id="facebook-button">
-    <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://covid19-waiting-time.thejoin.tech/">
-      <span><i class="fab fa-facebook"></i></span>
-    </a>
-  </div>
+  <!-- build:include partials/overlay-button.html --><!-- /build -->
   <!-- build:include partials/loader.html --><!-- /build -->
   <div id="full-map"></div>
   <!-- build:include partials/footer.html --><!-- /build -->
