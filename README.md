@@ -63,14 +63,14 @@ My friends for helping and support me as beta testers with a huge amount of feed
 
 - Add search input in an overlay
 - Get geoip information to searh place in region **in progress**
-- Add a sidebar to list all the visible places **initiating**
+- Add a sidebar to list all the visible places **testing**
 - Add autosuggest on search city/address **in progress**
 - Add geocoding data from geocode API in client localStorage as a cache **in progress**
 - Add history as #5
-- Testing endpoint with redis cache **in progress**
 - Need to optimize the load avg to grant the access to 1500 users in 10min **testing**
 - Add category filters and force estimation #6
 - Refacotring UI/UX #9 **in progress**
+- add favorites location
 - Change modal asking the geodata/search
 - guarantee accessibility
 
