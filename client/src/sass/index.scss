@@ -65,7 +65,7 @@
 @import 'components/rating';
 
 $circle-btn-vars: (
-  size: 5rem
+  size: 4rem
 );
 
 #search-button,
@@ -86,8 +86,8 @@ $circle-btn-vars: (
   z-index: 999;
 
   span {
-    font-size: 2.5rem;
-    line-height: 5rem;
+    font-size: 1.8rem;
+    line-height: 4rem;
   }
 }
 
@@ -112,7 +112,7 @@ $circle-btn-vars: (
 }
 
 #search-button {
-  bottom: 10px;
+  bottom: 1em;
   background: #2780ca;
   border: 1px solid #35a9ff;
 }
@@ -158,11 +158,11 @@ $circle-btn-vars: (
   div#search-button,
   div#search-place-button,
   div#help-button {
-    padding: 0.4em;
+    /*padding: 0.4em;*/
 
     span {
-      font-size: 2.5rem;
-      line-height: 3rem;
+      font-size: 1.8rem;
+      line-height: 4rem;
     }
   }
   .modal {

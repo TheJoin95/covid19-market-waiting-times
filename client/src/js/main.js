@@ -542,7 +542,7 @@ const TimesApp = {
         if (r.ok) return r.json();
       })
       .then((places) => {
-        const markers = TimesApp.setPlaceOnMap(places);
+        TimesApp.setPlaceOnMap(places);
         if (TimesApp.mapMarkers[places[0]["place_id"]] !== undefined) {
           TimesApp.lMap.setView([places[0]["coordinates"]["lat"], places[0]["coordinates"]["lng"]], TimesApp.zoom);
           TimesApp.mapMarkers[places[0]["place_id"]].fireEvent('click');
@@ -614,7 +614,7 @@ const TimesApp = {
     var pointMarkers = [];
 
     for (const key in places) {
-      if (places[key]["populartimes"] === undefined || TimesApp.place_ids.indexOf(places[key]["place_id"]) !== -1) continue;
+      if (places[key]["populartimes"] === undefined) continue;
 
       let waitTimeArr = TimesApp.getWaitTime(places[key]);
 
@@ -642,7 +642,6 @@ const TimesApp = {
         var date = new Date(places[key]["updatetime"] * 1000);
         var hours = date.getHours();
         var minutes = "0" + date.getMinutes();
-        var seconds = "0" + date.getSeconds();
         var formattedTime = hours + ':' + minutes.substr(-2);
         message += " - <i>Last update at</i> " + formattedTime;
       }
@@ -652,6 +651,11 @@ const TimesApp = {
       const pointMarker = L.marker([places[key]["coordinates"]["lat"], places[key]["coordinates"]["lng"]], {
         icon: icon
       });
+
+      if (TimesApp.place_ids.indexOf(places[key]["place_id"]) !== -1) {
+        TimesApp.mapMarkers[places[key]["place_id"]].setIcon(icon);
+        TimesApp.mapMarkers[places[key]["place_id"]].removeEventListener("click");
+      }
 
       // pointMarker.bindPopup(message);
       pointMarker.addTo(TimesApp.lMap).on('click', function () {
@@ -964,6 +968,11 @@ document.addEventListener('DOMContentLoaded', function () {
   setTimeout(function () {
     document.getElementById('banner').style.display = "none";
   }, 30 * 1000);
+
+  // Auto-refresh
+  setTimeout(function () {
+    TimesApp.getPlaces(null, true);
+  }, 5 * 60 * 1000);
 
   if (localStorage.getItem('sended_review') !== 'yes') {
     setTimeout(function () {

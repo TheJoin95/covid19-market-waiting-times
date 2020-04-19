@@ -64,7 +64,6 @@ My friends for helping and support me as beta testers with a huge amount of feed
 - Add search input in an overlay
 - Get geoip information to searh place in region **in progress**
 - Add a sidebar to list all the visible places **initiating**
-- Add a refresh function **in progress**
 - Add autosuggest on search city/address **in progress**
 - Add geocoding data from geocode API in client localStorage as a cache **in progress**
 - Add history as #5
