@@ -766,7 +766,7 @@ const TimesApp = {
   sendHelp: function(message, email) {
     var email = email || "";
 
-    if (message != '' || email != '') {
+    if (message != '' && email != '') {
       Utils.sendError({
         message: message,
         email: email,
@@ -961,9 +961,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const mapEl = document.getElementById('full-map');
   mapEl.style.height = window.innerHeight + 'px';
 
-  // setTimeout(function () {
-  //   document.getElementById('banner').style.display = "none";
-  // }, 30 * 1000);
+  setTimeout(function () {
+    document.getElementById('banner').style.display = "none";
+  }, 30 * 1000);
 
   if (localStorage.getItem('sended_review') !== 'yes') {
     setTimeout(function () {

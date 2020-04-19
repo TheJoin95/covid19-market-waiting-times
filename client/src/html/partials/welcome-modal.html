@@ -5,12 +5,12 @@
     <div class="welcome-modal__body">
       <div class="welcome-modal__helper">
         <p class="d-block text-left">
-          <a class="btn btn--info" href="https://github.com/TheJoin95/covid19-market-waiting-times/blob/master/FAQ.md" target="_blank">
+          <a class="btn btn--info" onclick="ga('send', 'event', 'Link', 'Modal', 'faq');" href="https://github.com/TheJoin95/covid19-market-waiting-times/blob/master/FAQ.md" target="_blank">
             <span class="info-color"><i class="fas fa-info-circle"></i></span> FAQ
           </a>
         </p>
         <p class="pull-right">
-          <a class="btn btn--info" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LDJAYNBVGBZHS&source=url" target="_blank">
+          <a class="btn btn--info" onclick="ga('send', 'event', 'Link', 'Modal', 'paypal');" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LDJAYNBVGBZHS&source=url" target="_blank">
             <span class="heart-color">❤</span> <b>Sponsor</b>
           </a>
         </p>
@@ -22,7 +22,7 @@
       <p>
         Each place is indicated by a marker on the map; the estimated wait time is
         indicated by the colour of the marker. The legend tells you the wait time indicated by each
-        coloured marker.
+        coloured marker. <u>By clicking on the marker you can update the wait time</u>.
       </p>
       <p>
         Less line-ups, more safety.
@@ -37,11 +37,11 @@
       </p>
       <ul>
         <li>Use &#x1F50E; to search an address or a city</li>
-        <li>Use <i class="fas fa-store"></i> to search a place by its name and its address</li>
+        <li>Use <i class="fas fa-store" style="color: #666"></i> to search a place by its name and its address</li>
         <li>Use &#x2753; to send a feedback</li>
       </ul>
       <p>
-        This is an <a href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank"><b>open-source tool</b></a>
+        This is an <a onclick="ga('send', 'event', 'Link', 'Modal', 'repo');" href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank"><b>open-source tool</b></a>
         made with <span class="heart-color">❤</span> in Florence.
         <br/>
         Any help or feedback is appreciated.
@@ -49,7 +49,7 @@
       <p>
         Due to the high traffic volume, the map may be slow and may not show some places.
         Any bug fix or feature request please 
-        <a href="https://github.com/TheJoin95/covid19-market-waiting-times/issues" target="_blank"><b>report here</b></a>.
+        <a href="https://github.com/TheJoin95/covid19-market-waiting-times/issues" onclick="ga('send', 'event', 'Link', 'Modal', 'issue');" target="_blank"><b>report here</b></a>.
         Thank you.
       </p>
       <center>

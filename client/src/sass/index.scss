@@ -128,7 +128,7 @@ $circle-btn-vars: (
 #facebook-button {
   top: 4em;
   background: #ffffff;
-  left: 0.5rem;
+  left: 0.5em;
   width: 3.5rem;
   height: 3.5rem;
   box-shadow: 0 1px 5px rgba(0,0,0,0.65);
@@ -144,7 +144,7 @@ $circle-btn-vars: (
 
 #banner {
   position: absolute;
-  display: none;
+  display: block;
   bottom: 0;
   width: 100%;
   z-index: 10000;

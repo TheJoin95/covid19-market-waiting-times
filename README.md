@@ -56,32 +56,23 @@ Then we can start our dev server:
 `python3.6 server/index.py`
 
 # Other contributors
+My friends for helping and support me as beta testers with a huge amount of feedback.
 [danieldafoe](https://github.com/danieldafoe) for helping me on the frontend side.
-Many thanks to [ptoone](https://github.com/ptoone), that run [thexyz](https://www.thexyz.com/) a secure, private email hosting service, for support the project by mantain a VPS in US/CA region.
 
 # TODO
 
 - Add search input in an overlay
-- Add update time in popup marker **in progress**
 - Get geoip information to searh place in region **in progress**
-- Add a sidebar to list all the visible places
-- Add a sort of cache on the backend (e.g. Redis with Geopos operator) **testing**
-- Add a way to store the place data to prevent an overload on the requested resource **in progress**
-- Add a refresh function
-- Add a prevent function to reload the same data in the same areas
+- Add a sidebar to list all the visible places **initiating**
+- Add a refresh function **in progress**
 - Add autosuggest on search city/address **in progress**
-- Add nominatim API as a fallback for geocoding **testing**
 - Add geocoding data from geocode API in client localStorage as a cache **in progress**
 - Add history as #5
 - Testing endpoint with redis cache **in progress**
-- Need to optimize the load avg to grant the access to 800 users in 30min
+- Need to optimize the load avg to grant the access to 1500 users in 10min **testing**
 - Add category filters and force estimation #6
-- Refacotring UI/UX
-- Add modal popup marker
-- Add on marker popup a form for user feedback about lines
-- Add a modal or a splashscreen giving info about the project
+- Refacotring UI/UX #9 **in progress**
 - Change modal asking the geodata/search
-- change way to search store
 - guarantee accessibility
 
 
