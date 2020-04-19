@@ -319,6 +319,15 @@ const Utils = {
 
     return [lat2.toDeg(), lon2.toDeg()];
   },
+  toggleLegend: function (e) {
+    if (document.getElementById('legend-values').style.display == 'none') {
+      document.getElementById('legend-values').style.display = 'block';
+      e.innerHTML = 'Legend ▾';
+    } else {
+      document.getElementById('legend-values').style.display = 'none';
+      e.innerHTML = 'Legend ▴';
+    }
+  },
   distanceLatLng: function(lat1, lon1, lat2, lon2) {
     var R = 6371; // km
     var dLat = (lat2 - lat1).toRad();
@@ -451,7 +460,7 @@ const TimesApp = {
           from + (to ? '&ndash;' + to : '+'));
       }
 
-      div.innerHTML = "Minutes:<br>" + labels.join('<br>');
+      div.innerHTML = "<span onclick=\"Utils.toggleLegend(this)\">Legend ▴</span><div style=\"display: none\" id=\"legend-values\"><u>Minutes</u>:<br>" + labels.join('<br>') + "</div>";
       return div;
     };
 
