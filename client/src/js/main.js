@@ -110,6 +110,66 @@ const Utils = {
       TimesApp.initGeodata();
     }
   },
+  showPlaceSidebar: function () {
+    var placeSidebar = document.getElementById('places-sidebar');
+    placeSidebar.classList.add('show');
+    placeSidebar.focus();
+
+    // Reset list
+    var sidebarItemContainer = document.querySelector('.sidebar__items')
+    sidebarItemContainer.innerHTML = "";
+
+    if (Object.keys(TimesApp.menuPlaces).length > 0) {
+      for (let key in TimesApp.menuPlaces) {
+        var place = TimesApp.menuPlaces[key]["data"];
+        var waitTimeArr = TimesApp.menuPlaces[key]["waitTimeArr"];
+
+        var formattedTime = "recent";
+        if (place["updatetime"] !== undefined) {
+          var date = new Date(place["updatetime"] * 1000);
+          var hours = date.getHours();
+          var minutes = "0" + date.getMinutes();
+          formattedTime = hours + ':' + minutes.substr(-2);
+        }
+    
+        var waitTime = waitTimeArr[1];
+        var isClosed = (waitTimeArr[0] === 0) ? true : false;
+        var noInfo = (typeof(waitTime) === 'string' && !isClosed) ? true : false;
+        waitTime = (isClosed) ? "Closed" : waitTime;
+
+        var badgeText = (isClosed) ? "Closed" : (waitTime + " min");
+        badgeText = (noInfo) ? "No info" : badgeText;
+
+        var itemTitle = document.createElement("h2");
+        itemTitle.className = "sidebar__item--title sidebar__item--title--bg-" + waitTime.toString().toLowerCase() + "min";
+        itemTitle.innerHTML = place["name"];
+
+        var itemSubtitle = document.createElement("p");
+        itemSubtitle.className = "sidebar__item--subtitle";
+        itemSubtitle.innerHTML = place["address"];
+
+        var itemBadge = document.createElement("div");
+        itemBadge.className = "sidebar__item--badge";
+
+        var badgeBg = document.createElement("div");
+        badgeBg.className = "text-center bg-" + waitTime.toString().toLowerCase() + "min";
+        badgeBg.innerHTML = "<span>" + badgeText + "</span><br/>Last update <time>" + formattedTime + "</time>";
+
+        itemBadge.appendChild(badgeBg);
+
+        var sidebarItem = document.createElement("div");
+        sidebarItem.setAttribute("onclick", "TimesApp.mapMarkers['"+key+"'].fireEvent('click')");
+        sidebarItem.className = "sidebar__item";
+        sidebarItem.setAttribute("title", place["name"] + " " + place["address"] + " - wait time: " + waitTime + "min");
+
+        sidebarItem.appendChild(itemTitle);
+        sidebarItem.appendChild(itemSubtitle);
+        sidebarItem.appendChild(itemBadge);
+
+        sidebarItemContainer.appendChild(sidebarItem);
+      }
+    }
+  },
   showPlaceModal: function (place, waitTimeArr) {
     console.log(place);
     var placeModal = document.getElementById('place-modal');
@@ -346,6 +406,7 @@ const Utils = {
 const TimesApp = {
   startBoundIndex: 361,
   mapMarkers: {},
+  menuPlaces: {},
   lat: null,
   lng: null,
   address: "",
@@ -621,6 +682,9 @@ const TimesApp = {
     console.log(places);
     TimesApp.setLoading(false);
     var pointMarkers = [];
+    if (places >= 80) {
+      TimesApp.menuPlaces = {};
+    }
 
     for (const key in places) {
       if (places[key]["populartimes"] === undefined) continue;
@@ -671,6 +735,7 @@ const TimesApp = {
         Utils.showPlaceModal(places[key], waitTimeArr);
       });
       pointMarkers.push(pointMarker);
+      TimesApp.menuPlaces[places[key]["place_id"]] = {data: places[key], waitTimeArr: waitTimeArr};
       TimesApp.mapMarkers[places[key]["place_id"]] = pointMarker;
 
       TimesApp.place_ids.push(places[key]["place_id"]);
