@@ -26,8 +26,7 @@
 }
 
 .legend i {
-  /*width: 18px;*/
-  /*height: 18px;*/
+  cursor: pointer;
   width: 16px;
   height: 16px;
   float: left;
@@ -112,7 +111,7 @@ $circle-btn-vars: (
   span {
     font-size: 2.3rem;
     line-height: 2rem;
-    color: black !important;
+    margin-left: 0.1rem;
   }
 }
 
@@ -177,16 +176,10 @@ $circle-btn-vars: (
 
 #whatsapp-button {
   top: 6.65em;
-  span > i {
-    color: black !important;
-  }
 }
 
 #facebook-button {
   top: 9em;
-  span > i {
-    color: black !important;
-  }
 }
 
 #banner {
@@ -194,7 +187,7 @@ $circle-btn-vars: (
   display: block;
   bottom: 0;
   width: 100%;
-  z-index: 900;
+  z-index: 10000;
   background: #26a69a;
   text-align: center;
   color: #f2f2f2;
@@ -222,17 +215,11 @@ $circle-btn-vars: (
   }
 }
 
-#info-button {
-  background-color: #3498db;
-}
-
 #info-button > span {
   display: flex;
   justify-content: center;
   align-self: center;
-  i {
-    color: white;
-  }
+  color: #2780ca;
 }
 
 .leaflet-left.leaflet-control {
