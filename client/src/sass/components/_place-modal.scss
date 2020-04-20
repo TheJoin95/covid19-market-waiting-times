@@ -67,10 +67,6 @@ $vars: (
     color: #fff;
     justify-content: center;
 
-    div > .time-min {
-      font-weight: 600;
-    }
-
     div:first-child {
       font-weight: 200;
     }
@@ -169,4 +165,8 @@ $vars: (
       max-height: 100%;
     }
   }
+}
+
+#time-min {
+  font-weight: 600;
 }
