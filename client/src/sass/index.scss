@@ -1,5 +1,5 @@
-@import 'global';
-@import 'utils';
+@import "global";
+@import "utils";
 
 #full-map {
   width: 100%;
@@ -26,8 +26,7 @@
 }
 
 .legend i {
-  /*width: 18px;*/
-  /*height: 18px;*/
+  cursor: pointer;
   width: 16px;
   height: 16px;
   float: left;
@@ -35,41 +34,40 @@
   opacity: 0.7;
 }
 
-
 // Spinner
 
-@import 'components/spinner';
+@import "components/spinner";
 
 // Modal
 
-@import 'components/modal';
+@import "components/modal";
 
 // Welcome Modal
 
-@import 'components/welcome-modal';
+@import "components/welcome-modal";
 
 // Place Modal
 
-@import 'components/place-modal';
+@import "components/place-modal";
 
 // Loading
 
-@import 'components/loader';
+@import "components/loader";
 
 // Slider
 
-@import 'components/slider';
+@import "components/slider";
 
 // Rating
 
-@import 'components/rating';
+@import "components/rating";
 
 // Sidebar
 
-@import 'components/sidebar';
+@import "components/sidebar";
 
 $circle-btn-vars: (
-  size: 4rem
+  size: 4rem,
 );
 
 #search-button,
@@ -79,7 +77,6 @@ $circle-btn-vars: (
 #whatsapp-button,
 #facebook-button {
   border-radius: 50%;
-  box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.2);
   cursor: pointer;
   font-size: 1.2em;
   height: map-get($map: $circle-btn-vars, $key: size);
@@ -88,6 +85,15 @@ $circle-btn-vars: (
   text-align: center;
   width: map-get($map: $circle-btn-vars, $key: size);
   z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-self: center;
+
+  a {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+  }
 
   span {
     font-size: 1.8rem;
@@ -103,47 +109,77 @@ $circle-btn-vars: (
 #whatsapp-button,
 #facebook-button {
   span {
-    font-size: 2.5rem;
-    line-height: 3.5rem;
-    color: #2780ca;
+    font-size: 2.3rem;
+    line-height: 2rem;
+    margin-left: 0.1rem;
   }
 }
 
 #help-button {
   top: 10px;
-  background: #ffc950;
+  background: #f39c12;
   border: 1px solid #fcd25e;
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  span {
+    font-size: 2.3rem;
+    line-height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    color: white;
+  }
 }
 
 #search-button {
   bottom: 1em;
-  background: #2780ca;
-  border: 1px solid #35a9ff;
+  background: #2980b9;
+  border: 1px solid #3498db;display: flex;
+  justify-content: center;
+  align-self: center;
+  span {
+    font-size: 2.3rem;
+    line-height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    color: white;
+  }
 }
 
 #search-place-button {
   bottom: 7rem;
-  background: #2780ca;
-  border: 1px solid #35a9ff;
+  background: #2980b9;
+  border: 1px solid #3498db;display: flex;
+  justify-content: center;
+  align-self: center;
+  span {
+    font-size: 2.3rem;
+    line-height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    color: white;
+  }
 }
 
 #info-button,
 #whatsapp-button,
 #facebook-button {
-  top: 4em;
+  top: 4.4em;
   background: #ffffff;
   left: 0.5em;
   width: 3.5rem;
   height: 3.5rem;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.65);
 }
 
 #whatsapp-button {
-  top: 6.25em;
+  top: 6.65em;
 }
 
 #facebook-button {
-  top: 8.5em;
+  top: 9em;
 }
 
 #banner {
@@ -172,9 +208,24 @@ $circle-btn-vars: (
   .modal {
     padding-top: 2rem;
   }
-  
+
   div#whatsapp-button,
   div#facebook-button {
     padding: 0em;
   }
+}
+
+#info-button > span {
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  color: #2780ca;
+}
+
+.leaflet-left.leaflet-control {
+  margin-left: 1.1em !important;
+}
+
+.leaflet-bar {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
 }

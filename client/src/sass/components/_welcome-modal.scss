@@ -1,43 +1,57 @@
 $vars: (
-  window-bg: #fff
+  window-bg: #fff,
 );
 
 .welcome-modal {
   display: none;
-  height: 100%;
-  left: 50%;
   position: fixed;
-  top: 50%;
-  transform: translateY(-50%) translateX(-50%);
-  width: 100%;
   z-index: 9999;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  justify-content: center;
+  align-items: center;
 
   &__overlay {
     background-color: rgba(0, 0, 0, 0.4);
-    height: 100%;
-    left: 0;
     position: absolute;
     top: 0;
-    width: 100%;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 9998;
   }
-  
+
   &__window {
+    position: relative;
     background-color: map-get($map: $vars, $key: window-bg);
     border-radius: 4px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25);
-    left: 50%;
     margin: auto;
     max-width: 65rem;
+    max-height: 85rem;
     padding: 4rem;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%) translateX(-50%);
     z-index: 9999;
+
+    .close-button.display-topright {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+    }
+
+    .welcome-modal__helper > a.btn > span {
+      margin-right: 5px;
+    }
+
+    .welcome-modal__helper > i {
+      line-height: 5rem;
+    }
   }
 
   &__title {
-    margin: 0 0 2.5rem;
+    margin: 1.5rem 0 .5rem;
+    line-height: 3.5rem;
   }
 
   &__body {
@@ -46,9 +60,8 @@ $vars: (
 
   &__helper {
     clear: both;
-    
   }
-  
+
   &__actions {
     align-items: center;
     display: flex;
@@ -57,17 +70,22 @@ $vars: (
   }
 }
 
+
 @media only screen and (max-width: 640px) {
   .welcome-modal {
-    width: 100%;
-    z-index: 10001;
+    /*z-index: 10001;*/
 
     &__window {
-      z-index: 100001;
-      width: 100%;
-      padding: 1rem 2rem;
+      /*z-index: 100001;*/
+      width: 95vw;
+      padding: 2rem 1.5rem;
+      max-height: 98vh;
+      overflow: hidden;
+    }
+
+    &__body {      
       overflow-y: auto;
-      max-height: 100%;
+      max-height: 75vh;
     }
   }
 }

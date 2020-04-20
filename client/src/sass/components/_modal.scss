@@ -5,12 +5,12 @@ $modal-vars: (
 .modal {
   z-index: 100000;
   display: none;
-  padding-top: 100px;
   position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  left: 0; bottom: 0;
+  top: 0; right: 0;
   overflow: auto;
   background-color: rgb(0, 0, 0);
   background-color: rgba(0, 0, 0, 0.4);
@@ -25,21 +25,28 @@ $modal-vars: (
 }
 
 .modal-content {
-  margin: auto;
   background-color: #fff;
   position: relative;
+  /*margin-top: 70px;*/
   padding: 0;
   outline: 0;
   width: 600px;
-  max-width: 100%;
+  max-width: 95vw;
+  
+  .container > h2 {
+    padding: .5rem 0;
+    margin: 1.5rem 0 0;
+  }
 }
 
 .modal-content textarea {
-  width: 100%;
+  max-width: 100%;
   margin-top: 10px;
   padding: 5px;
   border: 1px solid #f2f2f2;
   resize: none;
+  width: 100%;
+  font-family: 'Raleway', sans-serif;
 }
 
 .teal {
@@ -57,8 +64,8 @@ $modal-vars: (
 
 .display-topright {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 5px;
+  top: 5px;
 }
 
 .close-button {

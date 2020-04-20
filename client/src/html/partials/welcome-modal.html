@@ -3,18 +3,19 @@
     <button type="button" class="close-button display-topright" onclick="Utils.hideWelcomeModal();">×</button>
     <h1 class="welcome-modal__title">Welcome, social distancer! 👋</h1>
     <div class="welcome-modal__body">
-      <div class="welcome-modal__helper">
-        <p class="d-block text-left">
-          <a class="btn btn--info" onclick="ga('send', 'event', 'Link', 'Modal', 'faq');" href="https://github.com/TheJoin95/covid19-market-waiting-times/blob/master/FAQ.md" target="_blank">
-            <span class="info-color"><i class="fas fa-info-circle"></i></span> FAQ
-          </a>
-        </p>
-        <p class="pull-right">
-          <a class="btn btn--info" onclick="ga('send', 'event', 'Link', 'Modal', 'paypal');" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LDJAYNBVGBZHS&source=url" target="_blank">
-            <span class="heart-color">❤</span> <b>Sponsor</b>
-          </a>
-        </p>
+      
+    <div class="welcome-modal__helper">
+      <div class="d-block text-left">
+        <a class="btn btn--info" onclick="ga('send', 'event', 'Link', 'Modal', 'faq');" href="https://github.com/TheJoin95/covid19-market-waiting-times/blob/master/FAQ.md" target="_blank">
+          <span class="info-color"><i class="fas fa-info-circle"></i></span> FAQ
+        </a>
       </div>
+      <div class="pull-right">
+        <a class="btn btn--info" onclick="ga('send', 'event', 'Link', 'Modal', 'paypal');" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LDJAYNBVGBZHS&source=url" target="_blank">
+          <span class="heart-color">❤</span> <b>Sponsor</b>
+        </a>
+      </div>
+    </div>
       <p>
         To help you stay safe during the COVID-19 pandemic, we've created this tool to tell you the
         estimated wait time of line-ups at your local supermarkets, grocery store, pharmacies and other place of interest.
@@ -37,9 +38,9 @@
         Button meaning:
       </p>
       <ul>
-        <li>Use &#x1F50E; to search an address or a city</li>
+        <li>Use <i class="fas fa-search-location"></i> to search an address or a city</li>
         <li>Use <i class="fas fa-store" style="color: #666"></i> to search a place by its name and its address</li>
-        <li>Use &#x2753; to send a feedback</li>
+        <li>Use <i class="fas fa-question-circle"></i> to send a feedback</li>
       </ul>
       <p>
         This is an <a onclick="ga('send', 'event', 'Link', 'Modal', 'repo');" href="https://github.com/TheJoin95/covid19-market-waiting-times" target="_blank"><b>open-source tool</b></a>
@@ -53,9 +54,8 @@
         <a href="https://github.com/TheJoin95/covid19-market-waiting-times/issues" onclick="ga('send', 'event', 'Link', 'Modal', 'issue');" target="_blank"><b>report here</b></a>.
         Thank you.
       </p>
-      <center>
-        <i><small>The waiting times are estimated</small></i>
-      </center>
+      <div class="text-center"><i><small>The waiting times are estimated</small></i></div>
+      
     </div>
   </div>
   <div class="welcome-modal__overlay"></div>

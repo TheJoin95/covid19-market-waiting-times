@@ -15,6 +15,9 @@ $btn-info-vars: (
   border: 0;
   border-radius: map-get($map: $btn-vars, $key: radius);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.6rem;
   padding: 1rem;
   min-height: 50px;
@@ -26,6 +29,11 @@ $btn-info-vars: (
     box-shadow: 0 1px 2px rgba(0,0,0,0.65);
     text-decoration: none;
     color: map-get($map: $btn-info-vars, $key: primary-fg);
+    min-width: auto;
+    min-height: auto;
+    align-items: inherit;
+    justify-content: inherit;
+    display: block;
 
     &:active,
     &:focus,
