@@ -27,15 +27,15 @@ $modal-vars: (
 .modal-content {
   background-color: #fff;
   position: relative;
-  margin-top: 70px;
+  /*margin-top: 70px;*/
   padding: 0;
   outline: 0;
   width: 600px;
   max-width: 95vw;
-  max-height: 95vw;
   
   .container > h2 {
-    padding: 1.5rem 0;
+    padding: .5rem 0;
+    margin: 1.5rem 0 0;
   }
 }
 
@@ -45,6 +45,8 @@ $modal-vars: (
   padding: 5px;
   border: 1px solid #f2f2f2;
   resize: none;
+  width: 100%;
+  font-family: 'Raleway', sans-serif;
 }
 
 .teal {
