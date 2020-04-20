@@ -45,7 +45,7 @@ module.exports = function (grunt) {
         },
         expand: true,
         src: ["css/index.css"],
-        dest: "dist/",
+        dest: "./",
         ext: ".min.css",
       },
     },
@@ -67,7 +67,7 @@ module.exports = function (grunt) {
       },
       build: {
         src: "src/js/main.js",
-        dest: "dist/index.min.js",
+        dest: "js/index.min.js",
       },
     },
     processhtml: {
@@ -91,7 +91,7 @@ module.exports = function (grunt) {
           collapseWhitespace: true,
         },
         files: {
-          "dist/index.html": "dist/index.compiled.html",
+          "index.html": "dist/index.compiled.html",
         },
       },
     },
