@@ -45,7 +45,8 @@
 
     &__item {
         cursor: pointer;
-        box-shadow: 1px 1px 3px 1px #92929299;
+        box-shadow: 1px 1px 3px 0px #92929299;
+        border: 1px solid #f2f2f2;
         margin: 1rem 0;
         padding: 1rem;
 
@@ -216,4 +217,13 @@
             font-size: 1.5rem;
         }
     }
+}
+
+@media only screen and (max-width: 640px) {
+  .sidebar {
+    &__window,
+    &__header {
+      max-width: 100%;
+    }
+  }
 }

@@ -50,7 +50,8 @@ $vars: (
   }
 
   &__title {
-    margin: 0 0 2.5rem;
+    margin: 1.5rem 0 .5rem;
+    line-height: 3.5rem;
   }
 
   &__body {
@@ -59,11 +60,6 @@ $vars: (
 
   &__helper {
     clear: both;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
   }
 
   &__actions {
@@ -77,35 +73,19 @@ $vars: (
 
 @media only screen and (max-width: 640px) {
   .welcome-modal {
-    z-index: 10001;
+    /*z-index: 10001;*/
 
     &__window {
-      z-index: 100001;
+      /*z-index: 100001;*/
       width: 95vw;
-      padding: 2rem 2.5rem;
-      max-height: 95vh;
+      padding: 2rem 1.5rem;
+      max-height: 98vh;
       overflow: hidden;
     }
 
     &__body {      
       overflow-y: auto;
-      max-height: 56vh;
-    }
-
-    &__helper {
-      flex-wrap: wrap;
+      max-height: 75vh;
     }
   }
-}
-
-@media only screen and (max-width: 500px) {
-  .welcome-modal {
-    &__helper {
-      flex-direction: column;
-    }
-  }
-}
-
-.welcome-modal.show {
-  display: flex !important;
 }
