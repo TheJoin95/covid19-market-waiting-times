@@ -463,7 +463,7 @@ const TimesApp = {
       let center = TimesApp.lMap.getCenter();
       console.log("new center ", center.toString());
       console.log(e.type);
-      if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 3 || e.type == 'zoomend') {
+      if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 2.5 || e.type == 'zoomend') {
         TimesApp.lat = parseFloat(center.lat);
         TimesApp.lng = parseFloat(center.lng);
         Utils.updateTimeout = setTimeout(async function() {
