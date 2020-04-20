@@ -309,7 +309,7 @@ const Utils = {
       footer.appendChild(actionButton);
     }
 
-    divModal.style.display = "block";
+    divModal.style.display = "flex";
 
     document.getElementsByTagName('body')[0].appendChild(divModal);
   },
