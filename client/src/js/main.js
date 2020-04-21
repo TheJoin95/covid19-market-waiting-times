@@ -1,31 +1,54 @@
 require("./analytics.js");
+const api = require('./api');
 const error = require('./error');
 const location = require('./location');
 const modal = require('./modal');
 const utils = require('./utils');
 const welcomeModal = require('./welcome-modal');
 
-const API_DOMAIN_AVAILABLE = ['api-geo-fr', 'api-geo-ny'];
-const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
-const WaitingTimesAPI = {
-  fallbackGeocodeAPI: 'https://nominatim.openstreetmap.org/search.php?q=%s&format=json',
-  geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
-  geocodeAPIClient: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=%s,%s',
-  // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
-  logAPI: 'https://api-geo.thejoin.tech/logger',
-  feedbackAPI: "https://api-geo-fr.thejoin.tech/send-feedback",
-  getPlaceByNameAPI: 'https://api-geo-ny.thejoin.tech/places/get-by-name?q=%s&address=%s',
-  // getPlacesAPI: 'https://api-geo-fr.thejoin.tech/places/explore?q=%s&address=%s&lat=%s&lng=%s',
-  getPlacesAPI: 'https://'+API_DOMAIN+'.thejoin.tech/places/explore?q=%s&address=%s',
-  getPlacesAPIFallback: 'https://api-geo-fr.thejoin.tech/places/explore-redis?q=%s&address=%s',
-  searchSuggestAPI: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=%s&maxSuggestions=10&category=city,address&countryCode=&searchExtent=&location=&distance=&f=json',
-  format: function(str) {
-    var args = [].slice.call(arguments, 1),
-      i = 0;
+const FEEDBACK_MODAL_DELAY = 120 * 1000;
 
-    return str.replace(/%s/g, () => args[i++]);
+// DOMContentLoaded
+
+document.addEventListener('DOMContentLoaded', function () {
+  if (welcomeModal.shouldShowWelcomeModal()) {
+    welcomeModal.showWelcomeModal();
   }
-};
+
+  TimesApp.initGeodata();
+
+  const mapEl = document.getElementById('full-map');
+  mapEl.style.height = window.innerHeight + 'px';
+
+  // setTimeout(function () {
+  //   document.getElementById('banner').style.display = "none";
+  // }, 30 * 1000);
+
+  if (localStorage.getItem('sended_review') !== 'yes') {
+    setTimeout(function () {
+      modal.openModal(
+        'rating-modal', 
+        'Please, take time to rate this project', 
+        `
+          <h4>Your feedback is very important to understand if the estimates are correct or not. Together we can build something useful!</h4>
+          <div class="rate">
+            <input type="radio" id="star5" name="rate" value="5">
+            <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star5" data-value="5" title="5 stars"><span class='sr-only'>5 stars</span></label>
+            <input type="radio" id="star4" name="rate" value="4">
+            <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star4" data-value="4" title="4 stars"><span class='sr-only'>4 stars</span></label>
+            <input type="radio" id="star3" name="rate" value="3">
+            <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star3" data-value="3" title="3 stars"><span class='sr-only'>3 stars</span></label>
+            <input type="radio" id="star2" name="rate" value="2">
+            <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star2" data-value="2" title="2 stars"><span class='sr-only'>2 stars</span></label>
+            <input type="radio" id="star1" name="rate" value="1">
+            <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star1" data-value="1" title="1 star"><span class='sr-only'>1 star</span></label>
+          </div>
+        `, 
+        -1
+      );
+    }, FEEDBACK_MODAL_DELAY);
+  }
+});
 
 Number.prototype.toRad = function() {
   return this * Math.PI / 180;
@@ -236,7 +259,7 @@ const TimesApp = {
   },
   getPlace: function(q, address) {
     TimesApp.setLoading(true);
-    const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlaceByNameAPI, q, address);
+    const fetchUrl = api.WaitingTimesAPI.format(api.WaitingTimesAPI.getPlaceByNameAPI, q, address);
     ga('send', 'event', 'Request', 'Place', (q + ' ' + address));
     fetch(fetchUrl)
       .then((r) => {
@@ -259,7 +282,7 @@ const TimesApp = {
       }));
   },
   getPlacesFallback: async function() {
-    const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI.replace('api-geo-fr', 'api-geo-uk').replace('api-geo-ny', 'api-geo-uk'), TimesApp.query, TimesApp.address);
+    const fetchUrl = api.WaitingTimesAPI.format(api.WaitingTimesAPI.getPlacesAPI.replace('api-geo-fr', 'api-geo-uk').replace('api-geo-ny', 'api-geo-uk'), TimesApp.query, TimesApp.address);
     ga('send', 'event', 'Request', 'Places', TimesApp.address);
     fetch(fetchUrl)
       .then((r) => {
@@ -275,12 +298,12 @@ const TimesApp = {
     var query = query || TimesApp.query;
     var useFallback = useFallback || false;
     TimesApp.setLoading(true);
-    // const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng);
+    // const fetchUrl = api.WaitingTimesAPI.format(api.WaitingTimesAPI.getPlacesAPI, query, TimesApp.address, TimesApp.lat, TimesApp.lng);
     if (useFallback) {
       var headers = new Headers();
       headers.append('x-geo-lat', TimesApp.lat);
       headers.append('x-geo-lng', TimesApp.lng);
-      const fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.getPlacesAPIFallback, query, TimesApp.address);
+      const fetchUrl = api.WaitingTimesAPI.format(api.WaitingTimesAPI.getPlacesAPIFallback, query, TimesApp.address);
       ga('send', 'event', 'Request', 'Places', TimesApp.address);
       fetch(fetchUrl, {
           headers: headers
@@ -295,11 +318,11 @@ const TimesApp = {
         })
         .catch((r) => TimesApp.getPlacesFallback());
     } else {
-      var placeUrl = WaitingTimesAPI.getPlacesAPI;
+      var placeUrl = api.WaitingTimesAPI.getPlacesAPI;
       // if (Math.floor(Math.random() * 21) == 10)
       //   placeUrl = placeUrl.replace('api-geo-fr', 'api-geo-uk');
 
-      const fetchUrl = WaitingTimesAPI.format(placeUrl, query, TimesApp.address);
+      const fetchUrl = api.WaitingTimesAPI.format(placeUrl, query, TimesApp.address);
       ga('send', 'event', 'Request', 'Places', TimesApp.address);
       fetch(fetchUrl)
         .then((r) => {
@@ -368,7 +391,7 @@ const TimesApp = {
   },
   updateAddressAwait: async function(initMap) {
     initMap = initMap || true;
-    var r = await fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng));
+    var r = await fetch(api.WaitingTimesAPI.format(api.WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng));
     r = (r.ok) ? await r.json() : {
       staddress: '',
       city: ''
@@ -379,17 +402,17 @@ const TimesApp = {
     TimesApp.address = (r.staddress !== '') ? r.staddress + ', ' : '';
     TimesApp.address += r.city;
     (initMap === true) ? TimesApp.initMap(): TimesApp.getPlaces();
-    ga('send', 'event', 'Request', 'Geocode', WaitingTimesAPI.geocodeAPI);
+    ga('send', 'event', 'Request', 'Geocode', api.WaitingTimesAPI.geocodeAPI);
   },
   updateAddress: async function(initMap) {
     initMap = initMap || true;
     TimesApp.setLoading(true);
 
-    var fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat);
+    var fetchUrl = api.WaitingTimesAPI.format(api.WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat);
     var keyUrl = 1;
     if (Math.floor(Math.random() * 15) == 5) {
       keyUrl = 0;
-      fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng);
+      fetchUrl = api.WaitingTimesAPI.format(api.WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng);
     }
 
     var r = await fetch(fetchUrl);
@@ -422,7 +445,7 @@ const TimesApp = {
     TimesApp.address += json.city;
     (initMap === true) ? TimesApp.initMap(): TimesApp.getPlaces();
 
-    ga('send', 'event', 'Request', 'Geocode', ((keyUrl == 0) ? WaitingTimesAPI.geocodeAPI : WaitingTimesAPI.geocodeAPIClient));
+    ga('send', 'event', 'Request', 'Geocode', ((keyUrl == 0) ? api.WaitingTimesAPI.geocodeAPI : api.WaitingTimesAPI.geocodeAPIClient));
   },
   updateBound: async function(originLat, originLng) {
     TimesApp.setLoading(true);
@@ -482,7 +505,7 @@ const TimesApp = {
     }, 1200);
   },
   fallbackGeocodeCall: async function(address) {
-    var r = await fetch(WaitingTimesAPI.format(WaitingTimesAPI.fallbackGeocodeAPI, address));
+    var r = await fetch(api.WaitingTimesAPI.format(api.WaitingTimesAPI.fallbackGeocodeAPI, address));
     var json = await r.json();
 
     if (json.length > 0 && json[0]['lat'] !== undefined) {
@@ -643,51 +666,16 @@ const TimesApp = {
   toggleSpinner: function() {
     const spinnerEl = document.getElementById('loading');
     let displayProp = 'block';
-    if (spinnerEl.style.display == 'block')
+
+    spinnerEl.focus();
+
+    if (spinnerEl.style.display === 'block') {
       displayProp = 'none';
+    }
 
     spinnerEl.style.display = displayProp;
   }
 };
-window.TimesApp = TimesApp;
-
-
-// DOMContentLoaded
-
-document.addEventListener('DOMContentLoaded', function () {
-  if (welcomeModal.shouldShowWelcomeModal()) {
-    welcomeModal.showWelcomeModal();
-  } else {
-    TimesApp.initGeodata();
-  }
-
-  const mapEl = document.getElementById('full-map');
-  mapEl.style.height = window.innerHeight + 'px';
-
-  // setTimeout(function () {
-  //   document.getElementById('banner').style.display = "none";
-  // }, 30 * 1000);
-
-  if (localStorage.getItem('sended_review') !== 'yes') {
-    setTimeout(function () {
-      modal.openModal('rating-modal', 'Please, take time to rate this project', `
-        <h4>Your feedback is very important to understand if the estimates are correct or not. Together we can build something useful!</h4>
-        <div class="rate">
-          <input type="radio" id="star5" name="rate" value="5">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star5" data-value="5" title="5 stars"><span class='sr-only'>5 stars</span></label>
-          <input type="radio" id="star4" name="rate" value="4">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star4" data-value="4" title="4 stars"><span class='sr-only'>4 stars</span></label>
-          <input type="radio" id="star3" name="rate" value="3">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star3" data-value="3" title="3 stars"><span class='sr-only'>3 stars</span></label>
-          <input type="radio" id="star2" name="rate" value="2">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star2" data-value="2" title="2 stars"><span class='sr-only'>2 stars</span></label>
-          <input type="radio" id="star1" name="rate" value="1">
-          <label onclick="TimesApp.sendReview(this.getAttribute('data-value'))" for="star1" data-value="1" title="1 star"><span class='sr-only'>1 star</span></label>
-        </div>
-      `, -1);
-    }, 120 * 1000);
-  }
-});
 
 window.onerror = function(errorMessage, errorUrl, errorLine) {
   const requestBody = {
@@ -712,3 +700,7 @@ try {
 } catch (e) {
   console.log(e);
 }
+
+// Place on the window object until
+// we can extract it to separate file
+window.TimesApp = TimesApp;
