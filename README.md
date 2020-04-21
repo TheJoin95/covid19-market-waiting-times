@@ -44,7 +44,7 @@ Please, note that sometimes a place can have a parking area or other stuff where
 2. Run `npm install` to install dependencies.
 3. Run `npm start` to open a browser window with the application.
 
-SCSS, HTML, and JS files will be watched by the local server, so when one of these source files changes, grunt tasks are re-run, code is compiled, and your running application will either (1) reload, or (2) new code (in the case of CSS) will get injected without a reload.
+SCSS, HTML, and JS files will be watched by the local server, so when one of these source files changes, Gulp tasks are re-run, code is compiled, and your running application will either (1) reload, or (2) new code (in the case of CSS) will get injected without a reload.
 
 
 ### Back-end
