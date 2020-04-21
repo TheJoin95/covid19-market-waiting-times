@@ -1,5 +1,4 @@
 const { series, parallel, src, dest, watch } = require('gulp');
-// const babel = require('gulp-babel');
 const browserify = require("browserify");
 const browserSync = require('browser-sync');
 const cleanCSS = require('gulp-clean-css');
@@ -10,8 +9,9 @@ const rename = require('gulp-rename');
 const reload = browserSync.reload;
 const sass = require('gulp-sass');
 const source = require("vinyl-source-stream");
-// const uglify = require('gulp-uglify');
 
+const cssVersion = '20200421';
+const jsVersion = '20200421';
 const paths = {
   css: 'dist/css/',
   html: 'dist/',
@@ -40,7 +40,7 @@ function compileSCSS() {
   return src("src/sass/index.scss")
     .pipe(sass())
     .pipe(cleanCSS())
-    .pipe(rename('index-20200420.min.css'))
+    .pipe(rename(`index-${cssVersion}.min.css`))
     .pipe(dest(`${paths.css}`))
     .pipe(reload({ stream:true }));
 }
@@ -73,7 +73,7 @@ function bundleJS(cb) {
     //   presets: ["@babel/preset-env"],
     // })
     .bundle()
-    .pipe(source("index-20200420.min.js"))
+    .pipe(source(`index-${jsVersion}.min.js`))
     .pipe(dest(`${paths.js}`))
     .pipe(reload({ stream: true }))
   );
