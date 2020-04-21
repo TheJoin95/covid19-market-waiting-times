@@ -76,8 +76,6 @@ pip3.6 install flask flask-limiter flask-cors requests
 # Other contributors
 My friends for helping and support me as beta testers with a huge amount of feedback.
 
-
-# Contributors
 [danieldafoe](https://github.com/danieldafoe) for helping me on the frontend side.
 
 
