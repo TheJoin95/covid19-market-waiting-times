@@ -65,9 +65,6 @@ function bundleJS(cb) {
   return (
     browserify("src/js/main.js", {
       debug: true,
-      insertGlobalVars: {
-        utils: function() { return this.utils; }
-      }
     })
     // .transform("babelify", {
     //   presets: ["@babel/preset-env"],
