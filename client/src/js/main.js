@@ -893,7 +893,7 @@ const TimesApp = {
     }, 1200);
   },
   fallbackGeocodeCall: async function(address) {
-    var r = await fetch(WaitingTimesAPI.format(WaitingTimesAPI.fallbackGeocodeAPI, address));
+    var r = await fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, address));
     var json = await r.json();
 
     if (json.length > 0 && json[0]['lat'] !== undefined) {
