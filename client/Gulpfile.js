@@ -31,7 +31,7 @@ function startServer(cb) {
 
 function build(cb) {
   compileSCSS();
-  compileJS();
+  bundleJS();
   compileHTML();
   cb();
 }
@@ -45,21 +45,21 @@ function compileSCSS() {
     .pipe(reload({ stream:true }));
 }
 
-function compileJS(cb) {
-  // return src("src/js/main.js")
-  //   // Need to babel this before minify
-  //   .pipe(babel({
-  //     exclude: 'node_modules/**/*',
-  //     presets: ['@babel/env'],
-  //     // sourceType: 'unambiguous'
-  //     // modules: 'cjs'
-  //     plugins: []
-  //   }))
-  //   .pipe(rename("index.min.js"))
-  //   .pipe(dest(`${paths.js}`))
-  //   .pipe(reload({ stream: true }))
-  cb();
-}
+// function compileJS(cb) {
+//   return src("src/js/main.js")
+//     // Need to babel this before minify
+//     .pipe(babel({
+//       exclude: 'node_modules/**/*',
+//       presets: ['@babel/env'],
+//       // sourceType: 'unambiguous'
+//       // modules: 'cjs'
+//       plugins: []
+//     }))
+//     .pipe(rename("index.min.js"))
+//     .pipe(dest(`${paths.js}`))
+//     .pipe(reload({ stream: true }))
+//   cb();
+// }
 
 function bundleJS(cb) {
   return (
@@ -76,7 +76,7 @@ function bundleJS(cb) {
   );
 }
 
-function processHTML() {
+function compileHTML() {
   return src('src/html/index.uncompiled.html')
     .pipe(processhtml())
     .pipe(cleanHTML())
@@ -107,7 +107,7 @@ function watchSCSS() {
 
 function watchHTML() {
   watch("src/html/**/*.html", { events: "all" }, function (cb) {
-    processHTML();
+    compileHTML();
     cb();
   });
 }
@@ -121,12 +121,11 @@ function watchJS() {
 
 // Exports
 
-exports.build = build;
-exports.clean = clean;
+exports.build = series(clean, build);
+exports.clean = series(clean);
 exports.default = series(
   clean,
-  parallel(compileSCSS, bundleJS, processHTML),
-  compileJS,
+  parallel(compileSCSS, bundleJS, compileHTML),
   watchTasks,
   startServer
 );
