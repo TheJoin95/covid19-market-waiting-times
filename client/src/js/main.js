@@ -33,6 +33,7 @@ Number.prototype.toDeg = function() {
 const Utils = {
   updateTimeout: null,
   geoErrorTimeout: null,
+  suggestTimeout: null,
   geoErrorFailOverCount: 0,
   sendFeedback: function (body) {
     fetch(WaitingTimesAPI.feedbackAPI, {
@@ -57,20 +58,35 @@ const Utils = {
       body: JSON.stringify(requestBody)
     });
   },
-  searchSuggest: async function(el) {
-    if (el.value.length > 3) {
-      var fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.searchSuggestAPI, el.value);
-      var r = await fetch(fetchUrl);
-      if (r.ok) {
-        var json = await r.json();
-        var addresses = [];
-        if (json["suggestions"].length > 0) {
-          for (let i in json["suggestions"]) {
-            addresses.push(json["suggestions"][i]["text"]);
+  searchSuggest: function(el) {
+    clearTimeout(Utils.suggestTimeout);
+    if (el.value.length >= 2) {
+      Utils.suggestTimeout = setTimeout(async function () {
+        var fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.searchSuggestAPI, el.value);
+        var r = await fetch(fetchUrl);
+        var parentEl = document.getElementById('suggest-results');
+        parentEl.innerHTML = "";
+        var noResult = true;
+
+        if (r.ok) {
+          var json = await r.json();
+          var addresses = [];
+          if (json["suggestions"].length > 0) {
+            noResult = false;
+            for (let i in json["suggestions"]) {
+              var text = json["suggestions"][i]["text"].slice(0, -5);
+              var resultElement = document.createElement("div");
+              resultElement.className = "item-suggest-result";
+              resultElement.setAttribute('onclick', "document.getElementById('suggest-input').value = '" + text +"'; document.querySelector('#suggest-modal .container.teal .btn:nth-of-type(2)').click();");
+              resultElement.innerHTML = text;
+              parentEl.appendChild(resultElement);
+            }
           }
-          // render addresses
         }
-      }
+
+        if (noResult)
+          parentEl.innerHTML = '<div class="item-suggest-result">No results</div>';
+      }, 400);
     }
   },
   setDefaultLocation: function(address, lat, lng) {
@@ -98,17 +114,15 @@ const Utils = {
     welcomeModal.classList.add('show');
     welcomeModal.focus();
 
-    if (TimesApp.lMap !== null) {
+    if (TimesApp.address !== 'Firenze') {
       document.querySelector('.welcome-modal__actions').style.display = "none";
     }
   },
   hideWelcomeModal: function () {
     var welcomeModal = document.getElementById("welcome-modal");
     welcomeModal.classList.remove("show");
-    if (TimesApp.lMap === null) {
-      window.localStorage.setItem('hasSeenWelcomeModal', 'true');
-      TimesApp.initGeodata();
-    }
+    window.localStorage.setItem('hasSeenWelcomeModal', 'true');
+    TimesApp.initGeodata();
   },
   showPlaceSidebar: function () {
     var placeSidebar = document.getElementById('places-sidebar');
@@ -218,6 +232,29 @@ const Utils = {
         }
       });
     }
+  },
+  openSuggestModal: function() {
+    if (document.querySelector('.modal') !== null)
+      document.body.removeChild(document.querySelector('.modal'));
+    
+    Utils.openModal(
+      "suggest-modal",
+      "Search by address",
+      '<input type="text" autocomplete="off" name="suggest-adr" onkeydown="Utils.searchSuggest(this)" placeholder="Insert your city or address" id="suggest-input"><div id="suggest-results"></div>',
+      "Search",
+      function searchBySuggest() {
+        if (document.getElementById('suggest-input').value == '') {
+          alert("Please, specify a place name and a place address.");
+          return false;
+        }
+
+        TimesApp.address = document.getElementById('suggest-input').value;
+        TimesApp.search(-1);
+        // suggest-input
+        document.body.removeChild(document.querySelector('.modal'));
+      }
+    );
+    document.getElementById('suggest-input').focus();
   },
   searchByNameModal: function() {
     if (document.querySelector('.modal') !== null)
@@ -407,9 +444,9 @@ const TimesApp = {
   startBoundIndex: 361,
   mapMarkers: {},
   menuPlaces: {},
-  lat: null,
-  lng: null,
-  address: "",
+  lat: 43.7740236,
+  lng: 11.253233,
+  address: "Firenze",
   zoom: 15,
   lMap: null,
   myPosition: null,
@@ -437,14 +474,14 @@ const TimesApp = {
       }));
     }
   },
-  initMap: function() {
-    TimesApp.toggleSpinner();
+  initMap: function(getPlaces) {
+    var getPlaces = getPlaces || true;
     TimesApp.initIcon();
     TimesApp.lMap = L.map('full-map').setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
     L.tileLayer(
       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
-        minZoom: 13,
+        minZoom: 11,
         attribution: 'Map data <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
       }
     ).addTo(TimesApp.lMap);
@@ -477,7 +514,8 @@ const TimesApp = {
     });
 
     TimesApp.showLegend();
-    TimesApp.getPlaces(null, true);
+    if (getPlaces === true)
+      TimesApp.getPlaces(null, true);
   },
   // getMarkerPlaceColor: function (d) {
   //     return d > 60 ? ['#BD0026', '#cc0c33'] :
@@ -588,8 +626,7 @@ const TimesApp = {
     }
 
     meanIntersectPop += increase;
-
-    var waitTime = Math.ceil(waitTimes + meanIntersectPop);
+    var waitTime = (Math.ceil((waitTimes + meanIntersectPop) / 5) * 5);
 
     if (popTimes !== 0 && cPopularity >= 18)
       waitTime += 5; // relative error, white rumor
@@ -742,8 +779,7 @@ const TimesApp = {
     }
     return pointMarkers;
   },
-  updateAddressAwait: async function(initMap) {
-    initMap = initMap || true;
+  updateAddressAwait: async function() {
     var r = await fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, TimesApp.lat, TimesApp.lng));
     r = (r.ok) ? await r.json() : {
       staddress: '',
@@ -754,13 +790,10 @@ const TimesApp = {
 
     TimesApp.address = (r.staddress !== '') ? r.staddress + ', ' : '';
     TimesApp.address += r.city;
-    (initMap === true) ? TimesApp.initMap(): TimesApp.getPlaces();
+    TimesApp.getPlaces();
     ga('send', 'event', 'Request', 'Geocode', WaitingTimesAPI.geocodeAPI);
   },
-  updateAddress: async function(initMap) {
-    initMap = initMap || true;
-    TimesApp.setLoading(true);
-
+  updateAddress: async function() {
     var fetchUrl = WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPIClient, TimesApp.lng, TimesApp.lat);
     var keyUrl = 1;
     if (Math.floor(Math.random() * 15) == 5) {
@@ -796,7 +829,7 @@ const TimesApp = {
 
     TimesApp.address = (json.staddress !== '') ? json.staddress + ', ' : '';
     TimesApp.address += json.city;
-    (initMap === true) ? TimesApp.initMap(): TimesApp.getPlaces();
+    TimesApp.getPlaces(null, true);
 
     ga('send', 'event', 'Request', 'Geocode', ((keyUrl == 0) ? WaitingTimesAPI.geocodeAPI : WaitingTimesAPI.geocodeAPIClient));
   },
@@ -817,10 +850,12 @@ const TimesApp = {
       TimesApp.geoError();
       return false;
     }
+    TimesApp.toggleSpinner();
     TimesApp.lat = parseFloat(position.coords.latitude);
     TimesApp.lng = parseFloat(position.coords.longitude);
+    TimesApp.lMap.setView([TimesApp.lat, TimesApp.lng], TimesApp.zoom);
 
-    await TimesApp.updateAddressAwait();
+    await TimesApp.updateAddress();
     await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
     ga('send', 'event', 'Geolocation', 'GeoSuccess', 'true');
   },
@@ -870,8 +905,11 @@ const TimesApp = {
 
     return json;
   },
-  search: async function() {
-    TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "");
+  search: async function(ask) {
+    var ask = ask || true;
+    if (ask === true)
+      TimesApp.address = prompt("This app need your gps position or at least your address or your city:", "");
+
     if (TimesApp.address === null)
       return false;
 
@@ -910,98 +948,8 @@ const TimesApp = {
     return prompt("This app need your gps position or at least your address or your city:", "");
   },
   geoError: async function(e) {
-    clearTimeout(Utils.geoErrorTimeout);
-    TimesApp.address = TimesApp.promptAddress();
-
-    if (TimesApp.address === null) {
-      Utils.geoErrorFailOverCount += 1;
-      // Florence by default
-      TimesApp.lat = 43.7740236;
-      TimesApp.lng = 11.253233;
-      TimesApp.address = "Firenze";
-
-      if (TimesApp.lMap === null)
-        TimesApp.initMap();
-
-      // First failover test
-      if (Utils.geoErrorFailOverCount < 2) {
-        Utils.geoErrorTimeout = setTimeout(function() {
-          TimesApp.geoError();
-        }, 1000);
-      }
-    } else {
-      TimesApp.address = TimesApp.address.trim();
-    }
-
-
-    if (TimesApp.address != "") {
-      ga('send', 'event', 'Geolocation', 'GeoError', TimesApp.address);
-      const fetchUrl = "https://geocode.xyz/" + TimesApp.address + "?json=1";
-
-      // var json = Utils.getDefaultLocation();
-      // if (json === null) {
-      var r = await fetch(fetchUrl);
-      var json = await r.json();
-      if (!r.ok || (json['error'] !== undefined && json['error']['code'] === '006')) {
-        json = await TimesApp.fallbackGeocodeCall(TimesApp.address);
-      }
-
-      if (json["error"] !== undefined) {
-        setTimeout(function() {
-          alert("No results. Check your address/city and try again. Please write the city in english");
-          Utils.sendError({
-            url: fetchUrl,
-            geoError: true,
-            message: json["error"]
-          });
-          TimesApp.geoError();
-        }, 2000);
-        return false;
-      }
-      //Utils.setDefaultLocation(TimesApp.address, json.latt, json.longt);
-      // }
-
-      TimesApp.lat = parseFloat(json.latt);
-      TimesApp.lng = parseFloat(json.longt);
-      if (TimesApp.lMap === null) {
-        TimesApp.initMap();
-        TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
-      } else {
-        TimesApp.getPlaces(null, false);
-        TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
-      }
-
-      /*fetch(fetchUrl)
-          .then(async (r) => {
-              var json = await r.json();
-              if (json['error'] !== undefined && json['error']['code'] === '006') {
-                  json = await TimesApp.fallbackGeocodeCall(TimesApp.address);
-              }
-
-              return json;
-          })
-          .then((r) => {
-              if (r["error"] !== undefined) {
-                setTimeout(function () {
-                  alert("No results. Check your address/city and try again. Please write the city in english");
-                  Utils.sendError({url: fetchUrl, message: r["error"]});
-                  TimesApp.geoError();
-                }, 2000);
-                return false;
-              }
-
-              TimesApp.lat = parseFloat(r.latt);
-              TimesApp.lng = parseFloat(r.longt);
-              if (TimesApp.lMap === null) {
-                TimesApp.initMap();
-                TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
-              } else {
-                TimesApp.getPlaces();
-                TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
-              }
-          })
-          .catch((r) => Utils.sendError({url: fetchUrl, message: r.toString()}));*/
-    }
+    TimesApp.toggleSpinner();
+    Utils.openSuggestModal();
   },
   initGeodata: function () {
     TimesApp.toggleSpinner();
@@ -1030,14 +978,15 @@ const TimesApp = {
 // DOMContentLoaded
 
 document.addEventListener('DOMContentLoaded', function () {
+  const mapEl = document.getElementById('full-map');
+  mapEl.style.height = window.innerHeight + 'px';
+
+  TimesApp.initMap(-1);
   if (Utils.shouldShowWelcomeModal()) {
     Utils.showWelcomeModal();
   } else {
     TimesApp.initGeodata();
   }
-
-  const mapEl = document.getElementById('full-map');
-  mapEl.style.height = window.innerHeight + 'px';
 
   setTimeout(function () {
     document.getElementById('banner').style.display = "none";
