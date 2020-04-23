@@ -204,8 +204,9 @@ const Utils = {
       }
     }
   },
-  showPlaceModal: function (place, waitTimeArr) {
-    console.log(place);
+  showPlaceModal: function (place_id) {
+    var place = TimesApp.menuPlaces[place_id]["data"];
+    var waitTimeArr = TimesApp.menuPlaces[place_id]["waitTimeArr"];
     var placeModal = document.getElementById('place-modal');
     placeModal.classList.add('show');
     placeModal.focus();
@@ -805,7 +806,7 @@ const TimesApp = {
       
       // pointMarker.bindPopup(message);
       pointMarker.addTo(TimesApp.lMap).on('click', function () {
-        Utils.showPlaceModal(places[key], waitTimeArr);
+        Utils.showPlaceModal(places[key]["place_id"]);
       });
       pointMarkers.push(pointMarker);
       tmpMenuPlaces[places[key]["place_id"]] = {data: places[key], waitTimeArr: waitTimeArr};
