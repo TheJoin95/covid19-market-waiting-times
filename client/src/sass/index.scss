@@ -75,7 +75,8 @@ $circle-btn-vars: (
 #search-place-button,
 #info-button,
 #whatsapp-button,
-#facebook-button {
+#facebook-button,
+#sidebar-button {
   border-radius: 50%;
   cursor: pointer;
   font-size: 1.2em;
@@ -107,7 +108,8 @@ $circle-btn-vars: (
 
 #info-button,
 #whatsapp-button,
-#facebook-button {
+#facebook-button,
+#sidebar-button {
   span {
     font-size: 2.3rem;
     line-height: 2rem;
@@ -166,20 +168,30 @@ $circle-btn-vars: (
 
 #info-button,
 #whatsapp-button,
-#facebook-button {
+#facebook-button,
+#sidebar-button {
   top: 4.4em;
   background: #ffffff;
-  left: 0.5rem;
+  left: 10px;
   width: 3.5rem;
   height: 3.5rem;
 }
 
-#whatsapp-button {
+#sidebar-button {
   top: 6.65em;
+
+  span {
+    line-height: 3.5rem;
+    font-size: 2rem;
+  }
+}
+
+#whatsapp-button {
+  top: 9em;
 }
 
 #facebook-button {
-  top: 9em;
+  top: 11.25em;
 }
 
 #banner {
@@ -233,7 +245,8 @@ div#suggest-results {
   }
 
   div#whatsapp-button,
-  div#facebook-button {
+  div#facebook-button,
+  div#sidebar-button {
     padding: 0em;
   }
 }

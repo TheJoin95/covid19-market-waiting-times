@@ -21,7 +21,7 @@
         position: fixed;
         top: 0;
         width: 100%;
-        max-width: 360px;
+        max-width: 350px;
         box-shadow: 0px 0px 3px 1px #9c9c9c;
         background: #fff;
     }
@@ -38,9 +38,9 @@
 
     &__content {
         overflow: auto;
-        margin: 1rem .8rem;
-        width: 100%;
+        margin: 5.5rem .8rem;
         height: 100%;
+        max-width: 100%;
     }
 
     &__item {

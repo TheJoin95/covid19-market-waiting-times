@@ -124,10 +124,30 @@ const Utils = {
     window.localStorage.setItem('hasSeenWelcomeModal', 'true');
     TimesApp.initGeodata();
   },
+  filterSidebarList: function(el) {
+    window.filterSidebarTimeout = window.filterSidebarTimeout || null;
+    clearTimeout(window.filterSidebarTimeout);
+
+    filterSidebarTimeout = setTimeout(function () {
+      var value = el.value;
+      var regexp = new RegExp(value, 'i');
+      var items = document.querySelectorAll(".sidebar__item");
+      for (var i = 0; i < items.length; i++) {
+        var title = items[i].getAttribute("title");
+        if (title.search(regexp) === -1 && value.length >= 2) {
+          items[i].style.display = 'none';
+        } else {
+          items[i].style.display = 'block';
+        }
+      }
+    }, 400);
+  },
   showPlaceSidebar: function () {
     var placeSidebar = document.getElementById('places-sidebar');
     placeSidebar.classList.add('show');
     placeSidebar.focus();
+
+    document.getElementById('filter-sidebar').value = '';
 
     // Reset list
     var sidebarItemContainer = document.querySelector('.sidebar__items')
@@ -501,9 +521,9 @@ const TimesApp = {
       console.log("new center ", center.toString());
       console.log(e.type);
       if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 2.5 || e.type == 'zoomend') {
-        TimesApp.lat = parseFloat(center.lat);
-        TimesApp.lng = parseFloat(center.lng);
         Utils.updateTimeout = setTimeout(async function() {
+          TimesApp.lat = parseFloat(center.lat);
+          TimesApp.lng = parseFloat(center.lng);
           await TimesApp.updateAddress(-1);
           TimesApp.getPlaces(null, true);
           await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
@@ -584,12 +604,15 @@ const TimesApp = {
     const cPopularity = place["current_popularity"] || 0;
 
     var waitTimes = popTimes = 0;
+    var populartimes = 1;
     if (place["time_wait"] !== undefined && place["time_wait"].length > 0)
       waitTimes = place["time_wait"][weekDay]["data"][hour];
 
-    popTimes = place["populartimes"][weekDay]["data"][hour];
-    if ((new Date()).getMinutes() >= 40 && place["populartimes"][weekDay]["data"][hour+1] !== undefined && place["populartimes"][weekDay]["data"][hour+1] != 0)
-      popTimes = Math.floor((popTimes + place["populartimes"][weekDay]["data"][hour+1]) / 2);
+    if (place["populartimes"] !== undefined) {
+      populartimes = popTimes = place["populartimes"][weekDay]["data"][hour];
+      if ((new Date()).getMinutes() >= 40 && place["populartimes"][weekDay]["data"][hour+1] !== undefined && place["populartimes"][weekDay]["data"][hour+1] != 0)
+        popTimes = Math.floor((popTimes + place["populartimes"][weekDay]["data"][hour+1]) / 2);
+    }
     
     var meanIntersectPop = 0;
     const diffPopTimes = (popTimes - cPopularity);
@@ -634,7 +657,7 @@ const TimesApp = {
     if (waitTime === 0 && (meanTimeSpent === 0 || cPopularity === 0))
       waitTime = 'No information about ';
 
-    return [place["populartimes"][weekDay]["data"][hour], waitTime];
+    return [populartimes, waitTime];
   },
   getPharmacies: function() {
     console.log("Getting pharmacy");
@@ -719,12 +742,13 @@ const TimesApp = {
     console.log(places);
     TimesApp.setLoading(false);
     var pointMarkers = [];
-    if (places >= 80) {
+    var tmpMenuPlaces = {};
+    if (TimesApp.menuPlaces >= 140) {
       TimesApp.menuPlaces = {};
     }
 
     for (const key in places) {
-      if (places[key]["populartimes"] === undefined) continue;
+      // if (places[key]["populartimes"] === undefined) continue;
 
       let waitTimeArr = TimesApp.getWaitTime(places[key]);
 
@@ -765,18 +789,22 @@ const TimesApp = {
       if (TimesApp.place_ids.indexOf(places[key]["place_id"]) !== -1) {
         TimesApp.mapMarkers[places[key]["place_id"]].setIcon(icon);
         TimesApp.mapMarkers[places[key]["place_id"]].removeEventListener("click");
+        TimesApp.menuPlaces[places[key]["place_id"]] = {data: places[key], waitTimeArr: waitTimeArr};
       }
-
+      
       // pointMarker.bindPopup(message);
       pointMarker.addTo(TimesApp.lMap).on('click', function () {
         Utils.showPlaceModal(places[key], waitTimeArr);
       });
       pointMarkers.push(pointMarker);
-      TimesApp.menuPlaces[places[key]["place_id"]] = {data: places[key], waitTimeArr: waitTimeArr};
+      tmpMenuPlaces[places[key]["place_id"]] = {data: places[key], waitTimeArr: waitTimeArr};
       TimesApp.mapMarkers[places[key]["place_id"]] = pointMarker;
 
       TimesApp.place_ids.push(places[key]["place_id"]);
     }
+
+    if (Object.keys(tmpMenuPlaces).length > 0)
+      TimesApp.menuPlaces = Object.assign(tmpMenuPlaces, TimesApp.menuPlaces);
     return pointMarkers;
   },
   updateAddressAwait: async function() {
@@ -893,7 +921,7 @@ const TimesApp = {
     }, 1200);
   },
   fallbackGeocodeCall: async function(address) {
-    var r = await fetch(WaitingTimesAPI.format(WaitingTimesAPI.geocodeAPI, address));
+    var r = await fetch(WaitingTimesAPI.format(WaitingTimesAPI.fallbackGeocodeAPI, address));
     var json = await r.json();
 
     if (json.length > 0 && json[0]['lat'] !== undefined) {
