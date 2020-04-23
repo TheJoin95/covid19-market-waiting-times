@@ -71,8 +71,7 @@ My friends for helping and support me as beta testers with a huge amount of feed
 - Add category filters and force estimation #6
 - Refacotring UI/UX #9 **in progress**
 - add favorites location
-- Change modal asking the geodata/search
-- guarantee accessibility
+- guarantee accessibility **in progress**
 
 
 # Credits
