@@ -19,6 +19,7 @@ The Back-end is powered by Flask, a micro-framework for building some simple API
 # Data
 
 The data comes from Google, like Traffic for Maps, in real time. The data are also based on the data of the past week, to have a history (Google based), the time spent inside a place and the estimated waiting time to be able to complete the purchase.
+In the latest release the data are also crowdsourced via the user's feedback that anyone can give by clicking on the marker of a place on the map.
 
 The waiting time is also based on the current popularity (readme as realtime) of a specific place. This feature is not available for all places, but for the vast majority it is. In this way, the estimated waiting times can still be reliable, since the calculations that are carried out on these data try to take into consideration the variables of the emergence such as social distancing, less influx of people in closed places etc.
 The data is then divided into hours and weekdays.
