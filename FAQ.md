@@ -7,6 +7,7 @@ In the area where I live (Florence, Italy) it saves me (and other thousands peop
 It could may be not too much accurate, but give it a chance.
 
 - [How do you get the data / waiting times?](#how-do-you-get-the-data--waiting-times)
+- [How can I submit a feedback for a place?](#how-can-i-submit-a-feedback-for-a-place)
 - [Why use your map instead of Googling the place?](#why-use-your-map-instead-of-googling-the-place)
 - [Where your map will work?](#where-your-map-will-work)
 - [Is there an accessible version of the site?](#is-there-an-accessible-version-of-the-site)
@@ -25,18 +26,26 @@ It could may be not too much accurate, but give it a chance.
 ## How do you get the data / waiting times?
 
 The data comes from Google, like Traffic for Maps, in real time. The data are also based on the data of the past week, to have a history (Google based), the time spent inside a place and the estimated waiting time to be able to complete the purchase.
+In the latest release the data are also crowdsourced via the user's feedback that anyone can give by clicking on the marker of a place on the map.
 
 The waiting time is also based on the current popularity, a Google index that indicate how crowded is a specific place. This feature is not available for all places, but for the vast majority it is. By contextualizing these data, the estimated waiting times can still be reliable, since the calculations that are carried out on these data try to take into consideration the variables of the emergence such as social distancing, influx of people in closed places etc.
 The data is then divided into hours and weekdays.
 
-In the future it will then perhaps be possible to give an estimate on the following hours.
-A future feature will provide to the user a form where he can write his feedback on the wait time and based on these feedback also change the estimation.
+A user have the possibility to give an estimate on the following hours.
+This feature will provide to the user a form where he can write his feedback on the wait time and based on these feedback also change the estimation.
+The website, by using this feature, will be more accurate.
 
 **All times are to be kept as estimates.**
 
 Please, note that sometimes a place can have a parking area or other stuff where the geolocation can make some mistakes. I can not detect where the people are, if they are people or car, how many people are in the line etc etc. The estimates are based on the data that come from Google with an additional formula to get an approx time to wait. This error can change from a place to another.
 
 Also, please note that this map will be useful just for this emergency period.
+
+## How can I submit a feedback for a place?
+You can submit your feedback by clicking on the marker positioned on the map.
+By doing this it will show up a modal where you can select the wait time and press a button to submit your important feedback.
+
+This will be very useful to others user in your city, thank you.
 
 ## Why use your map instead of Googling the place?
 Googling your grocery stores will tell you, in a normal condition, how much time it takes you to complete your shopping not the waiting time to enter in the shop. It will tell you the mean time spent inside a shop and the mean time to wait for pay.
