@@ -244,13 +244,21 @@ const Utils = {
     var placeModal = document.getElementById("place-modal");
     placeModal.classList.remove("show");
     if (update) {
-      Utils.sendFeedback({
+      var feedback = {
         "place_id": placeModal.getAttribute("data-place-id"),
         "value": {
           "estimate_person": 0,
           "estimate_wait_min": parseInt(document.querySelector("#time-range").value)
         }
-      });
+      };
+
+      var place = TimesApp.menuPlaces[placeModal.getAttribute("data-place-id")]["data"];
+      place["user_feedback"] = feedback;
+      place["user_feedback"]["estimate_wait_min"] = feedback["value"]["estimate_wait_min"];
+      place["user_feedback"]["updatetime"] = (new Date()).getTime();
+
+      TimesApp.setPlaceOnMap([place]);
+      Utils.sendFeedback(feedback);
     }
   },
   openSuggestModal: function() {
