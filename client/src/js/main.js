@@ -183,7 +183,7 @@ const Utils = {
         itemSubtitle.innerHTML = place["address"];
 
         var itemBadge = document.createElement("div");
-        itemBadge.className = "sidebar__item--badge";
+        itemBadge.className = place["place_id"] + " sidebar__item--badge";
 
         var badgeBg = document.createElement("div");
         badgeBg.className = "text-center bg-" + waitTime.toString().toLowerCase() + "min";
@@ -251,14 +251,16 @@ const Utils = {
           "estimate_wait_min": parseInt(document.querySelector("#time-range").value)
         }
       };
+      Utils.sendFeedback(feedback);
 
       var place = TimesApp.menuPlaces[placeModal.getAttribute("data-place-id")]["data"];
       place["user_feedback"] = feedback;
       place["user_feedback"]["estimate_wait_min"] = feedback["value"]["estimate_wait_min"];
-      place["user_feedback"]["updatetime"] = (new Date()).getTime();
-
+      place["user_feedback"]["updatetime"] = (new Date()).getTime() * 1000;
       TimesApp.setPlaceOnMap([place]);
-      Utils.sendFeedback(feedback);
+
+      if (document.querySelector('.sidebar.show') !== null)
+        Utils.showPlaceSidebar();
     }
   },
   openSuggestModal: function() {
