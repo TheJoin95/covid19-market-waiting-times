@@ -256,7 +256,7 @@ const Utils = {
       var place = TimesApp.menuPlaces[placeModal.getAttribute("data-place-id")]["data"];
       place["user_feedback"] = feedback;
       place["user_feedback"]["estimate_wait_min"] = feedback["value"]["estimate_wait_min"];
-      place["user_feedback"]["updatetime"] = (new Date()).getTime() * 1000;
+      place["user_feedback"]["updatetime"] = (new Date()).getTime() / 1000;
       TimesApp.setPlaceOnMap([place]);
 
       if (document.querySelector('.sidebar.show') !== null)
