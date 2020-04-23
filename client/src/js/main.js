@@ -73,7 +73,7 @@ const Utils = {
           var addresses = [];
           if (json["suggestions"].length > 0) {
             noResult = false;
-            for (let i in json["suggestions"]) {
+            for (var i in json["suggestions"]) {
               var text = json["suggestions"][i]["text"].slice(0, -5);
               var resultElement = document.createElement("div");
               resultElement.className = "item-suggest-result";
@@ -154,7 +154,7 @@ const Utils = {
     sidebarItemContainer.innerHTML = "";
 
     if (Object.keys(TimesApp.menuPlaces).length > 0) {
-      for (let key in TimesApp.menuPlaces) {
+      for (var key in TimesApp.menuPlaces) {
         var place = TimesApp.menuPlaces[key]["data"];
         var waitTimeArr = TimesApp.menuPlaces[key]["waitTimeArr"];
 
@@ -527,7 +527,7 @@ const TimesApp = {
 
     TimesApp.lMap.on("moveend zoomend", async function(e) {
       clearTimeout(Utils.updateTimeout);
-      let center = TimesApp.lMap.getCenter();
+      var center = TimesApp.lMap.getCenter();
       console.log("new center ", center.toString());
       console.log(e.type);
       if (Utils.distanceLatLng(TimesApp.lat, TimesApp.lng, center.lat, center.lng) >= 2.5 || e.type == 'zoomend') {
@@ -682,12 +682,13 @@ const TimesApp = {
         if (r.ok) return r.json();
       })
       .then((places) => {
-        TimesApp.setPlaceOnMap(places);
-        if (TimesApp.mapMarkers[places[0]["place_id"]] !== undefined) {
+        TimesApp.setLoading(false);
+        if (TimesApp.mapMarkers[places[0]["place_id"]] !== undefined && places[0]["coordinates"]["lat"] !== null) {
+          TimesApp.setPlaceOnMap(places);
           TimesApp.lMap.setView([places[0]["coordinates"]["lat"], places[0]["coordinates"]["lng"]], TimesApp.zoom);
           TimesApp.mapMarkers[places[0]["place_id"]].fireEvent('click');
         } else {
-          alert("Unfortunally " + q + " does not have any information about waiting times");
+          alert("You need to specify the full address of a place.");
         }
       })
       .catch((r) => Utils.sendError({
@@ -760,12 +761,12 @@ const TimesApp = {
     for (const key in places) {
       // if (places[key]["populartimes"] === undefined) continue;
 
-      let waitTimeArr = TimesApp.getWaitTime(places[key]);
+      var waitTimeArr = TimesApp.getWaitTime(places[key]);
 
-      let waitTime = waitTimeArr[1];
-      // let radius = waitTime + 80;
-      let colors = TimesApp.getMarkerPlaceColor(waitTime);
-      let message = "<b>" + places[key]["name"] + "</b><br><small>" + places[key]["address"] + "</small><br/><i>" + waitTime + "min</i> of line";
+      var waitTime = waitTimeArr[1];
+      // var radius = waitTime + 80;
+      var colors = TimesApp.getMarkerPlaceColor(waitTime);
+      var message = "<b>" + places[key]["name"] + "</b><br><small>" + places[key]["address"] + "</small><br/><i>" + waitTime + "min</i> of line";
 
       // if (isNaN(radius)) radius = 80;
 
@@ -847,7 +848,7 @@ const TimesApp = {
     if ((r.ok)) {
       json = await r.json();
     } else {
-      let error = await r.json();
+      var error = await r.json();
       Utils.sendError({
         url: fetchUrl,
         updateAddress: true,
@@ -874,7 +875,7 @@ const TimesApp = {
   updateBound: async function(originLat, originLng) {
     TimesApp.setLoading(true);
     for (var i = 361; i <= 360; i += 120) {
-      let destLatLng = Utils.destinationPoint(originLat, originLng, i, 2.5);
+      var destLatLng = Utils.destinationPoint(originLat, originLng, i, 2.5);
       TimesApp.lat = parseFloat(destLatLng[0]);
       TimesApp.lng = parseFloat(destLatLng[1]);
 
@@ -1004,7 +1005,7 @@ const TimesApp = {
   },
   toggleSpinner: function() {
     const spinnerEl = document.getElementById('loading');
-    let displayProp = 'block';
+    var displayProp = 'block';
     if (spinnerEl.style.display == 'block')
       displayProp = 'none';
 
