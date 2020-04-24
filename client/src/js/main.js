@@ -122,7 +122,8 @@ const Utils = {
     var welcomeModal = document.getElementById("welcome-modal");
     welcomeModal.classList.remove("show");
     window.localStorage.setItem('hasSeenWelcomeModal', 'true');
-    TimesApp.initGeodata();
+    if (TimesApp.address === 'Firenze')
+      TimesApp.initGeodata();
   },
   filterSidebarList: function(el) {
     window.filterSidebarTimeout = window.filterSidebarTimeout || null;
@@ -238,7 +239,7 @@ const Utils = {
     var updateTimeEl = document.querySelector("#place-modal time");
     updateTimeEl.innerHTML = formattedTime;
     var timeRangeEl = document.querySelector("#time-range");
-    timeRangeEl.value = waitTimeArr[1];
+    timeRangeEl.value = (typeof(waitTimeArr[1]) === 'string') ? 10 : waitTimeArr[1];
   },
   hidePlaceModal: function (update) {
     var update = update || false;
@@ -471,13 +472,17 @@ const Utils = {
   }
 };
 
+var last_address = localStorage.getItem("last_address");
+var last_lat = localStorage.getItem("last_lat");
+var last_lng = localStorage.getItem("last_lng");
+
 const TimesApp = {
   startBoundIndex: 361,
   mapMarkers: {},
   menuPlaces: {},
-  lat: 43.7740236,
-  lng: 11.253233,
-  address: "Firenze",
+  address: (last_address !== null) ? last_address : "Firenze",
+  lat: (last_lat !== null) ? last_lat : 43.7740236,
+  lng: (last_lng !== null) ? last_lng : 11.253233,
   zoom: 15,
   lMap: null,
   myPosition: null,
@@ -684,7 +689,7 @@ const TimesApp = {
       })
       .then((places) => {
         TimesApp.setLoading(false);
-        if (TimesApp.mapMarkers[places[0]["place_id"]] !== undefined && places[0]["coordinates"]["lat"] !== null) {
+        if (places[0]["place_id"] !== undefined && places[0]["coordinates"]["lat"] !== null) {
           TimesApp.setPlaceOnMap(places);
           TimesApp.lMap.setView([places[0]["coordinates"]["lat"], places[0]["coordinates"]["lng"]], TimesApp.zoom);
           TimesApp.mapMarkers[places[0]["place_id"]].fireEvent('click');
@@ -1024,8 +1029,10 @@ document.addEventListener('DOMContentLoaded', function () {
   TimesApp.initMap(-1);
   if (Utils.shouldShowWelcomeModal()) {
     Utils.showWelcomeModal();
-  } else {
+  } else if (last_address === null) {
     TimesApp.initGeodata();
+  } else {
+    TimesApp.getPlaces(null, true);
   }
 
   setTimeout(function () {
@@ -1057,6 +1064,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 120 * 1000);
   }
 });
+
+window.onbeforeunload = function(e) {
+  localStorage.setItem("last_address", TimesApp.address);
+  localStorage.setItem("last_lat", TimesApp.lat);
+  localStorage.setItem("last_lng", TimesApp.lng);
+};
 
 window.onerror = function(errorMessage, errorUrl, errorLine) {
 
