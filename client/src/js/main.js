@@ -1,7 +1,7 @@
 const API_DOMAIN_AVAILABLE = ['api-geo-fr', 'api-geo-ny'];
 const API_DOMAIN = API_DOMAIN_AVAILABLE[Math.floor(Math.random() * API_DOMAIN_AVAILABLE.length)];
 const WaitingTimesAPI = {
-  fallbackGeocodeAPI: 'https://nominatim.openstreetmap.org/search.php?q=%s&format=json',
+  fallbackGeocodeAPI: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?Address=%s&f=json',
   geocodeAPI: 'https://api-geo.thejoin.tech/geocode?lat=%s&lng=%s',
   geocodeAPIClient: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&featureTypes=&location=%s,%s',
   // geocodeAPI: 'https://geocode.xyz/%s,%s?json=1',
@@ -941,9 +941,9 @@ const TimesApp = {
     var r = await fetch(WaitingTimesAPI.format(WaitingTimesAPI.fallbackGeocodeAPI, address));
     var json = await r.json();
 
-    if (json.length > 0 && json[0]['lat'] !== undefined) {
-      json['latt'] = json[0]['lat'];
-      json['longt'] = json[0]['lon'];
+    if (json["candidates"] !== undefined && json["candidates"].length > 0) {
+      json['latt'] = json["candidates"][0]['location']['y'];
+      json['longt'] = json["candidates"][0]['location']['x'];
     } else {
       json["error"] = true;
     }
@@ -977,7 +977,7 @@ const TimesApp = {
             search: true,
             message: json["error"]
           });
-          TimesApp.search();
+          TimesApp.openSuggestModal();
         }, 2000);
         return false;
       }
