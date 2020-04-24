@@ -977,7 +977,7 @@ const TimesApp = {
             search: true,
             message: json["error"]
           });
-          TimesApp.openSuggestModal();
+          Utils.openSuggestModal();
         }, 2000);
         return false;
       }
