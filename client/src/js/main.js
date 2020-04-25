@@ -20,6 +20,14 @@ const WaitingTimesAPI = {
   }
 };
 
+const CONTENT_CONSTANTS = {
+  HELP_MODAL: {
+    BODY: `
+      <p>Didn't find what you were looking for? <br/><u style="cursor: pointer" onclick="Utils.searchByNameModal()">Tap here to search by name 🔍</u></p><input type="text" id="email" placeholder="Insert an email for an answer or leave blank" /><textarea placeholder="Write here your question or tips" rows="7"></textarea><small><i>Note: this is not a search box</i></small>
+    `
+  }
+}
+
 Number.prototype.toRad = function() {
   return this * Math.PI / 180;
 }
@@ -115,12 +123,12 @@ const Utils = {
     welcomeModal.focus();
 
     if (TimesApp.address !== 'Firenze') {
+      // Hide the 'Get Started' button
       document.querySelector('.welcome-modal__actions').style.display = "none";
     }
   },
   hideWelcomeModal: function () {
-    var welcomeModal = document.getElementById("welcome-modal");
-    welcomeModal.classList.remove("show");
+    Utils.closeModal('welcome-modal')
     window.localStorage.setItem('hasSeenWelcomeModal', 'true');
     if (TimesApp.address === 'Firenze')
       TimesApp.initGeodata();
@@ -316,29 +324,43 @@ const Utils = {
     var h2 = title;
     var actionText = actionText || 'Send';
 
-    var divModal = document.createElement('div');
-    divModal.id = id;
-    divModal.className = 'modal';
+    var modal = document.createElement('div');
+    modal.id = id;
+    modal.className = 'modal show';
+    modal.tabIndex = '-1';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-label', title);
+    modal.setAttribute('aria-modal', 'true');
 
-    var innerdivModalm = document.createElement('div');
-    innerdivModalm.className = 'modal-content animate-opacity card-4';
-    divModal.appendChild(innerdivModalm);
+    modal.addEventListener('keyup', (e) => {
+      console.log(e);
+      const ESC_KEY = 27;
+      const KEY_PRESSED = e.which;
 
-    var headerModal = document.createElement('header');
+      if (KEY_PRESSED === ESC_KEY) {
+        Utils.closeModal(id);
+      }
+    });
+
+    var modalInner = document.createElement('div');
+    modalInner.className = 'modal-content animate-opacity card-4';
+    modal.appendChild(modalInner);
+
+    var headerModal = document.createElement('div');
     headerModal.className = 'container teal';
-    innerdivModalm.appendChild(headerModal);
+    modalInner.appendChild(headerModal);
 
     var containerContentDiv = document.createElement('div');
     containerContentDiv.className = 'container';
-    innerdivModalm.appendChild(containerContentDiv);
+    modalInner.appendChild(containerContentDiv);
 
-    containerContentDiv.innerHTML = content || '<p>Did not find what you were looking for? <br/><u style="cursor: pointer" onclick="Utils.searchByNameModal()">Tap here to search by name 🔍</u></p><input type="text" id="email" placeholder="Insert an email for an answer or leave blank" /><textarea placeholder="Write here your question or tips" rows="7"></textarea><small><i>Note: this is not a search box</i></small>';
+    containerContentDiv.innerHTML = content || CONTENT_CONSTANTS.HELP_MODAL.BODY;
 
     var buttonM = document.createElement("button");
     buttonM.setAttribute("type", "button");
     buttonM.className = 'close-button display-topright';
-    buttonM.setAttribute("onclick", "document.getElementById('" + id + "').style.display='none'");
-    buttonM.innerHTML = "&times;";
+    buttonM.setAttribute("onclick", "Utils.closeModal('" + id + "')");
+    buttonM.innerHTML = "&times; <span class='sr-only'>Close" + title + " modal</span>";
     headerModal.appendChild(buttonM);
 
     var headerM = document.createElement("H2");
@@ -347,7 +369,7 @@ const Utils = {
 
     var footer = document.createElement('div');
     footer.className = 'container teal';
-    innerdivModalm.appendChild(footer);
+    modalInner.appendChild(footer);
 
     var closeButton = document.createElement("button");
     closeButton.setAttribute('type', 'button');
@@ -356,7 +378,7 @@ const Utils = {
       closeButton.style.float = "right";
 
     if (closeFn === undefined) {
-      closeButton.setAttribute("onclick", "document.getElementById('" + id + "').style.display='none'");
+      closeButton.setAttribute("onclick", "Utils.closeModal('" + id + "')");
     } else {
       closeButton.addEventListener('click', closeFn);
     }
@@ -378,9 +400,12 @@ const Utils = {
       footer.appendChild(actionButton);
     }
 
-    divModal.style.display = "flex";
-
-    document.getElementsByTagName('body')[0].appendChild(divModal);
+    document.getElementsByTagName('body')[0].appendChild(modal);
+    modal.focus();
+  },
+  closeModal: function(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.toggle('show');
   },
   getAccurateCurrentPosition: function(geolocationSuccess, geolocationError, geoprogress, options) {
     var lastCheckedPosition,
@@ -934,7 +959,7 @@ const TimesApp = {
 
     document.querySelector('.modal-content div.container').innerHTML = '<h2>Message sent, thank you!</h2>';
     setTimeout(function() {
-      document.getElementById('help-modal').style.display = 'none';
+      Utils.closeModal('help-modal');
     }, 1200);
   },
   fallbackGeocodeCall: async function(address) {
