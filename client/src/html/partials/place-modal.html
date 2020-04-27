@@ -1,8 +1,16 @@
 <div id="place-modal" class="place-modal plain-modal" role="dialog" aria-modal="true" tabindex="-1" data-place-id="0">
   <div class="place-modal__window plain-modal__window">
-    <button type="button" class="close-button display-topright" onclick="Utils.hidePlaceModal();">×</button>
-    <h2 class="place-modal__title">Place modal</h2>
-    <h5 class="place-modal__subtitle">Place modal</h5>
+    <div class="place-modal__header">
+      <button type="button" class="close-button display-topright"
+              onclick="Utils.hidePlaceModal();">
+              ×
+              <span class='sr-only'>
+                Close Modal
+              </span>
+      </button>
+      <h2 class="place-modal__title">Place modal</h2>
+      <p class="place-modal__subtitle">Place modal</p>
+    </div>
     <div class="place-modal__body">
       <div class="place-modal__badge">
         <div class="text-center bg-25min">
@@ -10,7 +18,9 @@
         </div>
       </div>
       <div class="place-modal__infobox">
-        <p>If you are in line, please provide us your feedback</p>
+        <p>
+          If you are in line, please provide us your feedback with the slider below.
+        </p>
       </div>
       <div class="place-modal__actions">
         <div>
@@ -23,7 +33,7 @@
               />
           </div>
         </div>
-        <div class="place-modal__helper clearfix">
+        <div class="place-modal__helper">
           <p class="d-block text-left">
             0min
           </p>
@@ -31,7 +41,6 @@
             90min
           </p>
         </div>
-        <div class="clearfix"></div>
         <div class="text-center">
           <button type="button" class="mt-1 btn btn--primary" onclick="Utils.hidePlaceModal(true)">
             Submit feedback
@@ -40,5 +49,5 @@
       </div>
     </div>
   </div>
-  <div class="place-modal__overlay"></div>
+  <div class="place-modal__overlay" onclick='Utils.closeModal("place-modal")'></div>
 </div>
