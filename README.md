@@ -1,4 +1,4 @@
-# Covid19 Waiting Times
+# COVID-19 Waiting Times
 
 This project aims to avoid the gatherings of people in various supermarkets and pharmacies during the covid-19 pandemic. Based on the geolocation of the device, it will show various points of interest such as supermarkets, pharmacies, clinics, bars etc., with an estimate waiting time and a forecast of the next hour.
 
@@ -6,15 +6,17 @@ This project aims to avoid the gatherings of people in various supermarkets and 
 
 ![snippet](https://raw.githubusercontent.com/TheJoin95/covid19-market-waiting-times/master/client/assets/map.png)
 
+
 # How it works
 
-The Front-end side is super simple and uses Open Street Map with the Leaflet.js library.
+The front end uses Open Street Map with the Leaflet.js library.
 
-It uses also geocode.xyz API, client side, to retrieve details about the address and the city from the geo-coordinates retrieve by the HTML5 API.
+It uses also the geocode.xyz API, client side, to retrieve details about the address and the city from the geo-coordinates retrieved by the HTML5 API.
 
-The Back-end is powered by Flask, a micro-framework for building some simple APIs to retrieve data from Google Places.
+The back end is powered by Flask, a micro-framework for building some simple APIs to retrieve data from Google Places.
 
 **NOTE**: this project does not use the official Google APIs, but it is working via a sort of workaround / bug. We can call this "scraping", but it is not the right word.
+
 
 # Data
 
@@ -32,7 +34,23 @@ In fact, the same data that you would view on Google are used, i.e. the data wit
 
 Please, note that sometimes a place can have a parking area or other stuff where the geolocation can make some mistakes. I can not detect where the people are, if they are people or car, how many people are in the line etc etc. The estimates are based on the data that come from Google with an additional formula to get an approx time to wait. This error can change from a place to another.
 
-# Start the Flask server
+
+## Local development
+
+### Front-end
+
+#### Running the application
+
+1. From the command line, change to the `client/` directory.
+2. Run `npm install` to install dependencies.
+3. Run `npm start` to open a browser window with the application.
+
+SCSS, HTML, and JS files will be watched by the local server, so when one of these source files changes, Gulp tasks are re-run, code is compiled, and your running application will either (1) reload, or (2) new code (in the case of CSS) will get injected without a reload.
+
+
+### Back end
+
+#### Start the Flask server
 
 First of all you need to clone the repository on master branch.
 
@@ -56,9 +74,13 @@ pip3.6 install flask flask-limiter flask-cors requests
 Then we can start our dev server:
 `python3.6 server/index.py`
 
+
 # Other contributors
+
 My friends for helping and support me as beta testers with a huge amount of feedback.
+
 [danieldafoe](https://github.com/danieldafoe) for helping me on the frontend side.
+
 
 # TODO
 
