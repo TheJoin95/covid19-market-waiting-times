@@ -1,3 +1,5 @@
+@import 'variables';
+@import 'functions';
 @import "global";
 @import "utils";
 
@@ -65,6 +67,12 @@
 // Sidebar
 
 @import "components/sidebar";
+
+// Info Banner
+
+@import "components/info-banner";
+
+//
 
 $circle-btn-vars: (
   size: 4rem,
@@ -192,18 +200,6 @@ $circle-btn-vars: (
 
 #facebook-button {
   top: 11.25em;
-}
-
-#banner {
-  position: absolute;
-  display: block;
-  bottom: 0;
-  width: 100%;
-  z-index: 10000;
-  background: #26a69a;
-  text-align: center;
-  color: #f2f2f2;
-  padding: 5px 0;
 }
 
 .item-suggest-result {
