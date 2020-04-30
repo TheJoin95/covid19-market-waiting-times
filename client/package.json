@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "A project to help people stand in line at the market as little as possible",
   "main": "Gruntfile.js",
-  "dependencies": {},
+  "dependencies": {
+    "@babel/polyfill": "^7.8.7"
+  },
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
