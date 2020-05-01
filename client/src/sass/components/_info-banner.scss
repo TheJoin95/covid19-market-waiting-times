@@ -1,0 +1,15 @@
+.info-banner {
+  background-color: brand-color(primary);
+  bottom: 0;
+  color: #f2f2f2;
+  display: block;
+  padding: 2rem;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  z-index: 10000;
+
+  a {
+    color: #00fa9a;
+  }
+}

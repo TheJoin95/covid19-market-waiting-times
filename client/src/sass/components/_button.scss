@@ -2,7 +2,10 @@ $btn-vars: (
   radius: 4px,
   primary-bg: #2f735a,
   primary-bg-active: #094030,
-  primary-fg: #fff
+  primary-fg: #fff,
+  tertiary-bg: transparent,
+  tertiary-bg-active: transparent,
+  tertiary-fg: #00fa9a
 );
 
 $btn-info-vars: (
@@ -51,5 +54,18 @@ $btn-info-vars: (
     &:hover {
       background-color: map-get($map: $btn-vars, $key: primary-bg-active);
     }
+  }
+
+  &--tertiary {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    color: map-get($btn-vars, 'tertiary-fg');
+    cursor: pointer;
+    font-size: inherit;
+    font-weight: 300;
+    padding: 0;
+    text-decoration: underline;
   }
 }
