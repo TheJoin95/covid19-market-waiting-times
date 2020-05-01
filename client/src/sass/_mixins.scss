@@ -1,0 +1,29 @@
+@import 'variables';
+
+// Target screens above the specified breakpoint
+@mixin media-breakpoint-up($bp) {
+  $dimension: map-get($breakpoints, $bp);
+
+  @if ($dimension) {
+    @media only screen and (min-width: map-get($breakpoints, $bp)) {
+      @content;
+    }
+  }
+  @else {
+    @error 'Breakpoint name #{$bp} does not exist in the $breakpoints map.';
+  }
+}
+
+// Target screens below the specified breakpoint
+@mixin media-breakpoint-down($bp) {
+  $dimension: map-get($breakpoints, $bp);
+
+  @if ($dimension) {
+    @media only screen and (max-width: map-get($breakpoints, $bp)) {
+      @content;
+    }
+  }
+  @else {
+    @error 'Breakpoint name #{$bp} does not exist in the $breakpoints map.';
+  }
+}
