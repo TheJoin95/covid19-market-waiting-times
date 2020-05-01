@@ -47,6 +47,15 @@ const Utils = {
   suggestTimeout: null,
   geoErrorFailOverCount: 0,
   waitTimeSteps: [0, 10, 15, 25, 30, 45, 60],
+  waitTimeColorMap: {
+    0: '#1fcc00',
+    1: '#ecf716',
+    2: '#ffbf1c',
+    3: '#fc7e2a',
+    4: '#fa4c25',
+    5: '#ff2929',
+    6: '#cc0c33'
+  },
   getWaitTimeLevel: function (waitTime) {
     // check which range the wait time is in
     for (let i = waitTimeSteps.length - 1; i > 0; i--) {
@@ -216,7 +225,7 @@ const Utils = {
     // Reset sidebar contents
     sidebarFilter.value = '';
     sidebarItemContainer.innerHTML = '';
-    console.log(TimesApp);
+
     if (Object.keys(TimesApp.menuPlaces).length > 0) {
       for (let key in TimesApp.menuPlaces) {
         let place = TimesApp.menuPlaces[key]['data'];
@@ -560,6 +569,8 @@ const TimesApp = {
   place_ids: [],
   icons: [],
   fullEstimation: true,
+  classes: {},
+  el: {},
   setLoading: function (b) {
     TimesApp.isLoading = b;
     var display = b === true ? 'block' : 'none';
@@ -634,20 +645,11 @@ const TimesApp = {
   //         d > 10   ? ['#d9e30e', '#ecf716'] :
   //                     ['#1dbd00', '#1fcc00'];
   // },
-  getMarkerPlaceColor: function (d) {
-    return d > 60
-      ? [6, '#cc0c33']
-      : d > 45
-      ? [5, '#ff2929']
-      : d > 30
-      ? [4, '#fa4c25']
-      : d > 25
-      ? [3, '#fc7e2a']
-      : d > 15
-      ? [2, '#ffbf1c']
-      : d > 10
-      ? [1, '#ecf716']
-      : [0, '#1fcc00'];
+  getMarkerPlaceColor: function (waitTime) {
+    const waitTimeLevel = getWaitTimeLevel(waitTime);
+    const color = this.waitTimeColorMap[waitTimeLevel];
+
+    return [waitTimeLevel, color];
   },
   showLegend: function () {
     var legend = L.control({
