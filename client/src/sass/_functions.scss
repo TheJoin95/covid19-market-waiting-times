@@ -5,9 +5,10 @@
 @function brand-color($name) {
   @if (map-has-key($map: $brand-colors, $key: $name)) {
     @return map-get($brand-colors, $name);
-  }
-  @else {
-    $possibleValues: map-keys($map: $brand-colors);
+  } @else {
+    $possibleValues: map-keys(
+      $map: $brand-colors
+    );
     @error '#{$name} is not a known brand colour. Known colours are: #{possibleValues}';
   }
 }
@@ -15,9 +16,21 @@
 @function grey($name) {
   @if (map-has-key($map: $greys, $key: $name)) {
     @return map-get($greys, $name);
-  }
-  @else {
-    $possibleValues: map-keys($map: $greys);
+  } @else {
+    $possibleValues: map-keys(
+      $map: $greys
+    );
     @error '#{$name} is not a known grey. Known greys are #{possibleValues}';
+  }
+}
+
+@function wt-color($level) {
+  @if (map-has-key($map: $wait-level-colors, $key: $level)) {
+    @return map-get($wait-level-colors, $level);
+  } @else {
+    $possibleValues: map-keys(
+      $map: $wait-level-colors
+    );
+    @error '#{$level} is not a known grey. Known wait time colors are #{possibleValues}';
   }
 }
