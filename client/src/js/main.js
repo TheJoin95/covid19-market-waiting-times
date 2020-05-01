@@ -217,8 +217,6 @@ const Utils = {
     var place = TimesApp.menuPlaces[place_id]["data"];
     var waitTimeArr = TimesApp.menuPlaces[place_id]["waitTimeArr"];
     var placeModal = document.getElementById('place-modal');
-    placeModal.classList.add('show');
-    placeModal.focus();
     placeModal.setAttribute("data-place-id", place["place_id"]);
 
     var formattedTime = "recent";
@@ -248,6 +246,19 @@ const Utils = {
     updateTimeEl.innerHTML = formattedTime;
     var timeRangeEl = document.querySelector("#time-range");
     timeRangeEl.value = (typeof(waitTimeArr[1]) === 'string') ? 10 : waitTimeArr[1];
+
+    placeModal.addEventListener('keyup', (e) => {
+      console.log(e);
+      const ESC_KEY = 'Escape';
+      const KEY_PRESSED = e.key;
+
+      if (KEY_PRESSED === ESC_KEY) {
+        Utils.closeModal('place-modal');
+      }
+    });
+
+    placeModal.classList.add('show');
+    placeModal.focus();
   },
   hidePlaceModal: function (update) {
     var update = update || false;
@@ -333,9 +344,8 @@ const Utils = {
     modal.setAttribute('aria-modal', 'true');
 
     modal.addEventListener('keyup', (e) => {
-      console.log(e);
-      const ESC_KEY = 27;
-      const KEY_PRESSED = e.which;
+      const ESC_KEY = 'Escape';
+      const KEY_PRESSED = e.key;
 
       if (KEY_PRESSED === ESC_KEY) {
         Utils.closeModal(id);
@@ -404,8 +414,8 @@ const Utils = {
     modal.focus();
   },
   closeModal: function(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.toggle('show');
+    let modal = document.getElementById(modalId);
+    modal.classList.remove('show');
   },
   getAccurateCurrentPosition: function(geolocationSuccess, geolocationError, geoprogress, options) {
     var lastCheckedPosition,
@@ -630,7 +640,9 @@ const TimesApp = {
     const hour = (new Date()).getHours();
     const weekDay = ((new Date()).getDay() === 0) ? 6 : (new Date()).getDay() - 1;
 
-    var maxTimeSpent = meanTimeSpent = minTimeSpent = 0;
+    var maxTimeSpent = 0;
+    var meanTimeSpent = 0;
+    var minTimeSpent = 0;
 
     if (place["time_spent"] !== undefined && place["time_spent"].length > 0) {
       place["time_spent"][0] = (place["time_spent"][0] == 1) ? 60 : place["time_spent"][0];
@@ -644,7 +656,8 @@ const TimesApp = {
 
     const cPopularity = place["current_popularity"] || 0;
 
-    var waitTimes = popTimes = 0;
+    var waitTimes = 0;
+    var popTimes = 0;
     var populartimes = 1;
     if (place["time_wait"] !== undefined && place["time_wait"].length > 0)
       waitTimes = place["time_wait"][weekDay]["data"][hour];
@@ -1134,7 +1147,7 @@ ga('set', 'anonymizeIp', true);
 ga('send', 'pageview');
 
 try {
-  navigator.serviceWorker.register('sw.js');
+  navigator.serviceWorker.register('/sw.js');
 } catch (e) {
   console.log(e);
 }

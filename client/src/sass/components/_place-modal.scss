@@ -12,6 +12,10 @@ $vars: (
   width: 100%;
   z-index: 9999;
 
+  @include media-breakpoint-down(sm) {
+    z-index: 10001;
+  }
+
   &__overlay {
     background-color: rgba(0, 0, 0, 0.4);
     height: 100%;
@@ -29,12 +33,24 @@ $vars: (
     left: 50%;
     margin: auto;
     margin-bottom: -0.8rem;
-    max-width: 65rem;
+    max-width: 55rem;
     padding: 4rem 4rem 1.5rem 4rem;
     position: absolute;
-    bottom: 0%;
-    transform: translateY(0%) translateX(-50%);
+    top: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    width: 100%;
     z-index: 9999;
+
+    @include media-breakpoint-down(sm) {
+      bottom: 0;
+      max-height: 100%;
+      overflow-y: auto;
+      padding: 3rem;
+      top: auto;
+      transform: translateY(0) translateX(-50%);
+      // width: 97vw;
+      z-index: 100001;
+    }
   }
 
   &__title {
@@ -49,14 +65,17 @@ $vars: (
   }
 
   &__body {
-    margin: 0 0 2.5rem;
+    @include media-breakpoint-up(sm) {
+      margin: 0 0 2.5rem;
+    }
   }
   
   &__actions {
-    margin: 1.5rem 0;
-    div.text-center > button { 
+    margin: 1.5rem 0 0;
+
+    button { 
+      margin-top: 1rem;
       width: 100%;
-      margin-top: 1rem
     }
   }
 
@@ -148,21 +167,6 @@ $vars: (
   &__helper {
     p {
       margin: 0;
-    }
-  }
-}
-
-@media only screen and (max-width: 640px) {
-  .place-modal {
-    width: 100%;
-    z-index: 10001;
-
-    &__window {
-      z-index: 100001;
-      width: 97vw;
-      padding: 1rem 2rem;
-      overflow-y: auto;
-      max-height: 100%;
     }
   }
 }

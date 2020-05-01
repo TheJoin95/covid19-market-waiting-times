@@ -6,10 +6,11 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-htmlmin");
   grunt.loadNpmTasks("grunt-contrib-uglify-es");
   grunt.loadNpmTasks("grunt-contrib-cssmin");
+  grunt.loadNpmTasks("grunt-postcss");
   grunt.loadNpmTasks("grunt-processhtml");
   grunt.loadNpmTasks("grunt-contrib-clean");
   grunt.loadNpmTasks("grunt-contrib-sass");
-  // grunt.loadNpmTasks("grunt-babel");
+  grunt.loadNpmTasks("grunt-babel");
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks('grunt-browser-sync');
 
@@ -19,7 +20,7 @@ module.exports = function (grunt) {
     watch: {
       sass: {
         files: "src/sass/**/*.scss",
-        tasks: ["sass", "cssmin"],
+        tasks: ["sass", "postcss", "cssmin"],
       },
       html: {
         files: "src/html/**/*.html",
@@ -27,7 +28,7 @@ module.exports = function (grunt) {
       },
       js: {
         files: "src/js/**/*.js",
-        tasks: ["uglify"],
+        tasks: ["babel", "uglify"],
       },
     },
     sass: {
@@ -35,6 +36,17 @@ module.exports = function (grunt) {
         files: {
           "css/index.css": "src/sass/index.scss",
         },
+      },
+    },
+    postcss: {
+      options: {
+        processors: [
+          require("pixrem")(), // add fallbacks for rem units
+          require("autoprefixer")({ browsers: "last 2 versions" }), // add vendor prefixes
+        ],
+      },
+      dist: {
+        src: "css/*.css",
       },
     },
     cssmin: {
@@ -49,24 +61,34 @@ module.exports = function (grunt) {
         ext: ".min.css",
       },
     },
-    // babel: {
-    //   options: {
-    //     sourceMap: true,
-    //     presets: ['@babel/preset-env']
-    //   },
-    //   dist: {
-    //     files: {
-    //       'dist/js/main.js': 'src/js/main.js'
-    //     }
-    //   }
-    // },
+    babel: {
+      options: {
+        sourceMap: true,
+        presets: [
+          [
+            '@babel/preset-env',
+            {
+              "targets": {
+                "chrome": "58",
+                "ie": "11"
+              }
+            }
+          ]
+        ]
+      },
+      dist: {
+        files: {
+          'dist/js/main.js': 'src/js/main.js'
+        }
+      }
+    },
     uglify: {
       options: {
         banner:
           '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */',
       },
       build: {
-        src: "src/js/main.js",
+        src: "dist/js/main.js",
         dest: "dist/index.min.js",
       },
     },
@@ -116,14 +138,24 @@ module.exports = function (grunt) {
   // Tasks
   grunt.registerTask("default", [
     "sass",
+    "postcss",
     "cssmin",
+    "babel",
     "uglify",
     "processhtml",
     "htmlmin",
     "browserSync",
-    "watch", 
+    "watch",
     "clean",
   ]);
-  grunt.registerTask('build', ['sass', 'cssmin', 'uglify', 'htmlmin', 'processhtml']);
-  
+  grunt.registerTask('build', [
+    'sass',
+    "postcss",
+    'cssmin',
+    'babel',
+    'uglify',
+    'htmlmin',
+    'processhtml'
+  ]);
+
 };

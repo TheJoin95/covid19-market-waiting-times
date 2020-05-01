@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "A project to help people stand in line at the market as little as possible",
   "main": "Gruntfile.js",
-  "dependencies": {},
+  "dependencies": {
+    "@babel/polyfill": "^7.8.7"
+  },
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
+    "autoprefixer": "^9.7.6",
     "grunt": "^1.1.0",
     "grunt-babel": "^8.0.0",
     "grunt-browser-sync": "^2.2.0",
@@ -17,8 +20,10 @@
     "grunt-contrib-uglify": "^4.0.1",
     "grunt-contrib-uglify-es": "^3.3.0",
     "grunt-contrib-watch": "^1.1.0",
+    "grunt-postcss": "^0.9.0",
     "grunt-processhtml": "^0.4.2",
-    "node-sass": "^4.13.1"
+    "node-sass": "^4.13.1",
+    "pixrem": "^5.0.0"
   },
   "scripts": {
     "start": "grunt --debug",
