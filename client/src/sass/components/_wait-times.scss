@@ -7,17 +7,14 @@ $wait-level-colors: (
   '3': #fc7e2a,
   '4': #fa4c25,
   '5': #ff2929,
-  '6': #cc0c33
+  '6': #cc0c33,
+  'no-info': #0696c1,
+  'closed': #777
 );
 
-.wait-time-bg {
-  background-color: $color-wt-default;
+.wait-time-box {
   padding: 0.8rem;
   border-radius: 4px;
-
-  &--closed {
-    background-color: #777;
-  }
 }
 
 @each $level, $color in $wait-level-colors {
