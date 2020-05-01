@@ -60,10 +60,8 @@
 }
 
 @media only screen and (max-width: 640px) {
-  .sidebar {
-    &__window,
-    &__header {
-      max-width: 100%;
-    }
+  .sidebar__window,
+  .sidebar__header {
+    max-width: 100%;
   }
 }

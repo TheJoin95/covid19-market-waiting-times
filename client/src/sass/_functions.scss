@@ -1,0 +1,23 @@
+@import 'variables';
+
+// Colours
+
+@function brand-color($name) {
+  @if (map-has-key($map: $brand-colors, $key: $name)) {
+    @return map-get($brand-colors, $name);
+  }
+  @else {
+    $possibleValues: map-keys($map: $brand-colors);
+    @error '#{$name} is not a known brand colour. Known colours are: #{possibleValues}';
+  }
+}
+
+@function grey($name) {
+  @if (map-has-key($map: $greys, $key: $name)) {
+    @return map-get($greys, $name);
+  }
+  @else {
+    $possibleValues: map-keys($map: $greys);
+    @error '#{$name} is not a known grey. Known greys are #{possibleValues}';
+  }
+}

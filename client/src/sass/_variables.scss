@@ -1,0 +1,32 @@
+$breakpoints: (
+  xs: 480px,
+  sm: 640px,
+  md: 992px,
+  lg: 1040px,
+  xl: 1200px
+);
+
+// Colours
+
+$brand-colors: (
+  primary: #006633,
+  secondary: #000,
+  tertiary: #111
+);
+
+$greys: (
+  100: #f3f4f5,
+  200: #c3c3c3,
+  300: #999,
+  400: #888,
+  500: #555,
+  600: #333,
+);
+
+$whites: (
+  white: #fff
+);
+
+$blacks: (
+  black: #222
+);

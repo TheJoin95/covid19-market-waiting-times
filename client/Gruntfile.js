@@ -6,6 +6,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-htmlmin");
   grunt.loadNpmTasks("grunt-contrib-uglify-es");
   grunt.loadNpmTasks("grunt-contrib-cssmin");
+  grunt.loadNpmTasks("grunt-postcss");
   grunt.loadNpmTasks("grunt-processhtml");
   grunt.loadNpmTasks("grunt-contrib-clean");
   grunt.loadNpmTasks("grunt-contrib-sass");
@@ -19,7 +20,7 @@ module.exports = function (grunt) {
     watch: {
       sass: {
         files: "src/sass/**/*.scss",
-        tasks: ["sass", "cssmin"],
+        tasks: ["sass", "postcss", "cssmin"],
       },
       html: {
         files: "src/html/**/*.html",
@@ -35,6 +36,17 @@ module.exports = function (grunt) {
         files: {
           "css/index.css": "src/sass/index.scss",
         },
+      },
+    },
+    postcss: {
+      options: {
+        processors: [
+          require("pixrem")(), // add fallbacks for rem units
+          require("autoprefixer")({ browsers: "last 2 versions" }), // add vendor prefixes
+        ],
+      },
+      dist: {
+        src: "css/*.css",
       },
     },
     cssmin: {
@@ -55,11 +67,13 @@ module.exports = function (grunt) {
         presets: [
           [
             '@babel/preset-env',
-            {"targets": {
-              "chrome": "58",
-              "ie": "11"
-            }}
-         ]
+            {
+              "targets": {
+                "chrome": "58",
+                "ie": "11"
+              }
+            }
+          ]
         ]
       },
       dist: {
@@ -124,15 +138,24 @@ module.exports = function (grunt) {
   // Tasks
   grunt.registerTask("default", [
     "sass",
+    "postcss",
     "cssmin",
     "babel",
     "uglify",
     "processhtml",
     "htmlmin",
     "browserSync",
-    "watch", 
+    "watch",
     "clean",
   ]);
-  grunt.registerTask('build', ['sass', 'cssmin', 'babel', 'uglify', 'htmlmin', 'processhtml']);
-  
+  grunt.registerTask('build', [
+    'sass',
+    "postcss",
+    'cssmin',
+    'babel',
+    'uglify',
+    'htmlmin',
+    'processhtml'
+  ]);
+
 };

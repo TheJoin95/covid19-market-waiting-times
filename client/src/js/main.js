@@ -54,13 +54,18 @@ const Utils = {
     3: '#fc7e2a',
     4: '#fa4c25',
     5: '#ff2929',
-    6: '#cc0c33'
+    6: '#cc0c33',
+    'is-closed': '#777',
+    'no-info': '#0696c1'
   },
   getWaitTimeLevel: function (waitTime) {
     // check which range the wait time is in
-    for (let i = waitTimeSteps.length - 1; i > 0; i--) {
-      if (waitTime > waitTimeSteps[i]) return i;
+    for (let i = this.waitTimeSteps.length - 1; i > 0; i--) {
+      if (waitTime > this.waitTimeSteps[i]) return i;
     }
+  },
+  getWaitTimeColor: function (waitTimeLevel) {
+    return Utils.waitTimeColorMap[waitTimeLevel];
   },
   sendFeedback: function (body) {
     fetch(WaitingTimesAPI.feedbackAPI, {
@@ -173,32 +178,13 @@ const Utils = {
       }
     }, 400);
   },
-  createWaitTimeInfoComponent: function (place, waitTimeArr, updatedTime, showTitleIcon) {
-    const isClosed = waitTimeArr[0] === 0;
-    const waitTime = waitTimeArr[1];
-    const isValidWaitTime = Number.isInteger(waitTime);
-    const { name, address } = place;
-
-    // No info
-    let waitLevelClass = '';
-    let badgeText = 'No info';
-
-    // Location is closed
-    if (isClosed) {
-      waitLevelClass = 'wait-time-bg--closed';
-      badgeText = 'Closed';
-
-      // Location has wait time info
-    } else if (isValidWaitTime) {
-      waitLevelClass = `wait-time-bg--${Utils.getWaitTimeLevel(waitTime)}`;
-      badgeText = `${waitTime} min`;
-    }
-
+  generateWaitTimeInfoMarkup: (settings) => {
+    const { showTitleIcon, waitLevelClass, name, address, badgeText, updatedTime } = settings;
     return `
       <h2 class="wait-time__info__title">
         ${
           showTitleIcon
-            ? `<span class="wait-time__info__title__icon wait-time-bg ${waitLevelClass}"></span>`
+            ? `<span class="wait-time__info__title__icon wait-time-box wait-time-bg--${waitLevelClass}"></span>`
             : ''
         }
         ${name}
@@ -206,14 +192,41 @@ const Utils = {
 
       <p class="wait-time__info__subtitle">${address}</p>
       
-      <div class="wait-time__info wait-time-bg ${waitLevelClass}">
+      <div class="wait-time__info wait-time-box wait-time-bg--${waitLevelClass}">
         <span class="wait-time__info__text">${badgeText}</span>
         <span class="wait-time__info__text">Last update <time>${updatedTime}</time></span>
       </div>
       `;
   },
+  createWaitTimeInfoComponent: function (settings) {
+    // TODO: move this into a Class, map legend text and class names
+    const { place, waitTimeArr, updatedTime, showTitleIcon = false } = settings;
+    const isClosed = waitTimeArr[0] === 0;
+    const waitTime = waitTimeArr[1];
+    const isValidWaitTime = Number.isInteger(waitTime);
+    const { name, address } = place;
+
+    // No info
+    let waitLevelClass = 'no-info';
+    let badgeText = 'No info';
+
+    // Location is closed
+    if (isClosed) {
+      waitLevelClass = 'closed';
+      badgeText = 'Closed';
+
+      // Location has wait time info
+    } else if (isValidWaitTime) {
+      waitLevelClass = `${Utils.getWaitTimeLevel(waitTime)}`;
+      badgeText = `${waitTime} min`;
+    }
+
+    const markupVars = { showTitleIcon, waitLevelClass, name, address, badgeText, updatedTime };
+    return this.generateWaitTimeInfoMarkup(markupVars);
+  },
   showPlaceSidebar: function () {
-    // DOM
+    // DOM elements
+    // TODO: performance improvement: store at Class level
     let placeSidebar = document.getElementById('places-sidebar');
     let sidebarItemContainer = document.querySelector('.sidebar__items');
     let sidebarFilter = document.getElementById('filter-sidebar');
@@ -223,24 +236,24 @@ const Utils = {
     placeSidebar.focus();
 
     // Reset sidebar contents
+    // TODO: create generic .reset() method
     sidebarFilter.value = '';
     sidebarItemContainer.innerHTML = '';
 
     if (Object.keys(TimesApp.menuPlaces).length > 0) {
       for (let key in TimesApp.menuPlaces) {
+        // Pass data to wait time info component
         let place = TimesApp.menuPlaces[key]['data'];
         let waitTimeArr = TimesApp.menuPlaces[key]['waitTimeArr'];
         const formattedTime = formatTime(place);
 
-        // Pass data to wait time info component
-        const sidebarItemMarkup = this.createWaitTimeInfoComponent(
-          place,
-          waitTimeArr,
-          formattedTime,
-          true
-        );
+        // Create wait time info component
+        const wtSettings = { place, waitTimeArr, formattedTime, showTitleIcon: true };
+        const sidebarItemMarkup = this.createWaitTimeInfoComponent(wtSettings);
 
         // Create sidebar container for wait time info component
+        // TODO: move all event handlers into common method
+        // TODO: performance improvement: move all event listeners to parent node
         let sidebarItem = document.createElement('div');
         sidebarItem.className = 'sidebar__item';
         sidebarItem.setAttribute('title', `${place['name']}, ${place['address']}`);
@@ -264,25 +277,36 @@ const Utils = {
     return formattedTime;
   },
   showPlaceModal: function (place_id) {
+    const place = TimesApp.menuPlaces[place_id]['data'];
+    const waitTimeArr = TimesApp.menuPlaces[place_id]['waitTimeArr'];
+    const formattedTime = formatTime(place);
+
+    // DOM elements
+    // TODO: performance improvement: store at Class level
     let placeModal = document.getElementById('place-modal');
     let placeModalInfo = document.querySelector('.place-modal__info');
     let timeMinEl = document.querySelector('#time-min');
     let updateTimeEl = document.querySelector('#place-modal time');
     let timeRangeEl = document.querySelector('#time-range');
 
-    const place = TimesApp.menuPlaces[place_id]['data'];
-    const waitTimeArr = TimesApp.menuPlaces[place_id]['waitTimeArr'];
-    const formattedTime = formatTime(place);
-
     placeModal.classList.add('show');
     placeModal.focus();
     placeModal.setAttribute('data-place-id', place['place_id']);
 
-    const placeModalInfoMarkup = this.createWaitTimeInfoComponent(
-      place,
-      waitTimeArr,
-      formattedTime
-    );
+    // TODO: move all event handlers into common method
+    // TODO: performance improvement: move all event listeners to parent node
+    placeModal.addEventListener('keyup', (e) => {
+      const ESC_KEY = 'Escape';
+      const KEY_PRESSED = e.key;
+
+      if (KEY_PRESSED === ESC_KEY) {
+        Utils.closeModal('place-modal');
+      }
+    });
+
+    // Create wait time info component
+    const wtSettings = { place, waitTimeArr, formattedTime };
+    const placeModalInfoMarkup = this.createWaitTimeInfoComponent(wtSettings);
 
     placeModalInfo.innerHTML = placeModalInfoMarkup;
     timeMinEl.innerHTML = badgeText;
@@ -375,9 +399,8 @@ const Utils = {
     modal.setAttribute('aria-modal', 'true');
 
     modal.addEventListener('keyup', (e) => {
-      console.log(e);
-      const ESC_KEY = 27;
-      const KEY_PRESSED = e.which;
+      const ESC_KEY = 'Escape';
+      const KEY_PRESSED = e.key;
 
       if (KEY_PRESSED === ESC_KEY) {
         Utils.closeModal(id);
@@ -448,8 +471,8 @@ const Utils = {
     modal.focus();
   },
   closeModal: function (modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.toggle('show');
+    let modal = document.getElementById(modalId);
+    modal.classList.remove('show');
   },
   getAccurateCurrentPosition: function (
     geolocationSuccess,
@@ -636,20 +659,19 @@ const TimesApp = {
     TimesApp.showLegend();
     if (getPlaces === true) TimesApp.getPlaces(null, true);
   },
-  // getMarkerPlaceColor: function (d) {
-  //     return d > 60 ? ['#BD0026', '#cc0c33'] :
-  //         d > 45  ? ['#800026', '#ff2929'] :
-  //         d > 30  ? ['#e33c17', '#fa4c25'] :
-  //         d > 25  ? ['#de691b', '#fc7e2a'] :
-  //         d > 15   ? ['#e6a910', '#ffbf1c'] :
-  //         d > 10   ? ['#d9e30e', '#ecf716'] :
-  //                     ['#1dbd00', '#1fcc00'];
-  // },
   getMarkerPlaceColor: function (waitTime) {
-    const waitTimeLevel = getWaitTimeLevel(waitTime);
-    const color = this.waitTimeColorMap[waitTimeLevel];
+    const waitTimeLevel = Utils.getWaitTimeLevel(waitTime);
+    const color = Utils.getWaitTimeColor(waitTimeLevel);
 
     return [waitTimeLevel, color];
+  },
+  createLegendItem: function (level, label) {
+    return `
+      <div class="legend-item">
+        <i class="wait-time-bg--${level}"></i>
+        ${label}
+      </div>
+    `;
   },
   showLegend: function () {
     var legend = L.control({
@@ -657,32 +679,28 @@ const TimesApp = {
     });
 
     legend.onAdd = function (map) {
-      var div = L.DomUtil.create('div', 'info legend'),
-        grades = [5, 10, 15, 25, 30, 45, 60],
-        labels = [],
-        from,
-        to;
+      let infoLegendEl = L.DomUtil.create('div', 'info legend');
+      let labels = [];
 
-      labels.push('<i style="background: #3f8ee2"></i> No info');
+      // No info / default
+      let labelLevel = 'no-info';
+      let labelText = 'No info';
+      labels.push(TimesApp.createLegendItem(labelLevel, labelText));
+      console.log(this);
 
-      for (var i = 0; i < grades.length; i++) {
-        from = grades[i];
-        to = grades[i + 1];
+      // Steps
+      Utils.waitTimeSteps.forEach((step, i, arr) => {
+        labelLevel = i;
+        labelText = step + (i === arr.length - 1 ? '+' : ` – ${arr[i + 1]}`);
 
-        labels.push(
-          '<i style="background:' +
-            TimesApp.getMarkerPlaceColor(grades[i] + 1)[1] +
-            '"></i> ' +
-            from +
-            (to ? '&ndash;' + to : '+')
-        );
-      }
+        labels.push(TimesApp.createLegendItem(labelLevel, labelText));
+      });
 
-      div.innerHTML =
+      infoLegendEl.innerHTML =
         '<span onclick="Utils.toggleLegend(this)">Legend ▴</span><div style="display: none" id="legend-values"><u>Minutes</u>:<br>' +
-        labels.join('<br>') +
+        labels.join('') +
         '</div>';
-      return div;
+      return infoLegendEl;
     };
 
     legend.addTo(TimesApp.lMap);

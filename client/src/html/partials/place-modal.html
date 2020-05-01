@@ -14,7 +14,7 @@
     <div class="place-modal__info">
       <h2 class="wait-time__info__title">Location Name</h2>
       <h5 class="wait-time__info__subtitle">Location Address</h5>
-      <div class="wait-time__info wait-time-bg">
+      <div class="wait-time__info wait-time-box wait-time-bg--no-info">
         <span class="wait-time__info__text">No info</span>
         <span class="wait-time__info__text">Last update <time>12:00</time></span>
       </div>
@@ -22,7 +22,9 @@
 
     <div class="place-modal__body">
       <div class="place-modal__infobox">
-        <p>If you are in line, please provide us your feedback</p>
+        <p>
+          If you are in line, please provide us your feedback with the slider below.
+        </p>
       </div>
       <div class="place-modal__actions">
         <div>
@@ -40,7 +42,7 @@
             />
           </div>
         </div>
-        <div class="place-modal__helper clearfix">
+        <div class="place-modal__helper">
           <p class="d-block text-left">
             0min
           </p>
@@ -48,7 +50,6 @@
             90min
           </p>
         </div>
-        <div class="clearfix"></div>
         <div class="text-center">
           <button type="button" class="mt-1 btn btn--primary" onclick="Utils.hidePlaceModal(true)">
             Submit feedback
@@ -57,5 +58,5 @@
       </div>
     </div>
   </div>
-  <div class="place-modal__overlay"></div>
+  <div class="place-modal__overlay" onclick='Utils.closeModal("place-modal")'></div>
 </div>
