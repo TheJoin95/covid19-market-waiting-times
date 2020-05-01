@@ -1,5 +1,7 @@
-@import 'global';
-@import 'utils';
+@import 'variables';
+@import 'mixins';
+@import "global";
+@import "utils";
 
 #full-map {
   width: 100%;
