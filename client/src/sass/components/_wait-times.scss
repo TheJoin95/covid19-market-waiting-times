@@ -1,0 +1,54 @@
+$color-wt-default: #0696c1;
+
+$wait-level-colors: (
+  '0': #1fcc00,
+  '1': #ecf716,
+  '2': #ffbf1c,
+  '3': #fc7e2a,
+  '4': #fa4c25,
+  '5': #ff2929,
+  '6': #cc0c33
+);
+
+.wait-time-bg {
+  background-color: $color-wt-default;
+  padding: 0.8rem;
+  border-radius: 4px;
+
+  &--closed {
+    background-color: #777;
+  }
+}
+
+@each $level, $color in $wait-level-colors {
+  .wait-time-bg--#{$level} {
+    background-color: $color;
+  }
+}
+
+.wait-time__info {
+  color: #fff;
+  text-align: center;
+}
+
+.wait-time__info__title {
+  margin: 0 0;
+  font-size: 2rem;
+}
+
+.wait-time__info__subtitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.wait-time__info__title__icon {
+  width: 0.5rem;
+  height: 0.5rem;
+  vertical-align: middle;
+  display: inline-block;
+  margin: 0 0.5rem 0 0;
+}
+
+.wait-time__info__text {
+  display: block;
+}

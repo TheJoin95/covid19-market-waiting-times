@@ -1,26 +1,43 @@
-<div id="place-modal" class="place-modal plain-modal" role="dialog" aria-modal="true" tabindex="-1" data-place-id="0">
+<div
+  id="place-modal"
+  class="place-modal plain-modal"
+  role="dialog"
+  aria-modal="true"
+  tabindex="-1"
+  data-place-id="0"
+>
   <div class="place-modal__window plain-modal__window">
-    <button type="button" class="close-button display-topright" onclick="Utils.hidePlaceModal();">×</button>
-    <h2 class="place-modal__title">Place modal</h2>
-    <h5 class="place-modal__subtitle">Place modal</h5>
-    <div class="place-modal__body">
-      <div class="place-modal__badge">
-        <div class="text-center bg-25min">
-          <span id="time-min">25 min</span><br/>Last update <time>18:00</time>
-        </div>
+    <button type="button" class="close-button display-topright" onclick="Utils.hidePlaceModal();">
+      ×
+    </button>
+
+    <div class="place-modal__info">
+      <h2 class="wait-time__info__title">Location Name</h2>
+      <h5 class="wait-time__info__subtitle">Location Address</h5>
+      <div class="wait-time__info wait-time-bg">
+        <span class="wait-time__info__text">No info</span>
+        <span class="wait-time__info__text">Last update <time>12:00</time></span>
       </div>
+    </div>
+
+    <div class="place-modal__body">
       <div class="place-modal__infobox">
         <p>If you are in line, please provide us your feedback</p>
       </div>
       <div class="place-modal__actions">
         <div>
           <div class="slidecontainer">
-            <input 
+            <input
               oninput="
               document.getElementById('time-min').innerHTML = this.value + ' min';
               document.getElementById('time-min').parentNode.className = 'text-center bg-' + this.value + 'min'"
-              type="range" min="0" max="90" step="5" class="slider" id="time-range"
-              />
+              type="range"
+              min="0"
+              max="90"
+              step="5"
+              class="slider"
+              id="time-range"
+            />
           </div>
         </div>
         <div class="place-modal__helper clearfix">

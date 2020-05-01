@@ -1,5 +1,5 @@
-@import "global";
-@import "utils";
+@import 'global';
+@import 'utils';
 
 #full-map {
   width: 100%;
@@ -34,40 +34,35 @@
   opacity: 0.7;
 }
 
-// Spinner
+// Wait times
+@import 'components/wait-times';
 
-@import "components/spinner";
+// Spinner
+@import 'components/spinner';
 
 // Modal
-
-@import "components/modal";
+@import 'components/modal';
 
 // Welcome Modal
-
-@import "components/welcome-modal";
+@import 'components/welcome-modal';
 
 // Place Modal
-
-@import "components/place-modal";
+@import 'components/place-modal';
 
 // Loading
-
-@import "components/loader";
+@import 'components/loader';
 
 // Slider
-
-@import "components/slider";
+@import 'components/slider';
 
 // Rating
-
-@import "components/rating";
+@import 'components/rating';
 
 // Sidebar
-
-@import "components/sidebar";
+@import 'components/sidebar';
 
 $circle-btn-vars: (
-  size: 4rem,
+  size: 4rem
 );
 
 #search-button,
@@ -137,7 +132,8 @@ $circle-btn-vars: (
 #search-button {
   bottom: 1em;
   background: #2980b9;
-  border: 1px solid #3498db;display: flex;
+  border: 1px solid #3498db;
+  display: flex;
   justify-content: center;
   align-self: center;
   span {
@@ -153,7 +149,8 @@ $circle-btn-vars: (
 #search-place-button {
   bottom: 7rem;
   background: #2980b9;
-  border: 1px solid #3498db;display: flex;
+  border: 1px solid #3498db;
+  display: flex;
   justify-content: center;
   align-self: center;
   span {
