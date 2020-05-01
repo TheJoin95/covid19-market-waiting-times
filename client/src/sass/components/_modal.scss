@@ -9,8 +9,10 @@ $modal-vars: (
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  left: 0; bottom: 0;
-  top: 0; right: 0;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  right: 0;
   overflow: auto;
   background-color: rgb(0, 0, 0);
   background-color: rgba(0, 0, 0, 0.4);
@@ -33,9 +35,9 @@ $modal-vars: (
   outline: 0;
   width: 600px;
   max-width: 95vw;
-  
+
   .container > h2 {
-    padding: .5rem 0;
+    padding: 0.5rem 0;
     margin: 1.5rem 0 0;
   }
 }
@@ -51,8 +53,8 @@ $modal-vars: (
 }
 
 .teal {
-  color: #fff!important;
-  background-color: #009688!important;
+  color: #fff !important;
+  background-color: #009688 !important;
 }
 
 .container {

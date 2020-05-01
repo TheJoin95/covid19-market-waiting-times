@@ -38,38 +38,38 @@
 
 // Spinner
 
-@import "components/spinner";
+@import 'components/spinner';
 
 // Modal
 
-@import "components/modal";
+@import 'components/modal';
 
 // Welcome Modal
 
-@import "components/welcome-modal";
+@import 'components/welcome-modal';
 
 // Place Modal
 
-@import "components/place-modal";
+@import 'components/place-modal';
 
 // Loading
 
-@import "components/loader";
+@import 'components/loader';
 
 // Slider
 
-@import "components/slider";
+@import 'components/slider';
 
 // Rating
 
-@import "components/rating";
+@import 'components/rating';
 
 // Sidebar
 
-@import "components/sidebar";
+@import 'components/sidebar';
 
 $circle-btn-vars: (
-  size: 4rem,
+  size: 4rem
 );
 
 #search-button,
@@ -126,6 +126,7 @@ $circle-btn-vars: (
   display: flex;
   justify-content: center;
   align-self: center;
+
   span {
     font-size: 2.3rem;
     line-height: 2rem;
@@ -139,9 +140,11 @@ $circle-btn-vars: (
 #search-button {
   bottom: 1em;
   background: #2980b9;
-  border: 1px solid #3498db;display: flex;
+  border: 1px solid #3498db;
+  display: flex;
   justify-content: center;
   align-self: center;
+
   span {
     font-size: 2.3rem;
     line-height: 2rem;
@@ -155,9 +158,11 @@ $circle-btn-vars: (
 #search-place-button {
   bottom: 7rem;
   background: #2980b9;
-  border: 1px solid #3498db;display: flex;
+  border: 1px solid #3498db;
+  display: flex;
   justify-content: center;
   align-self: center;
+
   span {
     font-size: 2.3rem;
     line-height: 2rem;
