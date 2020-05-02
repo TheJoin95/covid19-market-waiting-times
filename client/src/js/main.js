@@ -576,14 +576,14 @@ const TimesApp = {
           TimesApp.lat = parseFloat(center.lat);
           TimesApp.lng = parseFloat(center.lng);
 
-          localStorage.setItem("last_address", TimesApp.address);
-          localStorage.setItem("last_lat", TimesApp.lat);
-          localStorage.setItem("last_lng", TimesApp.lng);
-
           await TimesApp.updateAddress(-1);
           TimesApp.getPlaces(null, true);
           await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
           TimesApp.getPharmacies();
+
+          localStorage.setItem("last_address", TimesApp.address);
+          localStorage.setItem("last_lat", TimesApp.lat);
+          localStorage.setItem("last_lng", TimesApp.lng);
         }, 1000);
       }
 
