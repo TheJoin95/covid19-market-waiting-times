@@ -575,6 +575,11 @@ const TimesApp = {
         Utils.updateTimeout = setTimeout(async function() {
           TimesApp.lat = parseFloat(center.lat);
           TimesApp.lng = parseFloat(center.lng);
+
+          localStorage.setItem("last_address", TimesApp.address);
+          localStorage.setItem("last_lat", TimesApp.lat);
+          localStorage.setItem("last_lng", TimesApp.lng);
+
           await TimesApp.updateAddress(-1);
           TimesApp.getPlaces(null, true);
           await TimesApp.updateBound(TimesApp.lat, TimesApp.lng);
@@ -1073,9 +1078,9 @@ document.addEventListener('DOMContentLoaded', function () {
     TimesApp.getPlaces(null, true);
   }
 
-  setTimeout(function () {
+  /*setTimeout(function () {
     document.getElementById('banner').style.display = "none";
-  }, 30 * 1000);
+  }, 30 * 1000);*/
 
   // Auto-refresh
   setTimeout(function () {
@@ -1102,12 +1107,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 120 * 1000);
   }
 });
-
-window.onbeforeunload = function(e) {
-  localStorage.setItem("last_address", TimesApp.address);
-  localStorage.setItem("last_lat", TimesApp.lat);
-  localStorage.setItem("last_lng", TimesApp.lng);
-};
 
 window.onerror = function(errorMessage, errorUrl, errorLine) {
 
