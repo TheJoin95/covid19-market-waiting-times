@@ -4,8 +4,12 @@ This project aims to avoid the gatherings of people in various supermarkets and 
 
 **NOTE**: This project does not wanna be for commercial use. This project wants to help people to stay outside their house as little time as possible and to avoid other people for the quarantine period.
 
-![snippet](https://raw.githubusercontent.com/TheJoin95/covid19-market-waiting-times/master/client/assets/map.png)
+### End of life - July 2020
 
+I hope that this project helped some people from all around the world. I will may reactive the project in case of a 2nd wave on late 2020.
+
+
+![snippet](https://raw.githubusercontent.com/TheJoin95/covid19-market-waiting-times/master/client/assets/map.png)
 
 # How it works
 
